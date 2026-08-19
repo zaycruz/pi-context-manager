@@ -13,12 +13,23 @@ A pi extension that lets the agent manage its own conversation context: hide, re
 | Action | Description |
 |---|---|
 | `list` | Show the current context with indices, token estimate, and active rules. |
+| `stats` | Show context usage against the model's context window (tokens, cap, percent, tokens saved by rules). |
 | `hide` | Exclude messages from context until unhidden. |
 | `unhide` | Bring hidden messages back. |
 | `remove` | Permanently remove messages from context (for this session). |
 | `summarize` | Replace messages with a single summary block (model-generated). |
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
+
+## Context-usage indicator
+
+Before every agent turn, the extension appends a compact usage line to the system prompt:
+
+```
+[Context usage: 42% of 128k (53,000 tokens). If usage is high, call manage_context action=stats for details, then hide, remove, or summarize old messages.]
+```
+
+This gives the agent a standing signal of how full its context is against the model's context window, so it can decide to manage its own context before hitting the cap. `action=stats` returns the same numbers plus the tokens saved by active rules.
 
 ### Parameters
 

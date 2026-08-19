@@ -218,6 +218,26 @@ function findOverlappingSummary(state: State, fps: string[]): SummaryRule | unde
   return state.summaries.find((s) => fps.some((f) => s.fingerprints.includes(f)));
 }
 
+function contextStats(
+  ctx: ExtensionContext,
+  messages: AgentMessage[],
+  state: State,
+): { tokens: number; cap: number | undefined; pct: number | undefined; saved: number } {
+  const usage = ctx.getContextUsage();
+  const tokens = usage && usage.tokens > 0 ? usage.tokens : estimateTokens(messages);
+  const cap = ctx.model?.contextWindow;
+  const pct = cap ? Math.round((tokens / cap) * 100) : undefined;
+  const hidden = new Set(state.hidden);
+  const removed = new Set(state.removed);
+  const summarized = new Set(state.summaries.flatMap((s) => s.fingerprints));
+  let saved = 0;
+  for (const m of messages) {
+    const fp = fingerprint(m);
+    if (hidden.has(fp) || removed.has(fp) || summarized.has(fp)) saved += estimateTokens(m);
+  }
+  return { tokens, cap, pct, saved };
+}
+
 function applyHide(state: State, messages: AgentMessage[], range: string | undefined) {
   const idx = closeSelection(messages, resolveIndices(range, messages.length));
   if (idx.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
@@ -382,20 +402,34 @@ export default function (pi: ExtensionAPI) {
     return { messages: out };
   });
 
+  pi.on("before_agent_start", (event, ctx) => {
+    const state = loadState(ctx);
+    const messages = sessionMessages(ctx);
+    const s = contextStats(ctx, messages, state);
+    const usageText = s.cap
+      ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
+      : `${s.tokens.toLocaleString()} tokens`;
+    const savedText = s.saved ? `, ${s.saved.toLocaleString()} saved by context rules` : "";
+    const line = `[Context usage: ${usageText}${savedText}. If usage is high, call manage_context action=stats for details, then hide, remove, or summarize old messages.]`;
+    return { systemPrompt: `${event.systemPrompt}\n${line}` };
+  });
+
   pi.registerTool({
     name: "manage_context",
     label: "Manage Context",
     description:
-      "Hide, remove, or summarize portions of the conversation context without compacting the whole session. Use action=list to see the current context with indices, then hide/remove/summarize by index range.",
+      "Hide, remove, or summarize portions of the conversation context without compacting the whole session. Use action=stats to see context usage against the model's context window, action=list to see the current context with indices, then hide/remove/summarize by index range.",
     promptSnippet: "Manage conversation context: hide, remove, or summarize old messages",
     promptGuidelines: [
       "Use manage_context when the conversation context is getting large and you want to hide, remove, or summarize old messages instead of compacting the whole session.",
+      "Call manage_context with action=stats to see context usage against the model's context window. When usage is high (roughly 80% or more), hide, remove, or summarize old messages to stay under the cap.",
       "Call manage_context with action=list first to see the current context and message indices.",
       "Tool calls and their results are paired automatically: hiding, removing, or summarizing one side also affects the other to keep the context valid.",
     ],
     parameters: Type.Object({
       action: Type.Union([
         Type.Literal("list"),
+        Type.Literal("stats"),
         Type.Literal("hide"),
         Type.Literal("unhide"),
         Type.Literal("remove"),
@@ -442,6 +476,29 @@ export default function (pi: ExtensionAPI) {
               removed: state.removed.length,
               summaries: state.summaries.length,
             });
+          }
+          case "stats": {
+            const s = contextStats(toolCtx, messages, state);
+            const usageText = s.cap
+              ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
+              : `${s.tokens.toLocaleString()} tokens`;
+            return ok(
+              [
+                `Context usage: ${usageText}`,
+                `Rules: ${state.hidden.length} hidden, ${state.removed.length} removed, ${state.summaries.length} summar${state.summaries.length === 1 ? "y" : "ies"}`,
+                `Saved by rules: ~${s.saved.toLocaleString()} tokens`,
+                `Messages in session: ${messages.length}`,
+              ].join("\n"),
+              {
+                tokens: s.tokens,
+                cap: s.cap,
+                pct: s.pct,
+                saved: s.saved,
+                hidden: state.hidden.length,
+                removed: state.removed.length,
+                summaries: state.summaries.length,
+              },
+            );
           }
           case "hide": {
             const r = applyHide(state, messages, params.range);
