@@ -1,18 +1,30 @@
 {
   "name": "pi-context-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Let the pi agent manage its own context: hide, remove, or summarize portions of the conversation without compacting the whole session.",
   "type": "module",
   "license": "MIT",
-  "keywords": ["pi-package", "pi-extension", "context", "agent"],
-  "files": ["extensions/", "README.md"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "context",
+    "agent"
+  ],
+  "files": [
+    "extensions/",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zaycruz/pi-context-manager.git"
   },
   "homepage": "https://github.com/zaycruz/pi-context-manager",
   "pi": {
-    "extensions": ["./extensions/context-manager.ts"],
-    "skills": ["./skills/context-manager/SKILL.md"]
+    "extensions": [
+      "./extensions/context-manager.ts"
+    ],
+    "skills": [
+      "./skills/context-manager/SKILL.md"
+    ]
   }
 }
