@@ -448,6 +448,11 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool({
     name: "manage_context",
     label: "Manage Context",
+    // Keep the tool top-level instead of mounting it as an xd:// device: OMP's
+    // xdev mechanism mounts `discoverable` tools under xd://<name>, which hides
+    // them from the model's direct toolset. `essential` keeps it a first-class
+    // tool the agent calls by name.
+    loadMode: "essential",
     description:
       "Hide, remove, or summarize portions of the conversation context without compacting the whole session. Use action=stats to see context usage against the model's context window, action=list to see the current context with indices, then hide/remove/summarize by index range.",
     promptSnippet: "Manage conversation context: hide, remove, or summarize old messages",
