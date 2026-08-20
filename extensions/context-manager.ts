@@ -482,6 +482,7 @@ export default function (pi: ExtensionAPI) {
       ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
       : `${s.tokens.toLocaleString()} tokens`;
     const savedText = s.saved ? `, ${s.saved.toLocaleString()} saved by context rules` : "";
+    logUsage(ctx, { action: "indicator", pct: s.pct, tokens: s.tokens, cap: s.cap, saved: s.saved });
     let line: string;
     if (s.pct >= 60) {
       line = `[Context usage: ${usageText}${savedText}. Usage is at or above 60% — you MUST call manage_context action=stats now, then action=list to see old messages, then hide, remove, or summarize them to stay under the cap. OMP auto-compacts during idle; act before that to keep control over what gets trimmed.]`;
