@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
@@ -6,7 +6,6 @@ import {
   estimateTokens,
   serializeConversation,
 } from "@earendil-works/pi-coding-agent";
-import { uuidv7 } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 
 const STATE_CUSTOM_TYPE = "context-manager-state";
@@ -345,7 +344,7 @@ ${text}
         },
       ],
     },
-    { signal, cacheRetention: "none", sessionId: uuidv7() },
+    { signal, cacheRetention: "none", sessionId: randomUUID() },
   );
   const summary = response.content
     .filter((c): c is { type: "text"; text: string } => c.type === "text")
@@ -355,7 +354,7 @@ ${text}
   if (!summary) return { error: "Summarization returned an empty result" };
 
   const rule: SummaryRule = {
-    id: uuidv7().slice(0, 8),
+    id: randomUUID().slice(0, 8),
     fingerprints: fps,
     summary,
     model: `${model.provider}/${model.id}`,
