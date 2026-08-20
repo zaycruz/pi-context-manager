@@ -318,6 +318,54 @@ function applyRestore(state: State, range: string | undefined) {
   return { ok: true };
 }
 
+interface CompletionModel {
+  provider: string;
+  id: string;
+}
+
+interface CompletionResponse {
+  content: { type: string; text: string }[];
+}
+
+/**
+ * Run a one-shot model completion through the pi extension API. The only
+ * native completion path is `modelRegistry.complete` (pi). OMP's registry
+ * does not implement it, so summarize degrades with a clear error there
+ * instead of reaching into runtime internals.
+ */
+async function completeWithModel(
+  ctx: ExtensionContext,
+  model: CompletionModel,
+  prompt: string,
+  signal: AbortSignal | undefined,
+): Promise<CompletionResponse> {
+  const registry = ctx.modelRegistry as {
+    complete?: (
+      model: CompletionModel,
+      context: { messages: { role: string; content: { type: string; text: string }[]; timestamp: number }[] },
+      options?: { signal?: AbortSignal; cacheRetention?: string; sessionId?: string },
+    ) => Promise<CompletionResponse>;
+  };
+  if (typeof registry.complete !== "function") {
+    throw new Error(
+      "summarize is not supported in this runtime: the extension context's modelRegistry has no `complete` method (pi exposes it; OMP does not).",
+    );
+  }
+  return await registry.complete(
+    model,
+    {
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: prompt }],
+          timestamp: Date.now(),
+        },
+      ],
+    },
+    { signal, cacheRetention: "none", sessionId: randomUUID() },
+  );
+}
+
 async function applySummarize(
   ctx: ExtensionContext,
   state: State,
@@ -354,19 +402,12 @@ async function applySummarize(
 ${text}
 </conversation>`;
 
-  const response = await ctx.modelRegistry.complete(
-    model,
-    {
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }],
-          timestamp: Date.now(),
-        },
-      ],
-    },
-    { signal, cacheRetention: "none", sessionId: randomUUID() },
-  );
+  let response: CompletionResponse;
+  try {
+    response = await completeWithModel(ctx, model, prompt, signal);
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
   const summary = response.content
     .filter((c): c is { type: "text"; text: string } => c.type === "text")
     .map((c) => c.text)
