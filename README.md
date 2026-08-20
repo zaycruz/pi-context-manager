@@ -23,10 +23,17 @@ A pi extension that lets the agent manage its own conversation context: hide, re
 
 ## Context-usage indicator
 
-Before every agent turn, the extension appends a compact usage line to the system prompt:
+Before every agent turn, the extension appends a compact usage line to the system prompt. The wording escalates with usage so the agent acts on its own before hitting the cap:
 
 ```
-[Context usage: 42% of 128k (53,000 tokens). If usage is high, call manage_context action=stats for details, then hide, remove, or summarize old messages.]
+# below 40% — advisory
+[Context usage: 12% of 128k (15,000 tokens). If usage is at or above 40%, call manage_context action=stats for details, then hide, remove, or summarize old messages.]
+
+# 40-60% — directive
+[Context usage: 45% of 128k (58,000 tokens). Usage is at or above 40% — call manage_context action=stats for details, then hide, remove, or summarize old messages to stay under the cap. OMP auto-compacts during idle at roughly 40% usage; act before that to keep control over what gets trimmed.]
+
+# 60%+ — imperative
+[Context usage: 65% of 128k (83,000 tokens). Usage is at or above 60% — you MUST call manage_context action=stats now, then action=list to see old messages, then hide, remove, or summarize them to stay under the cap. OMP auto-compacts during idle; act before that to keep control over what gets trimmed.]
 ```
 
 This gives the agent a standing signal of how full its context is against the model's context window, so it can decide to manage its own context before hitting the cap. `action=stats` returns the same numbers plus the tokens saved by active rules.
