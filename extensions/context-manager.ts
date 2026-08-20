@@ -5,7 +5,6 @@ import {
   convertToLlm,
   estimateTokens,
   serializeConversation,
-  sessionEntryToContextMessages,
 } from "@earendil-works/pi-coding-agent";
 import { uuidv7 } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
@@ -82,8 +81,20 @@ function saveState(pi: ExtensionAPI, state: State): void {
 
 function sessionMessages(ctx: ExtensionContext): AgentMessage[] {
   return ctx.sessionManager
-    .buildContextEntries()
-    .flatMap((entry) => sessionEntryToContextMessages(entry));
+    .getEntries()
+    .flatMap((entry) => {
+      if (entry.type !== "message") return [];
+      const message = entry.message;
+      if (
+        (message.role === "user" ||
+          message.role === "assistant" ||
+          message.role === "toolResult") &&
+        message.content == null
+      ) {
+        return [{ ...message, content: [] }];
+      }
+      return [message];
+    });
 }
 
 function resolveIndices(range: string | undefined, count: number): number[] {
