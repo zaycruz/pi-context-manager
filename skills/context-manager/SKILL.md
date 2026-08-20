@@ -33,7 +33,7 @@ The `manage_context` tool lets you manage your own conversation context without 
 | `hide` | Hide messages by range. They stay in the session and can be unhidden. |
 | `unhide` | Bring hidden messages back into context. |
 | `remove` | Remove messages from context permanently. |
-| `summarize` | Replace a range with a summary. Optionally pass `model` like `google/gemini-2.5-flash`. |
+| `summarize` | Replace a range with a summary. Optionally pass `model` like `google/gemini-2.5-flash`. Requires the runtime's `modelRegistry.complete` (pi). In OMP, `summarize` returns a clear error and changes nothing — use `hide` or `remove` instead. |
 | `restore` | Remove a summary rule and bring the original messages back. Pass the summary id shown by `list` as `range`. |
 | `reset` | Clear all context rules. |
 
