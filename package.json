@@ -12,6 +12,7 @@
   },
   "homepage": "https://github.com/zaycruz/pi-context-manager",
   "pi": {
-    "extensions": ["./extensions/context-manager.ts"]
+    "extensions": ["./extensions/context-manager.ts"],
+    "skills": ["./skills/context-manager/SKILL.md"]
   }
 }
