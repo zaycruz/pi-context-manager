@@ -1,6 +1,6 @@
 {
   "name": "pi-context-manager",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Let the pi agent manage its own context: hide, remove, or summarize portions of the conversation without compacting the whole session.",
   "type": "module",
   "license": "MIT",
