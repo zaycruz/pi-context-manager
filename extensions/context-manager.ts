@@ -1,4 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
+import { appendFileSync, mkdirSync } from "node:fs";
+import { homedir } from "node:os";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
@@ -76,6 +78,25 @@ function saveState(pi: ExtensionAPI, state: State): void {
   if (json === lastSavedJson) return;
   lastSavedJson = json;
   pi.appendEntry(STATE_CUSTOM_TYPE, state);
+}
+
+const USAGE_LOG = `${homedir()}/.pi/agent/context-manager-usage.jsonl`;
+
+function logUsage(ctx: ExtensionContext, entry: Record<string, unknown>): void {
+  try {
+    const dir = USAGE_LOG.slice(0, USAGE_LOG.lastIndexOf("/"));
+    mkdirSync(dir, { recursive: true });
+    appendFileSync(
+      USAGE_LOG,
+      JSON.stringify({
+        ts: new Date().toISOString(),
+        session: ctx.sessionManager.getLeafId?.() ?? "unknown",
+        ...entry,
+      }) + "\n",
+    );
+  } catch {
+    // telemetry must never break the tool
+  }
 }
 
 function sessionMessages(ctx: ExtensionContext): AgentMessage[] {
@@ -420,7 +441,7 @@ export default function (pi: ExtensionAPI) {
       ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
       : `${s.tokens.toLocaleString()} tokens`;
     const savedText = s.saved ? `, ${s.saved.toLocaleString()} saved by context rules` : "";
-    const line = `[Context usage: ${usageText}${savedText}. If usage is high, call manage_context action=stats for details, then hide, remove, or summarize old messages.]`;
+    const line = `[Context usage: ${usageText}${savedText}. If usage is at or above 40%, call manage_context action=stats for details, then hide, remove, or summarize old messages.]`;
     return { systemPrompt: `${event.systemPrompt}\n${line}` };
   });
 
@@ -432,7 +453,7 @@ export default function (pi: ExtensionAPI) {
     promptSnippet: "Manage conversation context: hide, remove, or summarize old messages",
     promptGuidelines: [
       "Use manage_context when the conversation context is getting large and you want to hide, remove, or summarize old messages instead of compacting the whole session.",
-      "Call manage_context with action=stats to see context usage against the model's context window. When usage is high (roughly 80% or more), hide, remove, or summarize old messages to stay under the cap.",
+      "Call manage_context with action=stats to see context usage against the model's context window. When usage is at or above 40%, hide, remove, or summarize old messages to stay under the cap.",
       "Call manage_context with action=list first to see the current context and message indices.",
       "Tool calls and their results are paired automatically: hiding, removing, or summarizing one side also affects the other to keep the context valid.",
     ],
@@ -480,6 +501,7 @@ export default function (pi: ExtensionAPI) {
         switch (params.action) {
           case "list": {
             const limit = params.limit ?? 25;
+            logUsage(toolCtx, { action: "list", messageCount: messages.length });
             return ok(renderList(state, messages, limit), {
               messageCount: messages.length,
               hidden: state.hidden.length,
@@ -489,6 +511,13 @@ export default function (pi: ExtensionAPI) {
           }
           case "stats": {
             const s = contextStats(toolCtx, messages, state);
+            logUsage(toolCtx, {
+              action: "stats",
+              tokens: s.tokens,
+              cap: s.cap,
+              pct: s.pct,
+              saved: s.saved,
+            });
             const usageText = s.cap
               ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
               : `${s.tokens.toLocaleString()} tokens`;
@@ -514,6 +543,7 @@ export default function (pi: ExtensionAPI) {
             const r = applyHide(state, messages, params.range);
             if (r.error) return err(r.error);
             saveState(pi, state);
+            logUsage(toolCtx, { action: "hide", count: r.count, closed: r.closed });
             const extra = r.closed > r.count ? ` (selection auto-extended to ${r.closed} to keep tool calls paired with their results)` : "";
             return ok(
               `Hidden ${r.count} message(s). They are excluded from context until unhidden.${extra}`,
@@ -524,6 +554,7 @@ export default function (pi: ExtensionAPI) {
             const r = applyUnhide(state, messages, params.range);
             if (r.error) return err(r.error);
             saveState(pi, state);
+            logUsage(toolCtx, { action: "unhide", count: r.count });
             return ok(
               r.count === 0
                 ? "No hidden messages in that range."
@@ -535,6 +566,7 @@ export default function (pi: ExtensionAPI) {
             const r = applyRemove(state, messages, params.range);
             if (r.error) return err(r.error);
             saveState(pi, state);
+            logUsage(toolCtx, { action: "remove", count: r.count, closed: r.closed });
             const extra = r.closed > r.count ? ` (selection auto-extended to ${r.closed} to keep tool calls paired with their results)` : "";
             return ok(
               `Removed ${r.count} message(s) from context permanently (for this session).${extra}`,
@@ -552,6 +584,13 @@ export default function (pi: ExtensionAPI) {
             );
             if (r.error) return err(r.error);
             saveState(pi, state);
+            logUsage(toolCtx, {
+              action: "summarize",
+              count: r.count,
+              closed: r.closed,
+              summaryId: r.summaryId,
+              model: r.model,
+            });
             const extra = r.closed > r.count ? ` (selection auto-extended to ${r.closed} to keep tool calls paired with their results)` : "";
             return ok(
               `Summarized ${r.count} message(s) into a single context block (id:${r.summaryId}, model: ${r.model}). Use action=restore range=${r.summaryId} to bring them back.${extra}`,
@@ -562,10 +601,12 @@ export default function (pi: ExtensionAPI) {
             const r = applyRestore(state, params.range);
             if (r.error) return err(r.error);
             saveState(pi, state);
+            logUsage(toolCtx, { action: "restore", summaryId: params.range });
             return ok(`Restored the summarized messages. They are back in context.`);
           }
           case "reset": {
             saveState(pi, { hidden: [], removed: [], summaries: [] });
+            logUsage(toolCtx, { action: "reset" });
             return ok(`Reset all context rules. All messages are back in context.`);
           }
         }

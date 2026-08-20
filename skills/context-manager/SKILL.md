@@ -1,6 +1,6 @@
 ---
 name: context-manager
-description: Manage the agent's own conversation context with the manage_context tool. Hide, remove, or summarize old messages instead of compacting the whole session. Use when context usage is high (roughly 80% of the model's context window) or when the conversation has grown large.
+description: Manage the agent's own conversation context with the manage_context tool. Hide, remove, or summarize old messages instead of compacting the whole session. Use when context usage is at or above 40% of the model's context window or when the conversation has grown large.
 ---
 
 # Context Manager
@@ -9,7 +9,7 @@ The `manage_context` tool lets you manage your own conversation context without 
 
 ## When to use
 
-- The context-usage indicator in your system prompt shows high usage (roughly 80% or more of the model's context window).
+- The context-usage indicator in your system prompt shows usage at or above 40% of the model's context window. OMP auto-compacts during idle at roughly 40% usage; act before that to keep control over what gets trimmed.
 - The conversation has grown large and old exchanges are no longer needed.
 - You want to free context without losing the session history.
 
