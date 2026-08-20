@@ -17,7 +17,7 @@ A pi extension that lets the agent manage its own conversation context: hide, re
 | `hide` | Exclude messages from context until unhidden. |
 | `unhide` | Bring hidden messages back. |
 | `remove` | Permanently remove messages from context (for this session). |
-| `summarize` | Replace messages with a single summary block (model-generated). |
+| `summarize` | Replace messages with a single summary block (model-generated). Requires the runtime's `modelRegistry.complete` (pi). In OMP, where that method is absent, `summarize` returns a clear error and changes nothing. |
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
 
@@ -46,6 +46,11 @@ A `toolResult` without its preceding `toolCall` is rejected by providers (HTTP 4
 - The same closure is applied defensively in the `context` handler, so even hand-edited state cannot produce an orphaned `toolResult`.
 
 The tool output reports when the selection was auto-extended.
+
+## Runtime support
+
+- **pi**: all actions work, including `summarize` (via `modelRegistry.complete`).
+- **OMP**: `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API; the action returns a clear error instead of crashing.
 
 ## Usage
 
