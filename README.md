@@ -2,6 +2,8 @@
 
 A Pi package that lets Pi and OMP agents inspect and selectively manage conversation context before runtime-owned compaction.
 
+See the [agent-managed context example and measured evidence](https://github.com/zaycruz/pi-context-manager/blob/main/examples/agent-managed-context.md) for the control loop, safety contracts, cache A/B, and current claim boundary.
+
 ## Install
 
 Install the public npm package:
