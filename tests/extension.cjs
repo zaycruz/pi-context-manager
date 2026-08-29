@@ -61,6 +61,7 @@ function responseText(response) {
   const manageTool = tools[0];
 
   let compactionCalls = 0;
+  let usageTokens = 20_000;
   let completionCalls = 0;
   let nextSummary = "Earlier work, safely summarized.";
   const completionPrompts = [];
@@ -73,7 +74,11 @@ function responseText(response) {
       getSessionId: () => "session-test",
       getLeafId: () => "leaf",
     },
-    getContextUsage: () => ({ tokens: 45_000, contextWindow: 128_000, percent: 35 }),
+    getContextUsage: () => ({
+      tokens: usageTokens,
+      contextWindow: 128_000,
+      percent: Math.round((usageTokens / 128_000) * 100),
+    }),
     model: knownModel,
     modelRegistry: {
       find: (provider, id) =>
@@ -274,6 +279,7 @@ function responseText(response) {
   ]) {
     assert.equal(stored.length, 32);
   }
+  assert.equal(migratedEntry.data.notificationLevel, 0);
   assertOk(await call({ action: "reset" }));
 
   const shortSummaryMessages = [
@@ -438,12 +444,48 @@ function responseText(response) {
   }
   assert.equal(compactionCalls, 0);
 
-  const promptResult = await handlers.get("before_agent_start")(
-    { systemPrompt: "BASE" },
+  usageTokens = 38_400;
+  const piPromptEvent = { systemPrompt: "PI BASE" };
+  const reviewNotice = await handlers.get("before_agent_start")(piPromptEvent, context);
+  assert.equal(piPromptEvent.systemPrompt, "PI BASE");
+  assert.equal("systemPrompt" in reviewNotice, false);
+  assert.equal(reviewNotice.message.customType, "context-manager-threshold");
+  assert.match(reviewNotice.message.content, /Usage reached 30%/);
+  assert.equal(branch.at(-1).data.notificationLevel, 30);
+
+  const ompPrompt = Object.freeze(["OMP BASE", "SECOND BLOCK"]);
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: ompPrompt }, context),
+    undefined,
+  );
+
+  usageTokens = 44_800;
+  const actionNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: ompPrompt },
     context,
   );
-  assert.match(promptResult.systemPrompt, /MUST call manage_context/);
-  assert.match(promptResult.systemPrompt, /runtime-owned idle compaction/);
+  assert.equal("systemPrompt" in actionNotice, false);
+  assert.match(actionNotice.message.content, /Usage reached 35%/);
+  assert.equal(branch.at(-1).data.notificationLevel, 35);
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: "UNCHANGED" }, context),
+    undefined,
+  );
+
+  assertOk(await call({ action: "reset" }));
+  assert.equal(branch.at(-1).data.notificationLevel, 35);
+  usageTokens = 20_000;
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: "UNCHANGED" }, context),
+    undefined,
+  );
+  assert.equal(branch.at(-1).data.notificationLevel, 0);
+  usageTokens = 38_400;
+  const nextCycleNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: "UNCHANGED" },
+    context,
+  );
+  assert.match(nextCycleNotice.message.content, /Usage reached 30%/);
 
   assertOk(await call({ action: "reset" }));
   await handlers.get("session_compact")({}, context);

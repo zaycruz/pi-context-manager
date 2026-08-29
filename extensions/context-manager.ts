@@ -8,9 +8,11 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import {
-  contextIndicatorLine,
+  contextNotificationText,
+  nextNotificationLevel,
   reconcileState,
   statesEqual,
+  type ContextNotificationLevel,
   type ContextState as State,
   type SummaryRule,
 } from "./context-policy.ts";
@@ -53,6 +55,10 @@ function normalizeState(data: unknown): State {
             typeof s.id === "string",
         )
       : [],
+    notificationLevel:
+      d.notificationLevel === 30 || d.notificationLevel === 35
+        ? d.notificationLevel
+        : 0,
   };
 }
 
@@ -77,7 +83,10 @@ function loadStoredState(ctx: ExtensionContext): StoredState {
   } catch {
     // session manager unavailable; treat as no state
   }
-  return { state: { hidden: [], removed: [], summaries: [] }, legacy: false };
+  return {
+    state: { hidden: [], removed: [], summaries: [], notificationLevel: 0 },
+    legacy: false,
+  };
 }
 
 function legacyFingerprintMap(messages: AgentMessage[]): Map<string, string[]> {
@@ -114,6 +123,7 @@ function migrateLegacyState(state: State, messages: AgentMessage[]): State {
       const migrated = migrateSummary(rule, mapped);
       return migrated ? [migrated] : [];
     }),
+    notificationLevel: 0,
   };
 }
 
@@ -933,9 +943,14 @@ function handleRestore(
 function handleReset(
   pi: ExtensionAPI,
   params: ManageParams,
-  ctx: ExtensionContext,
+  state: State,
 ): ToolResponse {
-  saveState(pi, { hidden: [], removed: [], summaries: [] });
+  saveState(pi, {
+    hidden: [],
+    removed: [],
+    summaries: [],
+    notificationLevel: state.notificationLevel,
+  });
   return toolSuccess(params.action, "Reset all context rules. All messages are back in context.");
 }
 
@@ -969,7 +984,7 @@ async function executeContextAction(
     case "restore":
       return handleRestore(pi, params, state, ctx);
     case "reset":
-      return handleReset(pi, params, ctx);
+      return handleReset(pi, params, state);
   }
 }
 
@@ -1007,19 +1022,44 @@ export default function (pi: ExtensionAPI) {
     return messages ? { messages } : undefined;
   });
 
-  pi.on("before_agent_start", (event, ctx) => {
+  pi.on("before_agent_start", (_event, ctx) => {
     const snapshot = contextSnapshots.get(sessionKey(ctx));
+    const stored = loadStoredState(ctx);
+    if (!snapshot && stored.legacy) return;
     const messages = snapshot ?? [];
     const state = snapshot
       ? loadManagedState(pi, ctx, snapshot)
-      : loadStoredState(ctx).state;
-    const s = contextStats(ctx, messages, state);
-    const usageText = s.cap
-      ? `${s.pct}% of ${(s.cap / 1000).toFixed(0)}k (${s.tokens.toLocaleString()} tokens)`
-      : `${s.tokens.toLocaleString()} tokens`;
-    const savedText = s.saved ? `, ${s.saved.toLocaleString()} saved by context rules` : "";
-    const line = contextIndicatorLine(s.pct, usageText, savedText);
-    return { systemPrompt: `${event.systemPrompt}\n${line}` };
+      : stored.state;
+    const stats = contextStats(ctx, messages, state);
+    const nextLevel = nextNotificationLevel(stats.pct, state.notificationLevel);
+    if (nextLevel === undefined) return;
+    state.notificationLevel = nextLevel;
+    saveState(pi, state);
+    if (nextLevel === 0) return;
+
+    const usageText = stats.cap
+      ? `${stats.pct}% of ${(stats.cap / 1000).toFixed(0)}k (${stats.tokens.toLocaleString()} tokens)`
+      : `${stats.tokens.toLocaleString()} tokens`;
+    const savedText = stats.saved
+      ? `, ${stats.saved.toLocaleString()} saved by context rules`
+      : "";
+    return {
+      message: {
+        customType: "context-manager-threshold",
+        content: contextNotificationText(
+          nextLevel as Exclude<ContextNotificationLevel, 0>,
+          usageText,
+          savedText,
+        ),
+        display: true,
+        details: {
+          level: nextLevel,
+          tokens: stats.tokens,
+          cap: stats.cap,
+          percent: stats.pct,
+        },
+      },
+    };
   });
 
   pi.registerTool({
