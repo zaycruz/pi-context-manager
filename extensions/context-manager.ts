@@ -1,6 +1,10 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+  ExtensionAPI,
+  ExtensionContext,
+  SessionEntry,
+} from "@earendil-works/pi-coding-agent";
 import {
   convertToLlm,
   estimateTokens,
@@ -19,6 +23,7 @@ import {
 
 const STATE_CUSTOM_TYPE = "pi-context-manager-state";
 const LEGACY_STATE_CUSTOM_TYPE = "context-manager-state";
+const THRESHOLD_CUSTOM_TYPE = "context-manager-threshold";
 
 function fingerprint(msg: AgentMessage): string {
   return createHash("sha256")
@@ -67,26 +72,62 @@ interface StoredState {
   legacy: boolean;
 }
 
-function loadStoredState(ctx: ExtensionContext): StoredState {
-  try {
-    const entries = ctx.sessionManager.getBranch();
-    for (let index = entries.length - 1; index >= 0; index--) {
-      const entry = entries[index];
-      if (entry.type !== "custom" || !entry.data) continue;
-      if (entry.customType === STATE_CUSTOM_TYPE) {
-        return { state: normalizeState(entry.data), legacy: false };
-      }
-      if (entry.customType === LEGACY_STATE_CUSTOM_TYPE) {
-        return { state: normalizeState(entry.data), legacy: true };
-      }
-    }
-  } catch {
-    // session manager unavailable; treat as no state
+function stateFromEntry(entry: SessionEntry): StoredState | undefined {
+  if (entry.type !== "custom" || !entry.data) return undefined;
+  if (entry.customType === STATE_CUSTOM_TYPE) {
+    return { state: normalizeState(entry.data), legacy: false };
   }
+  if (entry.customType === LEGACY_STATE_CUSTOM_TYPE) {
+    return { state: normalizeState(entry.data), legacy: true };
+  }
+  return undefined;
+}
+
+function thresholdLevelFromEntry(
+  entry: SessionEntry,
+): ContextNotificationLevel | undefined {
+  if (entry.type !== "custom_message" || entry.customType !== THRESHOLD_CUSTOM_TYPE) {
+    return undefined;
+  }
+  const level = (entry.details as { level?: unknown } | undefined)?.level;
+  return level === 30 || level === 35 ? level : undefined;
+}
+
+function emptyStoredState(): StoredState {
   return {
     state: { hidden: [], removed: [], summaries: [], notificationLevel: 0 },
     legacy: false,
   };
+}
+
+function storedStateFromEntries(entries: SessionEntry[]): StoredState {
+  let latestState: StoredState | undefined;
+  let notificationLevel: ContextNotificationLevel | undefined;
+  for (let index = entries.length - 1; index >= 0; index--) {
+    const entry = entries[index];
+    notificationLevel ??= thresholdLevelFromEntry(entry);
+    latestState ??= stateFromEntry(entry);
+    if (latestState && notificationLevel === undefined) {
+      notificationLevel = latestState.state.notificationLevel;
+    }
+    if (latestState && notificationLevel !== undefined) break;
+  }
+  const stored = latestState ?? emptyStoredState();
+  return {
+    ...stored,
+    state: {
+      ...stored.state,
+      notificationLevel: notificationLevel ?? stored.state.notificationLevel,
+    },
+  };
+}
+
+function loadStoredState(ctx: ExtensionContext): StoredState {
+  try {
+    return storedStateFromEntries(ctx.sessionManager.getBranch());
+  } catch {
+    return emptyStoredState();
+  }
 }
 
 function legacyFingerprintMap(messages: AgentMessage[]): Map<string, string[]> {
@@ -1033,9 +1074,11 @@ export default function (pi: ExtensionAPI) {
     const stats = contextStats(ctx, messages, state);
     const nextLevel = nextNotificationLevel(stats.pct, state.notificationLevel);
     if (nextLevel === undefined) return;
-    state.notificationLevel = nextLevel;
-    saveState(pi, state);
-    if (nextLevel === 0) return;
+    if (nextLevel === 0) {
+      state.notificationLevel = 0;
+      saveState(pi, state);
+      return;
+    }
 
     const usageText = stats.cap
       ? `${stats.pct}% of ${(stats.cap / 1000).toFixed(0)}k (${stats.tokens.toLocaleString()} tokens)`
@@ -1045,7 +1088,7 @@ export default function (pi: ExtensionAPI) {
       : "";
     return {
       message: {
-        customType: "context-manager-threshold",
+        customType: THRESHOLD_CUSTOM_TYPE,
         content: contextNotificationText(
           nextLevel as Exclude<ContextNotificationLevel, 0>,
           usageText,

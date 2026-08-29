@@ -47,8 +47,8 @@ export function nextNotificationLevel(
 ): ContextNotificationLevel | undefined {
   if (percent === undefined) return undefined;
   if (percent < CONTEXT_REVIEW_PERCENT) return current === 0 ? undefined : 0;
-  if (percent >= CONTEXT_ACTION_PERCENT && current < CONTEXT_ACTION_PERCENT) return 35;
   if (current < CONTEXT_REVIEW_PERCENT) return 30;
+  if (percent >= CONTEXT_ACTION_PERCENT && current < CONTEXT_ACTION_PERCENT) return 35;
   return undefined;
 }
 

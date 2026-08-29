@@ -72,6 +72,9 @@ test("notification levels emit only on threshold crossings", () => {
   assert.equal(nextNotificationLevel(35, 30), 35);
   assert.equal(nextNotificationLevel(40, 35), undefined);
   assert.equal(nextNotificationLevel(29, 35), 0);
+  assert.equal(nextNotificationLevel(35, 0), 30);
+  assert.equal(nextNotificationLevel(35, 30), 35);
+  assert.equal(nextNotificationLevel(35, 35), undefined);
 });
 
 test("notification text describes the crossed threshold", () => {
