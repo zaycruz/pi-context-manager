@@ -1,12 +1,32 @@
-# pi-context-manager
+# @zaycruz/pi-context-manager
 
-A pi extension that lets the agent manage its own conversation context: hide, remove, or summarize portions of the session without compacting the whole session.
+A Pi package that lets Pi and OMP agents inspect and selectively manage conversation context before runtime-owned compaction.
+
+## Install
+
+Install the public npm package:
+
+```sh
+pi install npm:@zaycruz/pi-context-manager
+```
+
+Install the latest GitHub revision:
+
+```sh
+pi install git:github.com/zaycruz/pi-context-manager
+```
+
+Start a new session or run `/reload` in an open session. The agent receives the `manage_context` tool and the bundled context-management skill.
+
+Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the actions listed under [Runtime support](#runtime-support).
 
 ## How it works
 
-- The `context` event fires before every LLM call with a deep copy of the messages. The extension returns `{ messages }` with hidden/removed messages dropped and summaries injected, so the session file is never modified.
-- Rules are persisted as a custom session entry (`customType: "context-manager-state"`) via `pi.appendEntry`, so they survive restarts and `-c` continuation.
-- Messages are identified by a SHA-256 fingerprint of `role|timestamp|content` (16 hex chars), so rules survive message edits and reloads.
+- Before each LLM call, the host sends the canonical message array through the `context` event. The extension caches that exact array for tool indices and returns a managed copy with hidden or removed messages omitted and summaries inserted. It does not reconstruct context from session entries.
+- Rules persist as a custom session entry (`customType: "pi-context-manager-state"`) through `pi.appendEntry`. They survive restarts and `-c` continuation.
+- Each message uses a 128-bit SHA-256 fingerprint of its full canonical value. The fingerprint includes tool-call and tool-result identity fields.
+- Each `context` event reconciles rules against the host-provided messages. The extension drops an entire summary rule if any source message is absent. It migrates legacy 1.0.x fingerprints against the canonical snapshot and maps collisions to every matching message.
+- Before runtime compaction, the extension applies the same rules to each host preparation bucket without changing split-turn boundaries. It also removes managed file operations from the derived file lists.
 
 ## Tool: `manage_context`
 
@@ -16,33 +36,35 @@ A pi extension that lets the agent manage its own conversation context: hide, re
 | `stats` | Show context usage against the model's context window (tokens, cap, percent, tokens saved by rules). |
 | `hide` | Exclude messages from context until unhidden. |
 | `unhide` | Bring hidden messages back. |
-| `remove` | Permanently remove messages from context (for this session). |
-| `summarize` | Replace messages with a single summary block (model-generated). Requires the runtime's `modelRegistry.complete` (pi). In OMP, where that method is absent, `summarize` returns a clear error and changes nothing. |
+| `remove` | Exclude messages from context without a per-range restore action. `reset` clears removal rules and brings the messages back. |
+| `summarize` | Replace messages with one model-generated summary block. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing because its extension context does not expose that method. |
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
 
 ## Context-usage indicator
 
-Before every agent turn, the extension appends a compact usage line to the system prompt. The wording escalates with usage so the agent acts on its own before hitting the cap:
+Before every agent turn, the extension appends a compact usage line to the system prompt. The thresholds leave time for selective management before OMP's runtime-owned idle compaction:
 
 ```
-# below 40% — advisory
-[Context usage: 12% of 128k (15,000 tokens). If usage is at or above 40%, call manage_context action=stats for details, then hide, remove, or summarize old messages.]
+# below 30% — future trigger
+[Context usage: 12% of 128k (15,000 tokens). When usage reaches 30%, call manage_context action=stats, then action=list, and review old completed messages.]
 
-# 40-60% — directive
-[Context usage: 45% of 128k (58,000 tokens). Usage is at or above 40% — call manage_context action=stats for details, then hide, remove, or summarize old messages to stay under the cap. OMP auto-compacts during idle at roughly 40% usage; act before that to keep control over what gets trimmed.]
+# 30-34% — review
+[Context usage: 32% of 128k (41,000 tokens). Usage is at or above 30% — call manage_context action=stats, then action=list, and review old completed messages before runtime compaction; hide, remove, or summarize them when safe.]
 
-# 60%+ — imperative
-[Context usage: 65% of 128k (83,000 tokens). Usage is at or above 60% — you MUST call manage_context action=stats now, then action=list to see old messages, then hide, remove, or summarize them to stay under the cap. OMP auto-compacts during idle; act before that to keep control over what gets trimmed.]
+# 35%+ — required action
+[Context usage: 36% of 128k (46,000 tokens). Usage is at or above 35% — you MUST call manage_context action=stats now, then action=list, then hide, remove, or summarize old completed messages before OMP's runtime-owned idle compaction at roughly 40%.]
 ```
 
-This gives the agent a standing signal of how full its context is against the model's context window, so it can decide to manage its own context before hitting the cap. `action=stats` returns the same numbers plus the tokens saved by active rules.
+The runtime is the sole owner of whole-session compaction. The extension never calls, cancels, or suppresses runtime compaction. Manual, threshold, and overflow compaction therefore continue through the runtime's normal safety path.
 
 ### Parameters
 
-- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. For `restore`: the summary id shown by `list`.
+- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. Destructive `all` targets completed messages before the current request. For `restore`, use the summary id shown by `list`.
 - `limit`: for `list`, how many trailing messages to show (default 25).
 - `model`: for `summarize`, a model id like `google/gemini-2.5-flash` (default: the active model).
+
+If you set `model`, use `provider/model`. The action returns an error without sending messages when the selector is malformed or unavailable.
 
 ## Safety: tool-call pairing
 
@@ -54,22 +76,35 @@ A `toolResult` without its preceding `toolCall` is rejected by providers (HTTP 4
 
 The tool output reports when the selection was auto-extended.
 
+The extension rejects any `hide`, `remove`, or `summarize` selection that includes the latest user request or the active turn.
+
 ## Runtime support
 
 - **pi**: all actions work, including `summarize` (via `modelRegistry.complete`).
 - **OMP**: `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API; the action returns a clear error instead of crashing.
 
-## Usage
+## Privacy
+
+- `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` operate locally.
+- `summarize` sends only the selected messages to the chosen model through Pi's model registry. The summarization prompt treats the selected transcript as untrusted inert data.
+- The package does not write usage telemetry.
+- The package does not start, cancel, or replace runtime compaction.
+
+## Remove
+
+Remove the npm installation:
 
 ```sh
-# Load for one session
-pi -e ./extensions/context-manager.ts
-
-# Install globally
-pi install ./pi-context-manager
+pi remove npm:@zaycruz/pi-context-manager
 ```
+
+Use `git:github.com/zaycruz/pi-context-manager` instead when you installed the Git source.
 
 ## Development
 
-- `extensions/context-manager.ts` — the single-file extension.
-- Test with a 3-turn session: seed a secret, hide it, then ask for it. The model answering `UNKNOWN` proves the filter works.
+```sh
+npm ci
+npm run check
+```
+
+`npm run check` runs behavioral tests, strict TypeScript checks, the cyclomatic-complexity limit, a packed-consumer test, and an npm package-content check.

@@ -1,24 +1,64 @@
 {
-  "name": "pi-context-manager",
-  "version": "1.0.2",
-  "description": "Let the pi agent manage its own context: hide, remove, or summarize portions of the conversation without compacting the whole session.",
+  "name": "@zaycruz/pi-context-manager",
+  "version": "1.1.0",
+  "description": "Let Pi and OMP agents inspect and selectively manage their conversation context before runtime compaction.",
   "type": "module",
   "license": "MIT",
+  "author": "Zay Cruz",
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "keywords": [
     "pi-package",
     "pi-extension",
-    "context",
+    "pi-coding-agent",
+    "oh-my-pi",
+    "context-management",
+    "compaction",
     "agent"
   ],
   "files": [
     "extensions/",
-    "README.md"
+    "skills/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zaycruz/pi-context-manager.git"
+  "scripts": {
+    "test": "node --import tsx --test tests/context-policy.test.ts && node tests/extension.cjs",
+    "typecheck": "tsc --noEmit",
+    "lint:complexity": "eslint extensions/**/*.ts tests/**/*.ts",
+    "test:packed": "node tests/packed-install.cjs",
+    "pack:check": "npm pack --dry-run",
+    "check": "npm run test && npm run typecheck && npm run lint:complexity && npm run test:packed && npm run pack:check"
   },
-  "homepage": "https://github.com/zaycruz/pi-context-manager",
+  "devDependencies": {
+    "@earendil-works/pi-agent-core": "^0.84.3",
+    "@earendil-works/pi-coding-agent": "0.84.3",
+    "@types/node": "^22.19.19",
+    "@typescript-eslint/parser": "^8.68.0",
+    "eslint": "^10.9.1",
+    "jiti": "^2.7.0",
+    "tsx": "^4.23.12",
+    "typebox": "^1.3.22",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-agent-core": {
+      "optional": true
+    },
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    },
+    "typebox": {
+      "optional": true
+    }
+  },
   "pi": {
     "extensions": [
       "./extensions/context-manager.ts"
@@ -26,5 +66,16 @@
     "skills": [
       "./skills/context-manager/SKILL.md"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaycruz/pi-context-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zaycruz/pi-context-manager/issues"
+  },
+  "homepage": "https://github.com/zaycruz/pi-context-manager#readme",
+  "publishConfig": {
+    "access": "public"
   }
 }

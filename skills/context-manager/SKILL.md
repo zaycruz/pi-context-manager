@@ -1,6 +1,6 @@
 ---
 name: context-manager
-description: Manage the agent's own conversation context with the manage_context tool. Hide, remove, or summarize old messages instead of compacting the whole session. Use when context usage is at or above 40% of the model's context window or when the conversation has grown large.
+description: Manage the agent's own conversation context with the manage_context tool. Review context at 30% usage and act by 35% before runtime-owned compaction.
 ---
 
 # Context Manager
@@ -9,9 +9,9 @@ The `manage_context` tool lets you manage your own conversation context without 
 
 ## When to use
 
-- The context-usage indicator in your system prompt shows usage at or above 40% of the model's context window. OMP auto-compacts during idle at roughly 40% usage; act before that to keep control over what gets trimmed.
-- The conversation has grown large and old exchanges are no longer needed.
-- You want to free context without losing the session history.
+- At 30% context usage, call `manage_context action=stats` and then `action=list`.
+- At 35% context usage, hide, remove, or summarize old completed messages before OMP can compact at roughly 40%.
+- Use the tool when old exchanges are no longer needed or when you must free context without losing session history.
 
 ## Workflow
 
@@ -20,9 +20,11 @@ The `manage_context` tool lets you manage your own conversation context without 
 3. Choose old, completed exchanges to manage. Do not hide or remove the current user request or your own in-progress work.
 4. Apply the action:
    - `hide` removes messages from context but keeps them in the session. You can bring them back with `unhide`.
-   - `remove` drops messages from context permanently for this session.
+   - `remove` drops messages from context without a per-range restore action. Use `reset` to clear all removal rules.
    - `summarize` replaces a range with a condensed summary. You can bring the originals back with `restore`.
 5. Verify with `action=list` that the context looks right.
+
+The runtime owns whole-session compaction. Do not start or suppress compaction through this tool.
 
 ## Actions
 
@@ -32,8 +34,8 @@ The `manage_context` tool lets you manage your own conversation context without 
 | `stats` | Show context usage: tokens, cap, percent, and tokens saved by context rules. |
 | `hide` | Hide messages by range. They stay in the session and can be unhidden. |
 | `unhide` | Bring hidden messages back into context. |
-| `remove` | Remove messages from context permanently. |
-| `summarize` | Replace a range with a summary. Optionally pass `model` like `google/gemini-2.5-flash`. Requires the runtime's `modelRegistry.complete` (pi). In OMP, `summarize` returns a clear error and changes nothing — use `hide` or `remove` instead. |
+| `remove` | Remove messages from context. Use `reset` to clear all removal rules and bring the messages back. |
+| `summarize` | Replace a range with a summary. Optionally pass `model` as `provider/model`. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing. |
 | `restore` | Remove a summary rule and bring the original messages back. Pass the summary id shown by `list` as `range`. |
 | `reset` | Clear all context rules. |
 
@@ -44,11 +46,13 @@ Ranges are 1-based message indices shown by `action=list`:
 - `3` a single message
 - `3-10` a range
 - `3,5,7` specific messages
-- `all` everything
+- `all` every completed message before the current user request
 
 ## Safety
 
 - Tool calls stay paired with their results automatically. Hiding, removing, or summarizing one side also affects the other so the context stays valid. You do not need to manage that.
-- Do not hide or remove the current user request or your own in-progress work. Target old, completed exchanges only.
+- The tool rejects a range that includes the latest user request or the active turn.
 - You cannot hide, remove, or summarize a range that overlaps an existing summary. Restore it first with `action=restore range=<id>`.
-- Hidden messages are not deleted. They remain in the session file and can be unhidden.
+- The tool lists the exact canonical context supplied by the host.
+- Each context event removes rules for messages that no longer exist. A summary rule is dropped if any source message is absent.
+- Hidden and removed messages remain in the session file. Use `unhide` for hidden messages. Use `reset` to clear all rules.
