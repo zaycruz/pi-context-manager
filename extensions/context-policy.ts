@@ -1,6 +1,8 @@
 export const CONTEXT_REVIEW_PERCENT = 30;
 export const CONTEXT_ACTION_PERCENT = 35;
 
+export type ContextNotificationLevel = 0 | 30 | 35;
+
 export interface SummaryRule {
   id: string;
   fingerprints: string[];
@@ -14,6 +16,7 @@ export interface ContextState {
   hidden: string[];
   removed: string[];
   summaries: SummaryRule[];
+  notificationLevel: ContextNotificationLevel;
 }
 
 
@@ -30,6 +33,7 @@ export function reconcileState(
         rule.fingerprints.length > 0 &&
         rule.fingerprints.every((fingerprint) => active.has(fingerprint)),
     ),
+    notificationLevel: state.notificationLevel,
   };
 }
 
@@ -37,17 +41,25 @@ export function statesEqual(left: ContextState, right: ContextState): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-export function contextIndicatorLine(
+export function nextNotificationLevel(
   percent: number | undefined,
+  current: ContextNotificationLevel,
+): ContextNotificationLevel | undefined {
+  if (percent === undefined) return undefined;
+  if (percent < CONTEXT_REVIEW_PERCENT) return current === 0 ? undefined : 0;
+  if (current < CONTEXT_REVIEW_PERCENT) return 30;
+  if (percent >= CONTEXT_ACTION_PERCENT && current < CONTEXT_ACTION_PERCENT) return 35;
+  return undefined;
+}
+
+export function contextNotificationText(
+  level: Exclude<ContextNotificationLevel, 0>,
   usageText: string,
   savedText: string,
 ): string {
   const prefix = `[Context usage: ${usageText}${savedText}.`;
-  if (percent !== undefined && percent >= CONTEXT_ACTION_PERCENT) {
-    return `${prefix} Usage is at or above 35% — you MUST call manage_context action=stats now, then action=list, then hide, remove, or summarize old completed messages before OMP's runtime-owned idle compaction at roughly 40%.]`;
+  if (level === CONTEXT_ACTION_PERCENT) {
+    return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, then hide, remove, or summarize old completed messages before runtime-owned compaction.]`;
   }
-  if (percent !== undefined && percent >= CONTEXT_REVIEW_PERCENT) {
-    return `${prefix} Usage is at or above 30% — call manage_context action=stats, then action=list, and review old completed messages before runtime compaction; hide, remove, or summarize them when safe.]`;
-  }
-  return `${prefix} When usage reaches 30%, call manage_context action=stats, then action=list, and review old completed messages.]`;
+  return `${prefix} Usage reached 30%. Call manage_context action=stats, then action=list, and review old completed messages. Manage them only when safe.]`;
 }

@@ -45,6 +45,21 @@ function responseText(response) {
     },
   };
 
+  let noticeId = 0;
+  function commitNotice(result) {
+    const message = result.message;
+    branch.push({
+      type: "custom_message",
+      id: `threshold-${++noticeId}`,
+      parentId: "leaf",
+      timestamp: Date.now(),
+      customType: message.customType,
+      content: message.content,
+      display: message.display,
+      details: structuredClone(message.details),
+    });
+  }
+
   contextManager(pi);
 
   for (const event of [
@@ -61,6 +76,7 @@ function responseText(response) {
   const manageTool = tools[0];
 
   let compactionCalls = 0;
+  let usageTokens = 20_000;
   let completionCalls = 0;
   let nextSummary = "Earlier work, safely summarized.";
   const completionPrompts = [];
@@ -73,7 +89,11 @@ function responseText(response) {
       getSessionId: () => "session-test",
       getLeafId: () => "leaf",
     },
-    getContextUsage: () => ({ tokens: 45_000, contextWindow: 128_000, percent: 35 }),
+    getContextUsage: () => ({
+      tokens: usageTokens,
+      contextWindow: 128_000,
+      percent: Math.round((usageTokens / 128_000) * 100),
+    }),
     model: knownModel,
     modelRegistry: {
       find: (provider, id) =>
@@ -274,6 +294,7 @@ function responseText(response) {
   ]) {
     assert.equal(stored.length, 32);
   }
+  assert.equal(migratedEntry.data.notificationLevel, 0);
   assertOk(await call({ action: "reset" }));
 
   const shortSummaryMessages = [
@@ -438,12 +459,67 @@ function responseText(response) {
   }
   assert.equal(compactionCalls, 0);
 
-  const promptResult = await handlers.get("before_agent_start")(
-    { systemPrompt: "BASE" },
+  usageTokens = 38_400;
+  const piPromptEvent = { systemPrompt: "PI BASE" };
+  const branchLengthBeforeNotice = branch.length;
+  const reviewNotice = await handlers.get("before_agent_start")(piPromptEvent, context);
+  assert.equal(piPromptEvent.systemPrompt, "PI BASE");
+  assert.equal("systemPrompt" in reviewNotice, false);
+  assert.equal(reviewNotice.message.customType, "context-manager-threshold");
+  assert.match(reviewNotice.message.content, /Usage reached 30%/);
+  assert.equal(branch.length, branchLengthBeforeNotice, "notice state must not commit early");
+
+  const ompPrompt = Object.freeze(["OMP BASE", "SECOND BLOCK"]);
+  const retriedNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: ompPrompt },
     context,
   );
-  assert.match(promptResult.systemPrompt, /MUST call manage_context/);
-  assert.match(promptResult.systemPrompt, /runtime-owned idle compaction/);
+  assert.match(retriedNotice.message.content, /Usage reached 30%/);
+  commitNotice(reviewNotice);
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: ompPrompt }, context),
+    undefined,
+  );
+
+  usageTokens = 44_800;
+  const actionNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: ompPrompt },
+    context,
+  );
+  assert.equal("systemPrompt" in actionNotice, false);
+  assert.match(actionNotice.message.content, /Usage reached 35%/);
+  commitNotice(actionNotice);
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: "UNCHANGED" }, context),
+    undefined,
+  );
+
+  assertOk(await call({ action: "reset" }));
+  assert.equal(branch.at(-1).data.notificationLevel, 35);
+  usageTokens = 20_000;
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: "UNCHANGED" }, context),
+    undefined,
+  );
+  assert.equal(branch.at(-1).data.notificationLevel, 0);
+
+  usageTokens = 44_800;
+  const jumpedReviewNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: "UNCHANGED" },
+    context,
+  );
+  assert.match(jumpedReviewNotice.message.content, /Usage reached 30%/);
+  commitNotice(jumpedReviewNotice);
+  const jumpedActionNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: "UNCHANGED" },
+    context,
+  );
+  assert.match(jumpedActionNotice.message.content, /Usage reached 35%/);
+  commitNotice(jumpedActionNotice);
+  assert.equal(
+    await handlers.get("before_agent_start")({ systemPrompt: "UNCHANGED" }, context),
+    undefined,
+  );
 
   assertOk(await call({ action: "reset" }));
   await handlers.get("session_compact")({}, context);

@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  contextIndicatorLine,
+  contextNotificationText,
+  nextNotificationLevel,
   reconcileState,
   statesEqual,
   type ContextState,
@@ -22,34 +23,62 @@ test("reconcileState removes inactive hidden and removed fingerprints", () => {
     hidden: ["active", "stale-hidden"],
     removed: ["active-removed", "stale-removed"],
     summaries: [],
+    notificationLevel: 30,
   };
 
   assert.deepEqual(reconcileState(state, ["active", "active-removed"]), {
     hidden: ["active"],
     removed: ["active-removed"],
     summaries: [],
+    notificationLevel: 30,
   });
 });
 
 test("reconcileState drops a summary when any source message is inactive", () => {
-  const state: ContextState = { hidden: [], removed: [], summaries: [summary] };
+  const state: ContextState = {
+    hidden: [],
+    removed: [],
+    summaries: [summary],
+    notificationLevel: 0,
+  };
   assert.deepEqual(reconcileState(state, ["first"]).summaries, []);
 });
 
 test("reconcileState retains a summary while every source message is active", () => {
-  const state: ContextState = { hidden: [], removed: [], summaries: [summary] };
+  const state: ContextState = {
+    hidden: [],
+    removed: [],
+    summaries: [summary],
+    notificationLevel: 0,
+  };
   assert.deepEqual(reconcileState(state, ["first", "second"]).summaries, [summary]);
 });
 
 test("statesEqual compares the persisted rule value", () => {
-  const left: ContextState = { hidden: ["one"], removed: [], summaries: [] };
+  const left: ContextState = {
+    hidden: ["one"],
+    removed: [],
+    summaries: [],
+    notificationLevel: 0,
+  };
   assert.equal(statesEqual(left, structuredClone(left)), true);
   assert.equal(statesEqual(left, { ...left, hidden: ["two"] }), false);
 });
 
-test("context indicator escalates before runtime compaction", () => {
-  assert.match(contextIndicatorLine(29, "29%", ""), /reaches 30%/);
-  assert.match(contextIndicatorLine(30, "30%", ""), /at or above 30%/);
-  assert.match(contextIndicatorLine(35, "35%", ""), /MUST call manage_context/);
-  assert.match(contextIndicatorLine(35, "35%", ""), /runtime-owned idle compaction/);
+test("notification levels emit only on threshold crossings", () => {
+  assert.equal(nextNotificationLevel(29, 0), undefined);
+  assert.equal(nextNotificationLevel(30, 0), 30);
+  assert.equal(nextNotificationLevel(34, 30), undefined);
+  assert.equal(nextNotificationLevel(35, 30), 35);
+  assert.equal(nextNotificationLevel(40, 35), undefined);
+  assert.equal(nextNotificationLevel(29, 35), 0);
+  assert.equal(nextNotificationLevel(35, 0), 30);
+  assert.equal(nextNotificationLevel(35, 30), 35);
+  assert.equal(nextNotificationLevel(35, 35), undefined);
+});
+
+test("notification text describes the crossed threshold", () => {
+  assert.match(contextNotificationText(30, "30%", ""), /Usage reached 30%/);
+  assert.match(contextNotificationText(35, "35%", ""), /Usage reached 35%/);
+  assert.match(contextNotificationText(35, "35%", ""), /runtime-owned compaction/);
 });

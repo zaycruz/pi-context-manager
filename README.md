@@ -41,22 +41,17 @@ Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the acti
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
 
-## Context-usage indicator
+## Context-usage threshold notices
 
-Before every agent turn, the extension appends a compact usage line to the system prompt. The thresholds leave time for selective management before OMP's runtime-owned idle compaction:
+The extension never changes the system prompt.
 
-```
-# below 30% — future trigger
-[Context usage: 12% of 128k (15,000 tokens). When usage reaches 30%, call manage_context action=stats, then action=list, and review old completed messages.]
+When usage first reaches 30%, the extension appends one persisted conversation message that asks the agent to inspect old completed messages. When usage first reaches 35%, it appends one persisted conversation message that requires the agent to manage safe old context. The extension does not append another notice at the same threshold.
 
-# 30-34% — review
-[Context usage: 32% of 128k (41,000 tokens). Usage is at or above 30% — call manage_context action=stats, then action=list, and review old completed messages before runtime compaction; hide, remove, or summarize them when safe.]
+Usage below 30% resets the notification cycle. A later crossing can then append new 30% and 35% notices.
 
-# 35%+ — required action
-[Context usage: 36% of 128k (46,000 tokens). Usage is at or above 35% — you MUST call manage_context action=stats now, then action=list, then hide, remove, or summarize old completed messages before OMP's runtime-owned idle compaction at roughly 40%.]
-```
+This append-only design keeps the existing provider prompt prefix stable during passive monitoring. An explicit `hide`, `remove`, `summarize`, `unhide`, `restore`, or `reset` action changes provider context by design.
 
-The runtime is the sole owner of whole-session compaction. The extension never calls, cancels, or suppresses runtime compaction. Manual, threshold, and overflow compaction therefore continue through the runtime's normal safety path.
+The runtime is the sole owner of whole-session compaction. The extension never calls, cancels, or suppresses runtime compaction. Manual, threshold, and overflow compaction continue through the runtime's normal safety path.
 
 ### Parameters
 

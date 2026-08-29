@@ -5,7 +5,7 @@
 First scoped npm release as `@zaycruz/pi-context-manager`.
 
 - Make Pi and OMP the sole owners of whole-session compaction.
-- Start context review at 30% usage and require management at 35% usage.
+- Append one persisted notice at each 30% and 35% threshold crossing without changing the system prompt.
 - Use the host's canonical `context` event messages for tool indices.
 - Apply context-management rules to runtime compaction preparation.
 - Reconcile stale context rules on each canonical context event.
