@@ -7,6 +7,10 @@
 - Report active-rule token savings on every state-changing context action.
 - Preserve nested summary usage and provider failures in benchmark accounting.
 - Strengthen summary guidance for exact durable constraints and meaningful context reduction.
+- Restrict lossy `hide` and `remove` actions to short plain assistant text, and direct durable context to `summarize`.
+- Clear pre-policy lossy rules during migration while preserving valid summaries.
+- Reject malformed and unsafe numeric ranges atomically, and clamp endpoints before expansion.
+- Give OMP capability-aware guidance when model-backed summarization is unavailable.
 
 ## 1.1.0
 

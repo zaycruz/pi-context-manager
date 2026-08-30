@@ -2,13 +2,14 @@
 
 `pi-context-manager` gives an agent a bounded control loop for its own working context:
 
-1. Observe context use with `stats` and inspect messages with `list`.
-2. Decide which completed messages are no longer useful for the active task.
-3. Apply `hide`, `remove`, or `summarize` to only those messages.
-4. Verify the reduced working set with `stats` and `list`.
-5. Recover with `unhide`, `restore`, or `reset` if the removed material becomes relevant.
+1. Observe context use with `stats`.
+2. Inspect messages and safety tags with `list`.
+3. Summarize completed durable context.
+4. Use `hide` or `remove` only for short plain assistant text.
+5. Verify the reduced working set with `stats` and `list`.
+6. Recover with `unhide`, `restore`, or `reset` if the managed material becomes relevant.
 
-This is different from whole-session compaction. The agent selects the working set before the runtime must compact the full conversation. The runtime remains the sole owner of compaction.
+This process is different from whole-session compaction. The agent selects the working set before the runtime must compact the full conversation. The runtime remains the sole owner of compaction.
 
 ## Reproduce the control loop
 
@@ -27,20 +28,23 @@ The agent can then use this sequence:
 ```text
 manage_context(action="stats")
 manage_context(action="list", limit=25)
-manage_context(action="hide", range="<completed-message-range>")
+manage_context(action="summarize", range="<completed-durable-range>")
 manage_context(action="stats")
 ```
+
+This sequence requires Pi. OMP cannot summarize because its extension API does not expose model completion. On OMP, the extension can remove only short plain assistant text.
 
 A successful run has these observable properties:
 
 - The second `stats` result reports tokens saved by context rules.
-- The next provider request excludes the selected messages.
+- The next provider request replaces the selected messages with one summary.
 - The current user request and active turn remain present.
-- A selection containing one side of a tool exchange automatically includes its paired tool call or tool result.
-- `unhide` or `reset` restores hidden messages.
+- A summary selection containing one side of a tool exchange automatically includes its paired tool call or tool result.
+- `restore` or `reset` restores summarized messages.
+- `hide` and `remove` reject messages tagged `SUMMARIZE-ONLY`.
 - The rules survive process restart and session continuation.
 
-At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it appends one persisted message that requires safe context management. Passive monitoring never replaces or modifies the system prompt.
+At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it tells the agent to summarize durable completed context. It limits `hide` and `remove` to plain assistant text with at most 128 estimated tokens per message and 512 estimated tokens per selection. Passive monitoring never replaces or modifies the system prompt.
 
 ## What the automated tests prove
 
@@ -55,6 +59,10 @@ The behavioral suite verifies these contracts:
 
 - `stats` and `list` expose the canonical host context.
 - `hide`, `remove`, `unhide`, `restore`, and `reset` persist and reconcile correctly.
+- `hide` and `remove` reject user content, tool exchanges, summaries, rich content, large messages, and large selections.
+- The lossy guard enforces its exact 128-token message and 512-token selection boundaries for block-array and string-form assistant content.
+- Range parsing rejects malformed or unsafe numeric input without partial action or unbounded expansion.
+- Policy migration restores all pre-policy hidden and removed messages while preserving valid summaries.
 - Pi can summarize a selected range and restore its original messages.
 - OMP rejects `summarize` without changing state because OMP does not expose model completion to extensions.
 - The extension rejects changes to the active turn.
@@ -110,6 +118,8 @@ The evaluation measures:
 - human context interventions; and
 - provider failures.
 
-The hardened clean-commit three-seed run did not meet that bar. Full context and manual runtime compaction each returned 36 of 36 fields. Agent-managed context returned 31 of 36 fields and passed 2 of 3 complete tasks. It attempted autonomous management in all three trials but met the exact-output and meaningful-final-savings criterion in only 1 of 3. One exact trial restored its summary and ended with no active rules. Another trial hid old ranges, saved 75,177 active-rule tokens, and returned only 7 of 12 fields. The managed arm's measured cost was also higher than both comparison arms.
+The hardened clean-commit three-arm run did not meet that bar. Full context and manual runtime compaction each returned 36 of 36 fields. Agent-managed context returned 31 of 36 fields and passed 2 of 3 complete tasks. It attempted autonomous management in all three trials but met the exact-output and meaningful-final-savings criterion in only 1 of 3. One exact trial restored its summary and ended with no active rules. Another trial hid old ranges, saved 75,177 active-rule tokens, and returned only 7 of 12 fields.
 
-Do not claim a task-quality or cost improvement from this result. The narrow measured result is that the agent autonomously achieved meaningful context reduction while preserving every field in 1 of 3 trials. Safe lossless range selection remains the load-bearing unproven boundary.
+We then added the lossless-selection guard and reran the three managed seeds from clean commit `5790f77`. The agent summarized context in every trial and did not use `hide` or `remove`. It returned 35 of 36 fields, passed 2 of 3 complete tasks, met the autonomous-success criterion in 2 of 3 trials, and ended with 335,476 active-rule tokens saved. The only miss was one `queue_name` value returned as `null`.
+
+This one-arm follow-up is directional evidence. It does not prove a task-quality or cost improvement because provider behavior is nondeterministic and the comparison arms were not rerun. The previous range-hiding failure did not recur. Summary fidelity is now the observed failure boundary.

@@ -34,12 +34,12 @@ Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the acti
 
 | Action | Description |
 |---|---|
-| `list` | Show the current context with indices, token estimate, and active rules. |
+| `list` | Show the current context with indices, token estimates, active rules, and `SUMMARIZE-ONLY` safety tags. |
 | `stats` | Show context usage against the model's context window (tokens, cap, percent, tokens saved by rules). |
-| `hide` | Exclude messages from context until unhidden. |
+| `hide` | Temporarily exclude short plain-assistant-text messages. Each message must be at most 128 estimated tokens. The closed selection must be at most 512 estimated tokens. |
 | `unhide` | Bring hidden messages back. |
-| `remove` | Exclude messages from context without a per-range restore action. `reset` clears removal rules and brings the messages back. |
-| `summarize` | Replace messages with one model-generated summary block. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing because its extension context does not expose that method. |
+| `remove` | Exclude short plain-assistant-text messages until `reset`. It uses the same 128-token message limit and 512-token selection limit as `hide`. |
+| `summarize` | Replace messages with one model-generated summary block. Use it for user content, facts, constraints, tool exchanges, and other durable context. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing because its extension context does not expose that method. |
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
 
@@ -47,7 +47,7 @@ Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the acti
 
 The extension never changes the system prompt.
 
-When usage first reaches 30%, the extension appends one persisted conversation message that asks the agent to inspect old completed messages. When usage first reaches 35%, it appends one persisted conversation message that requires the agent to manage safe old context. The extension does not append another notice at the same threshold.
+When usage first reaches 30%, the extension appends one persisted conversation message that asks the agent to inspect old completed messages. When usage first reaches 35%, it appends one persisted conversation message that requires the agent to summarize durable completed context. The notice limits `hide` and `remove` to short plain assistant text. The extension does not append another notice at the same threshold.
 
 Usage below 30% resets the notification cycle. A later crossing can then append new 30% and 35% notices.
 
@@ -57,28 +57,30 @@ The runtime is the sole owner of whole-session compaction. The extension never c
 
 ### Parameters
 
-- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. Destructive `all` targets completed messages before the current request. For `restore`, use the summary id shown by `list`.
+- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. `all` targets completed messages before the current request. The parser rejects the complete range when any component is malformed or is not a positive safe integer. It clamps valid endpoints before expansion. The action still enforces its selection limits. For `restore`, use the summary id shown by `list`.
 - `limit`: for `list`, how many trailing messages to show (default 25).
 - `model`: for `summarize`, a model id like `google/gemini-2.5-flash` (default: the active model).
 
 If you set `model`, use `provider/model`. The action returns an error without sending messages when the selector is malformed or unavailable.
 
-## Safety: tool-call pairing
+## Selection safety
 
-Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while the malformed context remains. The extension therefore auto-extends each selection so tool calls stay paired with their results:
+The extension marks messages that `hide` and `remove` cannot select as `SUMMARIZE-ONLY` in `list`.
 
-- Hiding/removing/summarizing a `toolResult` also includes its `toolCall` assistant message.
-- Hiding/removing/summarizing an assistant message with tool calls also includes its `toolResult` messages.
-- The same closure is applied defensively in the `context` handler, so even hand-edited state cannot produce an orphaned `toolResult`.
-
-The tool output reports when the selection was auto-extended.
+`hide` and `remove` accept only plain assistant text. Each selected message must contain only text and must be at most 128 estimated tokens. The full tool-pair-closed selection must be at most 512 estimated tokens. The extension rejects user messages, tool calls, tool results, summaries, thinking, images, custom messages, and larger selections. Use `summarize` for those messages.
 
 The extension rejects any `hide`, `remove`, or `summarize` selection that includes the latest user request or the active turn.
 
+The first context event after this policy upgrade clears all existing `hide` and `remove` rules. The extension cannot reconstruct the original selection groupings needed to prove the new limits. It preserves valid summaries and notification state.
+
+Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while the malformed context remains. The extension auto-extends each summary selection so tool calls stay paired with their results. It also applies this closure defensively in the `context` handler, so hand-edited state cannot produce an orphaned `toolResult`.
+
+The tool output reports when the selection was auto-extended.
+
 ## Runtime support
 
-- **pi**: all actions work, including `summarize` (via `modelRegistry.complete`).
-- **OMP**: `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API; the action returns a clear error instead of crashing.
+- **pi**: all actions work, including `summarize` through `modelRegistry.complete`.
+- **OMP**: `list`, `stats`, guarded `hide`, `unhide`, guarded `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API. The 35% notice tells OMP agents to leave durable content to runtime-owned compaction. OMP can remove only short plain assistant text and cannot perform durable-context reduction through this extension.
 
 ## Privacy
 

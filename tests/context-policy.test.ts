@@ -24,6 +24,7 @@ test("reconcileState removes inactive hidden and removed fingerprints", () => {
     removed: ["active-removed", "stale-removed"],
     summaries: [],
     notificationLevel: 30,
+    policyVersion: 1,
   };
 
   assert.deepEqual(reconcileState(state, ["active", "active-removed"]), {
@@ -31,6 +32,7 @@ test("reconcileState removes inactive hidden and removed fingerprints", () => {
     removed: ["active-removed"],
     summaries: [],
     notificationLevel: 30,
+    policyVersion: 1,
   });
 });
 
@@ -40,6 +42,7 @@ test("reconcileState drops a summary when any source message is inactive", () =>
     removed: [],
     summaries: [summary],
     notificationLevel: 0,
+    policyVersion: 1,
   };
   assert.deepEqual(reconcileState(state, ["first"]).summaries, []);
 });
@@ -50,6 +53,7 @@ test("reconcileState retains a summary while every source message is active", ()
     removed: [],
     summaries: [summary],
     notificationLevel: 0,
+    policyVersion: 1,
   };
   assert.deepEqual(reconcileState(state, ["first", "second"]).summaries, [summary]);
 });
@@ -60,6 +64,7 @@ test("statesEqual compares the persisted rule value", () => {
     removed: [],
     summaries: [],
     notificationLevel: 0,
+    policyVersion: 1,
   };
   assert.equal(statesEqual(left, structuredClone(left)), true);
   assert.equal(statesEqual(left, { ...left, hidden: ["two"] }), false);
@@ -81,5 +86,10 @@ test("notification text describes the crossed threshold", () => {
   assert.match(contextNotificationText(30, "30%", ""), /Usage reached 30%/);
   assert.match(contextNotificationText(35, "35%", ""), /Usage reached 35%/);
   assert.match(contextNotificationText(35, "35%", ""), /runtime-owned compaction/);
-  assert.match(contextNotificationText(35, "35%", ""), /facts or constraints needed later/);
+  assert.match(contextNotificationText(35, "35%", ""), /plain assistant text/);
+  assert.match(contextNotificationText(35, "35%", ""), /128 tokens/);
+  assert.match(contextNotificationText(35, "35%", ""), /512 tokens total/);
+  const ompText = contextNotificationText(35, "35%", "", false);
+  assert.match(ompText, /cannot summarize through manage_context/);
+  assert.match(ompText, /runtime-owned compaction/);
 });
