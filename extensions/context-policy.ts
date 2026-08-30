@@ -17,6 +17,7 @@ export interface ContextState {
   removed: string[];
   summaries: SummaryRule[];
   notificationLevel: ContextNotificationLevel;
+  policyVersion: 0 | 1;
 }
 
 
@@ -34,6 +35,7 @@ export function reconcileState(
         rule.fingerprints.every((fingerprint) => active.has(fingerprint)),
     ),
     notificationLevel: state.notificationLevel,
+    policyVersion: state.policyVersion,
   };
 }
 
@@ -56,8 +58,12 @@ export function contextNotificationText(
   level: Exclude<ContextNotificationLevel, 0>,
   usageText: string,
   savedText: string,
+  canSummarize = true,
 ): string {
   const prefix = `[Context usage: ${usageText}${savedText}.`;
+  if (level === CONTEXT_ACTION_PERCENT && !canSummarize) {
+    return `${prefix} Usage reached 35%. This runtime cannot summarize through manage_context. Do not hide or remove durable context as a substitute. Leave durable content to runtime-owned compaction. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total.]`;
+  }
   if (level === CONTEXT_ACTION_PERCENT) {
     return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, and manage completed context before runtime-owned compaction. Summarize the largest completed ranges that contain facts, constraints, user content, tool exchanges, or other durable context. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total. Call stats again; if active rules save less than 1% of the context window, summarize a more useful completed range.]`;
   }

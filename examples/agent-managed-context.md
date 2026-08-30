@@ -60,6 +60,9 @@ The behavioral suite verifies these contracts:
 - `stats` and `list` expose the canonical host context.
 - `hide`, `remove`, `unhide`, `restore`, and `reset` persist and reconcile correctly.
 - `hide` and `remove` reject user content, tool exchanges, summaries, rich content, large messages, and large selections.
+- The lossy guard enforces its exact 128-token message and 512-token selection boundaries for block-array and string-form assistant content.
+- Range parsing rejects malformed or unsafe numeric input without partial action or unbounded expansion.
+- Policy migration restores all pre-policy hidden and removed messages while preserving valid summaries.
 - Pi can summarize a selected range and restore its original messages.
 - OMP rejects `summarize` without changing state because OMP does not expose model completion to extensions.
 - The extension rejects changes to the active turn.

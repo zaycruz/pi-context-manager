@@ -57,7 +57,7 @@ The runtime is the sole owner of whole-session compaction. The extension never c
 
 ### Parameters
 
-- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. `all` targets completed messages before the current request. The action still enforces its selection limits. For `restore`, use the summary id shown by `list`.
+- `range`: `"3"`, `"3-10"`, `"3,5,7"`, or `"all"`. `all` targets completed messages before the current request. The parser rejects the complete range when any component is malformed or is not a positive safe integer. It clamps valid endpoints before expansion. The action still enforces its selection limits. For `restore`, use the summary id shown by `list`.
 - `limit`: for `list`, how many trailing messages to show (default 25).
 - `model`: for `summarize`, a model id like `google/gemini-2.5-flash` (default: the active model).
 
@@ -71,6 +71,8 @@ The extension marks messages that `hide` and `remove` cannot select as `SUMMARIZ
 
 The extension rejects any `hide`, `remove`, or `summarize` selection that includes the latest user request or the active turn.
 
+The first context event after this policy upgrade clears all existing `hide` and `remove` rules. The extension cannot reconstruct the original selection groupings needed to prove the new limits. It preserves valid summaries and notification state.
+
 Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while the malformed context remains. The extension auto-extends each summary selection so tool calls stay paired with their results. It also applies this closure defensively in the `context` handler, so hand-edited state cannot produce an orphaned `toolResult`.
 
 The tool output reports when the selection was auto-extended.
@@ -78,7 +80,7 @@ The tool output reports when the selection was auto-extended.
 ## Runtime support
 
 - **pi**: all actions work, including `summarize` through `modelRegistry.complete`.
-- **OMP**: `list`, `stats`, guarded `hide`, `unhide`, guarded `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API. OMP can remove only short plain assistant text and cannot perform durable-context reduction through this extension.
+- **OMP**: `list`, `stats`, guarded `hide`, `unhide`, guarded `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API. The 35% notice tells OMP agents to leave durable content to runtime-owned compaction. OMP can remove only short plain assistant text and cannot perform durable-context reduction through this extension.
 
 ## Privacy
 

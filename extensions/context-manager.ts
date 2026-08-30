@@ -66,6 +66,7 @@ function normalizeState(data: unknown): State {
       d.notificationLevel === 30 || d.notificationLevel === 35
         ? d.notificationLevel
         : 0,
+    policyVersion: d.policyVersion === 1 ? 1 : 0,
   };
 }
 
@@ -97,7 +98,7 @@ function thresholdLevelFromEntry(
 
 function emptyStoredState(): StoredState {
   return {
-    state: { hidden: [], removed: [], summaries: [], notificationLevel: 0 },
+    state: { hidden: [], removed: [], summaries: [], notificationLevel: 0, policyVersion: 1 },
     legacy: false,
   };
 }
@@ -160,53 +161,98 @@ function migrateSummary(
 function migrateLegacyState(state: State, messages: AgentMessage[]): State {
   const mapped = legacyFingerprintMap(messages);
   return {
-    hidden: migrateFingerprints(state.hidden, mapped),
-    removed: migrateFingerprints(state.removed, mapped),
+    hidden: [],
+    removed: [],
     summaries: state.summaries.flatMap((rule) => {
       const migrated = migrateSummary(rule, mapped);
       return migrated ? [migrated] : [];
     }),
     notificationLevel: 0,
+    policyVersion: 1,
   };
 }
 
-function loadManagedState(
-  pi: ExtensionAPI,
-  ctx: ExtensionContext,
-  messages: AgentMessage[],
-): State {
-  const stored = loadStoredState(ctx);
-  if (!stored.legacy) return stored.state;
-  const migrated = migrateLegacyState(stored.state, messages);
-  saveState(pi, migrated);
-  return migrated;
+function applyLossyPolicyMigration(state: State): State {
+  if (state.policyVersion === 1) return state;
+  return { ...state, hidden: [], removed: [], policyVersion: 1 };
+}
+
+function migrateStoredState(stored: StoredState, messages: AgentMessage[]): State {
+  const state = stored.legacy ? migrateLegacyState(stored.state, messages) : stored.state;
+  return applyLossyPolicyMigration(state);
+}
+
+function loadManagedState(ctx: ExtensionContext, messages: AgentMessage[]): State {
+  return migrateStoredState(loadStoredState(ctx), messages);
 }
 
 function saveState(pi: ExtensionAPI, state: State): void {
   pi.appendEntry(STATE_CUSTOM_TYPE, state);
 }
 
+type RangeResolution = { indices: number[] } | { error: string };
+
+function invalidRange(range: string | undefined): RangeResolution {
+  return {
+    error: `Invalid range '${range ?? ""}'. Use '3', '3-10', '3,5,7', or 'all' with positive safe integers.`,
+  };
+}
+
+function parseRangeEndpoint(value: string): number | undefined {
+  if (!/^\d+$/.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= 1 ? parsed : undefined;
+}
+
+interface NumericRange {
+  first: number;
+  last: number;
+}
+
+function parseRangePart(part: string): NumericRange | undefined {
+  const match = part.match(/^(\d+)(?:-(\d+))?$/);
+  if (!match) return undefined;
+  const first = parseRangeEndpoint(match[1]);
+  const last = parseRangeEndpoint(match[2] ?? match[1]);
+  if (first === undefined || last === undefined) return undefined;
+  return { first, last };
+}
+
+function resolveAllRange(
+  parts: string[],
+  count: number,
+  allCount: number,
+  range: string,
+): RangeResolution | undefined {
+  if (!parts.includes("all")) return undefined;
+  if (parts.length !== 1) return invalidRange(range);
+  return { indices: Array.from({ length: Math.min(count, allCount) }, (_, index) => index) };
+}
+
+function addClampedRange(out: Set<number>, first: number, last: number, count: number): void {
+  const start = Math.max(1, Math.min(first, last));
+  const end = Math.min(count, Math.max(first, last));
+  for (let index = start; index <= end; index++) out.add(index - 1);
+}
+
 function resolveIndices(
   range: string | undefined,
   count: number,
   allCount = count,
-): number[] {
-  if (!range) return [];
+): RangeResolution {
+  if (!range || range.length > 200) return invalidRange(range);
+  const parts = range.split(",").map((part) => part.trim());
+  if (parts.some((part) => part.length === 0)) return invalidRange(range);
+  const allRange = resolveAllRange(parts, count, allCount, range);
+  if (allRange) return allRange;
+
   const out = new Set<number>();
-  for (const part of range.split(",")) {
-    const p = part.trim();
-    if (!p) continue;
-    if (p === "all") {
-      for (let i = 0; i < allCount; i++) out.add(i);
-      continue;
-    }
-    const m = p.match(/^(\d+)(?:-(\d+))?$/);
-    if (!m) continue;
-    const a = parseInt(m[1], 10) - 1;
-    const b = (m[2] ? parseInt(m[2], 10) : a + 1) - 1;
-    for (let i = Math.min(a, b); i <= Math.max(a, b); i++) out.add(i);
+  for (const part of parts) {
+    const parsed = parseRangePart(part);
+    if (!parsed) return invalidRange(range);
+    addClampedRange(out, parsed.first, parsed.last, count);
   }
-  return [...out].filter((i) => i >= 0 && i < count).sort((x, y) => x - y);
+  return { indices: [...out].sort((left, right) => left - right) };
 }
 
 function currentTurnStart(messages: AgentMessage[]): number {
@@ -312,17 +358,22 @@ function preview(msg: AgentMessage, maxLen = 120): string {
   return text.length > maxLen ? text.slice(0, maxLen) + "…" : text;
 }
 
-function isPlainAssistantText(message: AgentMessage): boolean {
-  if (message.role !== "assistant") return false;
-  const content = "content" in message ? message.content : undefined;
-  if (typeof content === "string") return true;
-  if (!Array.isArray(content) || content.length === 0) return false;
-  return (content as PreviewBlock[]).every((block) => block.type === "text");
+function plainAssistantTextTokens(message: AgentMessage): number | undefined {
+  if (message.role !== "assistant") return undefined;
+  const content: unknown = "content" in message ? message.content : undefined;
+  if (typeof content === "string") return Math.ceil(content.length / 4);
+  if (!Array.isArray(content) || content.length === 0) return undefined;
+  let chars = 0;
+  for (const block of content as PreviewBlock[]) {
+    if (block.type !== "text" || typeof block.text !== "string") return undefined;
+    chars += block.text.length;
+  }
+  return Math.ceil(chars / 4);
 }
 
 function lossyMessageGuardReason(message: AgentMessage): string | undefined {
-  if (!isPlainAssistantText(message)) return "it is not plain assistant text";
-  const tokens = estimateTokens(message);
+  const tokens = plainAssistantTextTokens(message);
+  if (tokens === undefined) return "it is not plain assistant text";
   if (tokens > LOSSY_MESSAGE_MAX_TOKENS) {
     return `its estimated size is ${tokens} tokens, above the ${LOSSY_MESSAGE_MAX_TOKENS}-token per-message limit`;
   }
@@ -339,7 +390,10 @@ function lossySelectionError(
       return `Lossy hide/remove rejected message ${index + 1}: ${reason}. Use summarize to preserve durable context.`;
     }
   }
-  const tokens = selected.reduce((sum, index) => sum + estimateTokens(messages[index]), 0);
+  const tokens = selected.reduce(
+    (sum, index) => sum + (plainAssistantTextTokens(messages[index]) ?? 0),
+    0,
+  );
   if (tokens > LOSSY_SELECTION_MAX_TOKENS) {
     return `Lossy hide/remove rejected this ${tokens}-token selection because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit. Use summarize for meaningful context reduction.`;
   }
@@ -422,14 +476,31 @@ interface SelectionSuccess {
 type SelectionResult = SelectionSuccess | { error: string };
 type CountResult = { count: number } | { error: string };
 
+interface ClosedSelection {
+  requested: number[];
+  selected: number[];
+}
+
+function resolveClosedSelection(
+  messages: AgentMessage[],
+  range: string | undefined,
+): ClosedSelection | { error: string } {
+  const resolution = resolveIndices(range, messages.length, currentTurnStart(messages));
+  if ("error" in resolution) return resolution;
+  const requested = resolution.indices;
+  const selected = closeSelection(messages, requested);
+  if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
+  return { requested, selected };
+}
+
 function applyHide(
   state: State,
   messages: AgentMessage[],
   range: string | undefined,
 ): SelectionResult {
-  const requested = resolveIndices(range, messages.length, currentTurnStart(messages));
-  const selected = closeSelection(messages, requested);
-  if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
+  const resolution = resolveClosedSelection(messages, range);
+  if ("error" in resolution) return resolution;
+  const { requested, selected } = resolution;
   const protectionError = destructiveSelectionError(messages, selected);
   if (protectionError) return { error: protectionError };
   const lossyError = lossySelectionError(messages, selected);
@@ -450,7 +521,9 @@ function applyUnhide(
   messages: AgentMessage[],
   range: string | undefined,
 ): CountResult {
-  const selected = resolveIndices(range, messages.length);
+  const resolution = resolveIndices(range, messages.length);
+  if ("error" in resolution) return resolution;
+  const selected = resolution.indices;
   if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
   const fps = new Set(selected.map((index) => fingerprint(messages[index])));
   const before = state.hidden.length;
@@ -463,9 +536,9 @@ function applyRemove(
   messages: AgentMessage[],
   range: string | undefined,
 ): SelectionResult {
-  const requested = resolveIndices(range, messages.length, currentTurnStart(messages));
-  const selected = closeSelection(messages, requested);
-  if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
+  const resolution = resolveClosedSelection(messages, range);
+  if ("error" in resolution) return resolution;
+  const { requested, selected } = resolution;
   const protectionError = destructiveSelectionError(messages, selected);
   if (protectionError) return { error: protectionError };
   const lossyError = lossySelectionError(messages, selected);
@@ -627,11 +700,9 @@ async function applySummarize(
   modelId: string | undefined,
   signal: AbortSignal | undefined,
 ): Promise<SummarySuccess | SummaryFailure> {
-  const requested = resolveIndices(range, messages.length, currentTurnStart(messages));
-  const selectedIndices = closeSelection(messages, requested);
-  if (selectedIndices.length === 0) {
-    return { error: `No valid indices in range '${range ?? ""}'` };
-  }
+  const selection = resolveClosedSelection(messages, range);
+  if ("error" in selection) return selection;
+  const { requested, selected: selectedIndices } = selection;
   const protectionError = destructiveSelectionError(messages, selectedIndices);
   if (protectionError) return { error: protectionError };
   const selected = selectedIndices.map((index) => messages[index]);
@@ -694,9 +765,10 @@ function reconcilePersistedState(
   messages: AgentMessage[],
 ): State {
   const stored = loadStoredState(ctx);
-  const state = stored.legacy ? migrateLegacyState(stored.state, messages) : stored.state;
+  const state = migrateStoredState(stored, messages);
   const reconciled = reconcileState(state, messages.map(fingerprint));
-  if (stored.legacy || !statesEqual(state, reconciled)) saveState(pi, reconciled);
+  const migrated = stored.legacy || stored.state.policyVersion !== 1;
+  if (migrated || !statesEqual(state, reconciled)) saveState(pi, reconciled);
   return reconciled;
 }
 
@@ -1011,8 +1083,8 @@ function handleHide(
 ): ToolResponse {
   const result = applyHide(state, messages, params.range);
   if ("error" in result) return toolError(params.action, result.error);
-  saveState(pi, state);
   const savings = stateChangeSavings(ctx, messages, state);
+  saveState(pi, state);
   return toolSuccess(
     params.action,
     `Hidden ${result.count} message(s). They are excluded from context until unhidden.${selectionExtension(result)}${savings.text}`,
@@ -1029,8 +1101,8 @@ function handleUnhide(
 ): ToolResponse {
   const result = applyUnhide(state, messages, params.range);
   if ("error" in result) return toolError(params.action, result.error);
-  saveState(pi, state);
   const savings = stateChangeSavings(ctx, messages, state);
+  saveState(pi, state);
   const text =
     result.count === 0 ? "No hidden messages in that range." : `Unhidden ${result.count} message(s).`;
   return toolSuccess(params.action, `${text}${savings.text}`, {
@@ -1048,8 +1120,8 @@ function handleRemove(
 ): ToolResponse {
   const result = applyRemove(state, messages, params.range);
   if ("error" in result) return toolError(params.action, result.error);
-  saveState(pi, state);
   const savings = stateChangeSavings(ctx, messages, state);
+  saveState(pi, state);
   return toolSuccess(
     params.action,
     `Removed ${result.count} message(s) from context. Reset all rules to bring them back.${selectionExtension(result)}${savings.text}`,
@@ -1076,6 +1148,7 @@ async function handleSummarize(
   if ("error" in result) {
     return toolError(params.action, result.error, summaryFailureDetails(result));
   }
+  const savings = stateChangeSavings(ctx, messages, state);
   try {
     saveState(pi, state);
   } catch (error) {
@@ -1085,7 +1158,6 @@ async function handleSummarize(
       summaryFailureDetails(result),
     );
   }
-  const savings = stateChangeSavings(ctx, messages, state);
   return toolSuccess(
     params.action,
     `Summarized ${result.count} message(s) into a single context block (id:${result.summaryId}, model: ${result.model}). Use action=restore range=${result.summaryId} to bring them back.${selectionExtension(result)}${savings.text}`,
@@ -1102,8 +1174,8 @@ function handleRestore(
 ): ToolResponse {
   const result = applyRestore(state, params.range);
   if ("error" in result) return toolError(params.action, result.error);
-  saveState(pi, state);
   const savings = stateChangeSavings(ctx, messages, state);
+  saveState(pi, state);
   return toolSuccess(
     params.action,
     `Restored the summarized messages. They are back in context.${savings.text}`,
@@ -1123,9 +1195,10 @@ function handleReset(
     removed: [],
     summaries: [],
     notificationLevel: state.notificationLevel,
+    policyVersion: 1,
   };
-  saveState(pi, resetState);
   const savings = stateChangeSavings(ctx, messages, resetState);
+  saveState(pi, resetState);
   return toolSuccess(
     params.action,
     `Reset all context rules. All messages are back in context.${savings.text}`,
@@ -1146,7 +1219,7 @@ async function executeContextAction(
       "Canonical context is not available yet. Continue the session for one turn, then retry.",
     );
   }
-  const state = loadManagedState(pi, ctx, messages);
+  const state = loadManagedState(ctx, messages);
   switch (params.action) {
     case "list":
       return handleList(params, state, messages, ctx);
@@ -1209,7 +1282,7 @@ export default function (pi: ExtensionAPI) {
     const migrationMessages =
       contextSnapshots.get(sessionKey(ctx)) ?? preparationMessages;
     rewriteCompactionBuckets(
-      loadManagedState(pi, ctx, migrationMessages),
+      loadManagedState(ctx, migrationMessages),
       preparation,
     );
   });
@@ -1238,8 +1311,8 @@ export default function (pi: ExtensionAPI) {
     if (!snapshot && stored.legacy) return;
     const messages = snapshot ?? [];
     const state = snapshot
-      ? loadManagedState(pi, ctx, snapshot)
-      : stored.state;
+      ? loadManagedState(ctx, snapshot)
+      : applyLossyPolicyMigration(stored.state);
     const stats = contextStats(ctx, messages, state);
     const key = sessionKey(ctx);
     const currentLevel = currentNotificationLevel(
@@ -1266,6 +1339,7 @@ export default function (pi: ExtensionAPI) {
           nextLevel as Exclude<ContextNotificationLevel, 0>,
           usageText,
           savedText,
+          typeof ctx.modelRegistry.complete === "function",
         ),
         display: true,
         details: {
@@ -1293,6 +1367,7 @@ export default function (pi: ExtensionAPI) {
       "Use manage_context when the conversation context is getting large and you want to hide, remove, or summarize old messages instead of compacting the whole session.",
       "Call manage_context with action=stats and then action=list at 30% context usage. At or above 35%, summarize the largest completed ranges that contain facts, constraints, user content, tool exchanges, or other durable context. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total. Afterward, call stats again. If active rules save less than 1% of the context window, summarize a more useful completed range instead of stopping after short acknowledgments.",
       "For summarize, omit the model parameter to use the active model. Set model only when the user requests a known available provider/model.",
+      "If summarize is unsupported in this runtime, do not use hide/remove as a substitute for durable context. Leave durable content to runtime-owned compaction.",
       "Whole-session compaction belongs to the runtime; manage_context never starts or suppresses it.",
       "Call manage_context with action=list first to see the current context and message indices.",
       "Selections close tool calls and results automatically. Tool exchanges are summarize-only and cannot pass the hide/remove safety guard.",
@@ -1310,6 +1385,7 @@ export default function (pi: ExtensionAPI) {
       ]),
       range: Type.Optional(
         Type.String({
+          maxLength: 200,
           description:
             "Message range: '3', '3-10', '3,5,7', or 'all'. For restore: the summary id shown by list.",
         }),

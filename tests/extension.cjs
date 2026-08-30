@@ -20,6 +20,10 @@ function legacyFingerprint(message) {
     .slice(0, 16);
 }
 
+function fingerprint(message) {
+  return createHash("sha256").update(JSON.stringify(message)).digest("hex").slice(0, 32);
+}
+
 function responseText(response) {
   return response.content.map((item) => item.text).join("\n");
 }
@@ -85,6 +89,7 @@ function responseText(response) {
 
   let compactionCalls = 0;
   let usageTokens = 20_000;
+  let usageError;
   let completionCalls = 0;
   let nextSummary = "Earlier work, safely summarized.";
   let completionError;
@@ -113,11 +118,18 @@ function responseText(response) {
       getSessionId: () => "session-test",
       getLeafId: () => "leaf",
     },
-    getContextUsage: () => ({
-      tokens: usageTokens,
-      contextWindow: 128_000,
-      percent: Math.round((usageTokens / 128_000) * 100),
-    }),
+    getContextUsage: () => {
+      if (usageError) {
+        const error = usageError;
+        usageError = undefined;
+        throw error;
+      }
+      return {
+        tokens: usageTokens,
+        contextWindow: 128_000,
+        percent: Math.round((usageTokens / 128_000) * 100),
+      };
+    },
     model: knownModel,
     modelRegistry: {
       find: (provider, id) =>
@@ -162,8 +174,18 @@ function responseText(response) {
   async function assertLossyGuarded(messages, range, pattern) {
     await runContext(messages);
     for (const action of ["hide", "remove"]) {
+      const entriesBefore = branch.length;
       assertError(await call({ action, range }), pattern);
+      assert.equal(branch.length, entriesBefore, "rejected actions must not persist state");
       assert.equal(await runContext(messages), undefined);
+    }
+  }
+
+  async function assertLossyAccepted(messages, range) {
+    for (const action of ["hide", "remove"]) {
+      await runContext(messages);
+      assertOk(await call({ action, range }));
+      assertOk(await call({ action: "reset" }));
     }
   }
 
@@ -202,6 +224,17 @@ function responseText(response) {
     );
     assertOk(await call({ action: "reset" }));
   }
+
+  await runContext(baseline);
+  const entriesBeforeSavingsFailure = branch.length;
+  usageError = new Error("usage lookup failed");
+  assertError(await call({ action: "hide", range: "2" }), /usage lookup failed/);
+  assert.equal(
+    branch.length,
+    entriesBeforeSavingsFailure,
+    "a pre-persistence failure must not append state",
+  );
+  assert.equal(await runContext(baseline), undefined);
 
   await runContext(baseline);
   nextSummary = "Completed baseline context";
@@ -279,6 +312,60 @@ function responseText(response) {
     textMessage("user", "current aggregate request", 50),
   ];
   await assertLossyGuarded(aggregateAssistant, "1-7", /exceeds the 512-token total limit/i);
+
+  const longStringAssistant = [
+    { role: "assistant", content: "x".repeat(513), timestamp: 51 },
+    textMessage("user", "current string-message request", 52),
+  ];
+  await assertLossyGuarded(
+    longStringAssistant,
+    "1",
+    /above the 128-token per-message limit/i,
+  );
+
+  const exactMessageBoundary = [
+    textMessage("assistant", "x".repeat(512), 53),
+    textMessage("user", "current exact-message request", 54),
+  ];
+  await assertLossyAccepted(exactMessageBoundary, "1");
+  const overMessageBoundary = [
+    textMessage("assistant", "x".repeat(513), 55),
+    textMessage("user", "current over-message request", 56),
+  ];
+  await assertLossyGuarded(
+    overMessageBoundary,
+    "1",
+    /estimated size is 129 tokens.*128-token per-message limit/i,
+  );
+
+  const exactSelectionBoundary = [
+    ...Array.from({ length: 4 }, (_, index) =>
+      textMessage("assistant", "x".repeat(512), 60 + index),
+    ),
+    textMessage("user", "current exact-selection request", 64),
+  ];
+  await assertLossyAccepted(exactSelectionBoundary, "1-4");
+  const overSelectionBoundary = [
+    ...exactSelectionBoundary.slice(0, 4),
+    textMessage("assistant", "x", 65),
+    textMessage("user", "current over-selection request", 66),
+  ];
+  await assertLossyGuarded(
+    overSelectionBoundary,
+    "1-5",
+    /513-token selection.*512-token total limit/i,
+  );
+
+  await assertLossyGuarded(baseline, "2,3..5", /Invalid range/);
+  await assertLossyGuarded(baseline, "all,2", /Invalid range/);
+  await assertLossyGuarded(baseline, "999999999", /No valid indices/);
+  await assertLossyGuarded(
+    baseline,
+    "999999999999999999999",
+    /positive safe integers/,
+  );
+  await assertLossyGuarded(baseline, "1-1000000000", /current request|active turn/);
+  await assertLossyGuarded(baseline, "2-1", /message 1.*not plain assistant text/i);
   await runContext(baseline);
   nextSummary = "";
   const emptySummary = await call({
@@ -465,19 +552,38 @@ function responseText(response) {
   const legacyManaged = await runContext(legacyMessages);
   assert.deepEqual(
     legacyManaged.messages.map((message) => message.role),
-    ["compactionSummary", "user"],
+    ["user", "assistant", "compactionSummary", "toolResult", "toolResult", "user"],
   );
   const migratedEntry = branch.at(-1);
   assert.equal(migratedEntry.customType, "pi-context-manager-state");
-  assert.equal(migratedEntry.data.hidden.length, 3, "legacy collisions must fail closed");
-  for (const stored of [
-    ...migratedEntry.data.hidden,
-    ...migratedEntry.data.removed,
-    ...migratedEntry.data.summaries[0].fingerprints,
-  ]) {
-    assert.equal(stored.length, 32);
-  }
+  assert.deepEqual(migratedEntry.data.hidden, []);
+  assert.deepEqual(migratedEntry.data.removed, []);
+  assert.equal(migratedEntry.data.summaries[0].fingerprints[0].length, 32);
   assert.equal(migratedEntry.data.notificationLevel, 0);
+  assert.equal(migratedEntry.data.policyVersion, 1);
+  assertOk(await call({ action: "reset" }));
+
+  const prePolicyMessages = [
+    textMessage("user", "restore pre-policy user context", 17),
+    textMessage("assistant", "restore pre-policy large answer ".repeat(100), 18),
+    textMessage("user", "current pre-policy request", 19),
+  ];
+  branch.push({
+    type: "custom",
+    customType: "pi-context-manager-state",
+    data: {
+      hidden: [fingerprint(prePolicyMessages[0])],
+      removed: [fingerprint(prePolicyMessages[1])],
+      summaries: [],
+      notificationLevel: 0,
+    },
+  });
+  assert.equal(await runContext(prePolicyMessages), undefined);
+  const policyMigration = branch.at(-1);
+  assert.equal(policyMigration.customType, "pi-context-manager-state");
+  assert.deepEqual(policyMigration.data.hidden, []);
+  assert.deepEqual(policyMigration.data.removed, []);
+  assert.equal(policyMigration.data.policyVersion, 1);
   assertOk(await call({ action: "reset" }));
 
   const shortSummaryMessages = [
