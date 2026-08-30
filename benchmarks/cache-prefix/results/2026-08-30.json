@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "runAt": "2026-08-30T00:03:22.129Z",
+  "runDate": "2026-08-30",
   "environment": {
     "piVersion": "0.84.3",
     "nodeVersion": "v25.5.0",

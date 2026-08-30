@@ -90,7 +90,7 @@ async function main() {
 
   const result = {
     schemaVersion: 1,
-    runAt: new Date().toISOString(),
+    runDate: new Date().toISOString().slice(0, 10),
     environment: {
       piVersion: run(piBinary, ["--version"]).trim(),
       nodeVersion: process.version,
