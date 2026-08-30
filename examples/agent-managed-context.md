@@ -99,15 +99,17 @@ Provider caching is best-effort. These two runs show that the cache-safe arm all
 
 The implementation and tests demonstrate that the agent can observe, selectively transform, persist, and recover its working context within structural safety boundaries. The recorded A/B documents one stable-prefix cache observation with an auditable fixture, harness, and raw usage output.
 
-They do not yet prove that agent-directed context management improves long-horizon task quality. That requires a separate evaluation against no-manager and runtime-compaction-only baselines. That evaluation must measure:
+The repository now includes a [three-arm outcome evaluation](../benchmarks/context-autonomy/README.md) for the remaining task-quality question. It compares full context, one manual runtime compaction, and notice-driven agent management on the same seeded long-context audit.
 
-- final task score;
-- critical-constraint retention;
-- irrelevant-token reduction;
-- prompt tokens per turn;
-- turns before runtime compaction;
-- human interventions;
-- active-turn and tool-pair violations; and
-- recovery after an intentionally bad context decision.
+The evaluation measures:
 
-The strongest outcome claim will be: the managed arm uses materially fewer prompt tokens without reducing task score or critical-constraint retention.
+- canonical-field accuracy and full-task pass rate;
+- superseded-decoy errors;
+- prompt tokens and measured provider cost;
+- autonomous context actions;
+- human context interventions; and
+- provider failures.
+
+The hardened clean-commit three-seed run did not meet that bar. Full context and manual runtime compaction each returned 36 of 36 fields. Agent-managed context returned 31 of 36 fields and passed 2 of 3 complete tasks. It attempted autonomous management in all three trials but met the exact-output and meaningful-final-savings criterion in only 1 of 3. One exact trial restored its summary and ended with no active rules. Another trial hid old ranges, saved 75,177 active-rule tokens, and returned only 7 of 12 fields. The managed arm's measured cost was also higher than both comparison arms.
+
+Do not claim a task-quality or cost improvement from this result. The narrow measured result is that the agent autonomously achieved meaningful context reduction while preserving every field in 1 of 3 trials. Safe lossless range selection remains the load-bearing unproven boundary.

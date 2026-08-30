@@ -59,7 +59,7 @@ export function contextNotificationText(
 ): string {
   const prefix = `[Context usage: ${usageText}${savedText}.`;
   if (level === CONTEXT_ACTION_PERCENT) {
-    return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, then hide, remove, or summarize old completed messages before runtime-owned compaction.]`;
+    return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, then manage old completed messages before runtime-owned compaction. Summarize the largest completed ranges when they contain facts or constraints needed later. Hide or remove only safe-to-forget material. Do not stop after hiding short acknowledgments that save negligible context. Call stats again; if active rules save less than 1% of the context window, select a more useful completed range.]`;
   }
   return `${prefix} Usage reached 30%. Call manage_context action=stats, then action=list, and review old completed messages. Manage them only when safe.]`;
 }
