@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "runAt": "2026-08-30T00:03:22.129Z",
+  "environment": {
+    "piVersion": "0.84.3",
+    "nodeVersion": "v25.5.0",
+    "model": "openai-codex/gpt-5.4-mini"
+  },
+  "fixture": {
+    "source": "0dce5f7:README.md",
+    "warmupTurns": 1,
+    "measuredContinuationTurns": 3,
+    "repetitions": 1,
+    "providerCostSource": "Pi message usage.cost values returned by the provider adapter"
+  },
+  "arms": {
+    "fixed": {
+      "commit": "0dce5f7",
+      "turns": [
+        {
+          "input": 3434,
+          "output": 17,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 8,
+          "totalTokens": 3451,
+          "cost": {
+            "input": 0.0025755,
+            "output": 0.0000765,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.002652
+          }
+        },
+        {
+          "input": 1756,
+          "output": 17,
+          "cacheRead": 3072,
+          "cacheWrite": 0,
+          "reasoning": 8,
+          "totalTokens": 4845,
+          "cost": {
+            "input": 0.001317,
+            "output": 0.0000765,
+            "cacheRead": 0.0002304,
+            "cacheWrite": 0,
+            "total": 0.0016239
+          }
+        },
+        {
+          "input": 1614,
+          "output": 17,
+          "cacheRead": 4608,
+          "cacheWrite": 0,
+          "reasoning": 8,
+          "totalTokens": 6239,
+          "cost": {
+            "input": 0.0012105,
+            "output": 0.0000765,
+            "cacheRead": 0.0003456,
+            "cacheWrite": 0,
+            "total": 0.0016326
+          }
+        },
+        {
+          "input": 1472,
+          "output": 27,
+          "cacheRead": 6144,
+          "cacheWrite": 0,
+          "reasoning": 18,
+          "totalTokens": 7643,
+          "cost": {
+            "input": 0.001104,
+            "output": 0.0001215,
+            "cacheRead": 0.0004608,
+            "cacheWrite": 0,
+            "total": 0.0016863
+          }
+        }
+      ]
+    },
+    "dynamicPromptBaseline": {
+      "commit": "fc2e224",
+      "turns": [
+        {
+          "input": 3473,
+          "output": 17,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 8,
+          "totalTokens": 3490,
+          "cost": {
+            "input": 0.00260475,
+            "output": 0.0000765,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.00268125
+          }
+        },
+        {
+          "input": 4869,
+          "output": 20,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 11,
+          "totalTokens": 4889,
+          "cost": {
+            "input": 0.00365175,
+            "output": 0.00009,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.00374175
+          }
+        },
+        {
+          "input": 6263,
+          "output": 20,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 11,
+          "totalTokens": 6283,
+          "cost": {
+            "input": 0.00469725,
+            "output": 0.00009,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.00478725
+          }
+        },
+        {
+          "input": 6121,
+          "output": 17,
+          "cacheRead": 1536,
+          "cacheWrite": 0,
+          "reasoning": 8,
+          "totalTokens": 7674,
+          "cost": {
+            "input": 0.00459075,
+            "output": 0.0000765,
+            "cacheRead": 0.0001152,
+            "cacheWrite": 0,
+            "total": 0.00478245
+          }
+        }
+      ]
+    }
+  }
+}

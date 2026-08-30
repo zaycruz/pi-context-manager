@@ -199,6 +199,18 @@ function responseText(response) {
   );
   assert.equal(completionCalls, beforeInvalidModels);
 
+  await runContext(baseline);
+  const complete = context.modelRegistry.complete;
+  const entriesBeforeUnsupportedSummary = branch.length;
+  delete context.modelRegistry.complete;
+  assertError(
+    await call({ action: "summarize", range: "1", model: "test/summary" }),
+    /summarize is not supported in this runtime/,
+  );
+  assert.equal(branch.length, entriesBeforeUnsupportedSummary);
+  assert.equal(await runContext(baseline), undefined);
+  context.modelRegistry.complete = complete;
+
   const duplicateResults = [
     {
       role: "toolResult",

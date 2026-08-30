@@ -68,34 +68,36 @@ The relevant tests are in [`tests/extension.cjs`](../tests/extension.cjs) and [`
 
 We compared the cache-safe implementation at commit `0dce5f7` with the dynamic-system-prompt baseline at commit `fc2e224`.
 
-Test conditions:
+The repository includes the [benchmark harness](../benchmarks/cache-prefix/run.mjs), [reproduction procedure](../benchmarks/cache-prefix/README.md), and [raw usage records](../benchmarks/cache-prefix/results/). Reproduce a run with:
 
-- Runtime: Pi
-- Model: `openai-codex/gpt-5.4-mini`
-- One uncached warm-up turn per arm
-- Three continuation turns, each started in a fresh Pi process
-- Matched large-context fixture and turn structure
+```sh
+node benchmarks/cache-prefix/run.mjs > /tmp/pi-context-cache-result.json
+```
 
-| Continuation turn | Cache-safe implementation | Dynamic-prompt baseline |
-|---:|---:|---:|
-| 2 | 3,072 cache-read tokens | 0 |
-| 3 | 4,608 cache-read tokens | 0 |
-| 4 | 5,632 cache-read tokens | 0 |
-| **Total** | **13,312** | **0** |
+The first recorded run used Pi 0.84.3, Node.js v25.5.0, `openai-codex/gpt-5.4-mini`, and `README.md` from commit `0dce5f7` as the immutable fixture. Each arm had one warm-up turn and three measured continuation turns. Each continuation started a fresh Pi process.
 
-Across the measured continuation turns:
+| Turn | Fixed uncached input | Fixed cache read | Fixed output | Fixed cost | Baseline uncached input | Baseline cache read | Baseline output | Baseline cost |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 1,722 | 3,072 | 19 | $0.00160740 | 4,835 | 0 | 20 | $0.00371625 |
+| 3 | 1,563 | 4,608 | 21 | $0.00161235 | 6,212 | 0 | 20 | $0.00474900 |
+| 4 | 1,916 | 5,632 | 21 | $0.00195390 | 7,589 | 0 | 21 | $0.00578625 |
+| **Total** | **5,201** | **13,312** | **61** | **$0.00517365** | **18,636** | **0** | **61** | **$0.01425150** |
+
+The dollar values are the `usage.cost` values returned by Pi's provider adapter. They are not reconstructed from a separate price table.
+
+In the first recorded run:
 
 - The cache-safe arm reused 13,312 of 18,513 prompt tokens: 71.9%.
 - The dynamic-prompt baseline reused 0 of 18,636 prompt tokens.
-- The cache-safe arm cost $0.00517365.
-- The dynamic-prompt baseline cost $0.01425150.
-- The measured cost reduction for this fixture was 63.7%.
+- The cache-safe arm's measured continuation cost was 63.7% lower for this fixture.
 
-Provider caching is best-effort. This result proves that passive context monitoring no longer systematically invalidates the prompt prefix. It does not promise a cache hit on every request.
+The second run reused 13,824 cache tokens in the fixed arm and 1,536 in the baseline. Across both runs, the fixed arm reused 27,136 of 37,179 prompt tokens (73.0%); the baseline reused 1,536 of 37,425 (4.1%). The combined measured continuation cost was 63.3% lower in the fixed arm.
+
+Provider caching is best-effort. These two runs show that the cache-safe arm allowed substantially more provider cache reuse for this model and fixture. They do not establish a provider-wide hit rate or promise a cache hit on every request. Run more repetitions before making a general performance claim.
 
 ## Claim boundary
 
-The implementation and tests prove that the agent can observe, selectively transform, persist, and recover its working context within structural safety boundaries. The cache A/B proves the stable-prefix efficiency improvement.
+The implementation and tests demonstrate that the agent can observe, selectively transform, persist, and recover its working context within structural safety boundaries. The recorded A/B documents one stable-prefix cache observation with an auditable fixture, harness, and raw usage output.
 
 They do not yet prove that agent-directed context management improves long-horizon task quality. That requires a separate evaluation against no-manager and runtime-compaction-only baselines. That evaluation must measure:
 
