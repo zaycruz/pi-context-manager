@@ -2,6 +2,8 @@
 
 A Pi package that lets Pi and OMP agents inspect and selectively manage conversation context before runtime-owned compaction.
 
+See the [agent-managed context example and measured evidence](https://github.com/zaycruz/pi-context-manager/blob/main/examples/agent-managed-context.md) for the control loop, safety contracts, cache A/B, and current claim boundary.
+
 ## Install
 
 Install the public npm package:
@@ -63,7 +65,7 @@ If you set `model`, use `provider/model`. The action returns an error without se
 
 ## Safety: tool-call pairing
 
-A `toolResult` without its preceding `toolCall` is rejected by providers (HTTP 400) on every subsequent call, which would brick the session. The extension therefore auto-extends any selection so tool calls stay paired with their results:
+Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while the malformed context remains. The extension therefore auto-extends each selection so tool calls stay paired with their results:
 
 - Hiding/removing/summarizing a `toolResult` also includes its `toolCall` assistant message.
 - Hiding/removing/summarizing an assistant message with tool calls also includes its `toolResult` messages.
@@ -80,8 +82,9 @@ The extension rejects any `hide`, `remove`, or `summarize` selection that includ
 
 ## Privacy
 
-- `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` operate locally.
-- `summarize` sends only the selected messages to the chosen model through Pi's model registry. The summarization prompt treats the selected transcript as untrusted inert data.
+- `list`, `stats`, `hide`, `unhide`, `remove`, `restore`, and `reset` make no separate model or API request. Their tool-result content enters the conversation and is sent to the active provider on the next model call.
+- `list` includes short previews of canonical messages, including messages currently marked hidden, removed, or summarized. Do not use `list` after switching to a provider that must not receive those previews.
+- `summarize` sends the selected messages to the chosen model through Pi's model registry. The summarization prompt treats the selected transcript as untrusted inert data. The returned summary then enters the active conversation.
 - The package does not write usage telemetry.
 - The package does not start, cancel, or replace runtime compaction.
 

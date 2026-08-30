@@ -262,9 +262,9 @@ function isLinkedToolMessage(message: AgentMessage, links: ToolLinks): boolean {
 
 /**
  * Extend a 0-based selection so no toolResult is left without its toolCall and
- * no assistant toolCall message is left without its toolResults. A toolResult
- * without a preceding toolCall is rejected by providers (HTTP 400) on every
- * subsequent call, which would brick the session.
+ * no assistant toolCall message is left without its toolResults. Provider
+ * protocols can reject malformed tool exchanges on every request that retains
+ * the orphaned message.
  */
 function closeSelection(messages: AgentMessage[], indices: number[]): number[] {
   const selected = new Set(indices);
