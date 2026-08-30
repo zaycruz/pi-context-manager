@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Add a reproducible three-arm long-context outcome evaluation with strict scoring and raw evidence.
+- Make threshold notices retry after failed host persistence without duplicating within one agent turn.
+- Report active-rule token savings on every state-changing context action.
+- Preserve nested summary usage and provider failures in benchmark accounting.
+- Strengthen summary guidance for exact durable constraints and meaningful context reduction.
+
 ## 1.1.0
 
 First scoped npm release as `@zaycruz/pi-context-manager`.
