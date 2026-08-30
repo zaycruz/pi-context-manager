@@ -98,15 +98,22 @@ function toolResultText(result) {
     .join("\n");
 }
 
+function toolExecutionOk(end, details) {
+  if (typeof details?.ok === "boolean") return details.ok;
+  if (!end) return false;
+  return !end.isError;
+}
+
 function recordedContextAction(event, end) {
   const details = end?.result?.details;
-  const ok = typeof details?.ok === "boolean" ? details.ok : end ? !end.isError : false;
+  const ok = toolExecutionOk(end, details);
   const savedTokens = Number.isFinite(details?.saved) ? Number(details.saved) : null;
   return {
     toolCallId: event.toolCallId,
     action: event.args?.action,
     args: event.args,
     ok,
+    providerError: details?.providerError === true,
     savedTokens,
     result: toolResultText(end?.result),
   };
@@ -140,9 +147,18 @@ function summaryUsage(events) {
 }
 
 function providerErrors(events) {
-  return assistantMessages(events)
+  const mainErrors = assistantMessages(events)
     .filter((message) => message.stopReason === "error" || message.errorMessage)
     .map((message) => message.errorMessage ?? "provider error");
+  const nestedErrors = events
+    .filter(
+      (event) =>
+        event.type === "tool_execution_end" &&
+        event.toolName === "manage_context" &&
+        event.result?.details?.providerError === true,
+    )
+    .map((event) => toolResultText(event.result) || "nested summary provider error");
+  return [...mainErrors, ...nestedErrors];
 }
 
 async function sessionEntries(path) {

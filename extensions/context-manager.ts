@@ -557,6 +557,27 @@ interface SummarySuccess extends SelectionSuccess {
   completionUsage?: CompletionUsage;
 }
 
+interface SummaryFailure {
+  error: string;
+  completionUsage?: CompletionUsage;
+  providerError?: boolean;
+}
+
+function emptySummaryFailure(response: CompletionResponse): SummaryFailure {
+  const failure: SummaryFailure = {
+    error: "Summarization returned an empty result",
+    providerError: true,
+  };
+  if (response.usage) failure.completionUsage = response.usage;
+  return failure;
+}
+function summaryFailureDetails(result: { completionUsage?: CompletionUsage; providerError?: boolean }): object {
+  return {
+    ...(result.completionUsage ? { completionUsage: result.completionUsage } : {}),
+    ...(result.providerError ? { providerError: true } : {}),
+  };
+}
+
 async function applySummarize(
   ctx: ExtensionContext,
   state: State,
@@ -564,7 +585,7 @@ async function applySummarize(
   range: string | undefined,
   modelId: string | undefined,
   signal: AbortSignal | undefined,
-): Promise<SummarySuccess | { error: string }> {
+): Promise<SummarySuccess | SummaryFailure> {
   const requested = resolveIndices(range, messages.length, currentTurnStart(messages));
   const selectedIndices = closeSelection(messages, requested);
   if (selectedIndices.length === 0) {
@@ -593,14 +614,17 @@ ${JSON.stringify(text)}
   try {
     response = await completeWithModel(ctx, model, prompt, signal);
   } catch (error) {
-    return { error: error instanceof Error ? error.message : String(error) };
+    return {
+      error: error instanceof Error ? error.message : String(error),
+      providerError: true,
+    };
   }
   const summary = response.content
     .filter((content): content is { type: "text"; text: string } => content.type === "text")
     .map((content) => content.text)
     .join("\n")
     .trim();
-  if (!summary) return { error: "Summarization returned an empty result" };
+  if (!summary) return emptySummaryFailure(response);
 
   const rule: SummaryRule = {
     id: randomUUID().slice(0, 8),
@@ -857,10 +881,14 @@ interface ToolResponse {
   details: Record<string, unknown>;
 }
 
-function toolError(action: ManageAction, text: string): ToolResponse {
+function toolError(
+  action: ManageAction,
+  text: string,
+  details: object = {},
+): ToolResponse {
   return {
     content: [{ type: "text", text }],
-    details: { action, ok: false },
+    details: { action, ok: false, ...details },
   };
 }
 
@@ -1004,8 +1032,18 @@ async function handleSummarize(
     params.model,
     signal,
   );
-  if ("error" in result) return toolError(params.action, result.error);
-  saveState(pi, state);
+  if ("error" in result) {
+    return toolError(params.action, result.error, summaryFailureDetails(result));
+  }
+  try {
+    saveState(pi, state);
+  } catch (error) {
+    return toolError(
+      params.action,
+      error instanceof Error ? error.message : String(error),
+      summaryFailureDetails(result),
+    );
+  }
   const savings = stateChangeSavings(ctx, messages, state);
   return toolSuccess(
     params.action,

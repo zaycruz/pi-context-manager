@@ -37,10 +37,16 @@ function responseText(response) {
       message: textMessage("user", "must not enter the canonical snapshot", 0),
     },
   ];
+  let appendEntryError;
   const pi = {
     on: (event, handler) => handlers.set(event, handler),
     registerTool: (tool) => tools.push(tool),
     appendEntry: (customType, data) => {
+      if (appendEntryError) {
+        const error = appendEntryError;
+        appendEntryError = undefined;
+        throw error;
+      }
       branch.push({ type: "custom", customType, data: structuredClone(data) });
     },
   };
@@ -81,6 +87,7 @@ function responseText(response) {
   let usageTokens = 20_000;
   let completionCalls = 0;
   let nextSummary = "Earlier work, safely summarized.";
+  let completionError;
   const completionPrompts = [];
   const completionSystemPrompts = [];
   const knownModel = { provider: "test", id: "summary", contextWindow: 128_000 };
@@ -119,6 +126,11 @@ function responseText(response) {
         completionCalls += 1;
         completionPrompts.push(completionContext.messages[0].content[0].text);
         completionSystemPrompts.push(completionContext.systemPrompt);
+        if (completionError) {
+          const error = completionError;
+          completionError = undefined;
+          throw error;
+        }
         return {
           content: [{ type: "text", text: nextSummary }],
           usage: completionUsage,
@@ -180,6 +192,40 @@ function responseText(response) {
     assert.equal(managed.messages.length, action === "summarize" ? 2 : 1);
     assertOk(await call({ action: "reset" }));
   }
+
+  await runContext(baseline);
+  nextSummary = "";
+  const emptySummary = await call({
+    action: "summarize",
+    range: "1",
+    model: "test/summary",
+  });
+  assertError(emptySummary, /empty result/);
+  assert.deepEqual(emptySummary.details.completionUsage, completionUsage);
+  assert.equal(await runContext(baseline), undefined);
+  assert.equal(emptySummary.details.providerError, true);
+  nextSummary = "Completed baseline context";
+
+  completionError = new Error("nested provider failed");
+  const providerFailure = await call({
+    action: "summarize",
+    range: "1",
+    model: "test/summary",
+  });
+  assertError(providerFailure, /nested provider failed/);
+  assert.equal(providerFailure.details.providerError, true);
+  assert.equal(await runContext(baseline), undefined);
+
+  appendEntryError = new Error("state persistence failed");
+  const persistenceFailure = await call({
+    action: "summarize",
+    range: "1",
+    model: "test/summary",
+  });
+  assertError(persistenceFailure, /state persistence failed/);
+  assert.deepEqual(persistenceFailure.details.completionUsage, completionUsage);
+  assert.notEqual(persistenceFailure.details.providerError, true);
+  assert.equal(await runContext(baseline), undefined);
 
   const activeToolTail = [
     textMessage("user", "completed request", 4),
@@ -257,7 +303,9 @@ function responseText(response) {
     duplicateManaged.messages.map((message) => message.toolCallId).filter(Boolean),
     ["call-two"],
   );
-  assertOk(await call({ action: "unhide", range: "1" }));
+  const duplicateUnhide = await call({ action: "unhide", range: "1" });
+  assertOk(duplicateUnhide);
+  assert.equal(duplicateUnhide.details.saved, 0);
   assert.equal(await runContext(duplicateResults), undefined);
 
   await runContext(baseline);
@@ -268,7 +316,9 @@ function responseText(response) {
 
   assertOk(await call({ action: "remove", range: "1" }));
   assert.deepEqual((await runContext(baseline)).messages, baseline.slice(1));
-  assertOk(await call({ action: "reset" }));
+  const resetResponse = await call({ action: "reset" });
+  assertOk(resetResponse);
+  assert.equal(resetResponse.details.saved, 0);
   assert.equal(await runContext(baseline), undefined);
 
   const legacyMessages = [
@@ -351,7 +401,12 @@ function responseText(response) {
   const summaryStats = await call({ action: "stats" });
   assertOk(summaryStats);
   assert.equal(summaryStats.details.saved, 0, "saved tokens must be net of summary cost");
-  assertOk(await call({ action: "restore", range: summaryResponse.details.summaryId }));
+  const restoreResponse = await call({
+    action: "restore",
+    range: summaryResponse.details.summaryId,
+  });
+  assertOk(restoreResponse);
+  assert.equal(restoreResponse.details.saved, 0);
   assert.equal(await runContext(shortSummaryMessages), undefined);
 
   const splitMessages = [

@@ -70,17 +70,17 @@ Review the raw result before you commit it. Do not commit failed authentication 
 
 ## Recorded clean-commit result
 
-The 2026-08-30 run used Pi 0.84.3, Node.js v25.5.0, and `openai-codex/gpt-5.4-mini`. It ran from clean commit `706ef33c6e6d56c875db68ea2e672a7895098816`. The load pressure was 36.3% to 36.5% of the 272,000-token context window.
+The 2026-08-30 run used Pi 0.84.3, Node.js v25.5.0, and `openai-codex/gpt-5.4-mini`. It ran from clean commit `46ef79215cec0a03a3dd8a0d73626badcdff1320`. The load pressure was 36.3% to 36.5% of the 272,000-token context window. The fixture used independent deterministic opaque values for each canonical field.
 
-| Arm | Field accuracy | Full-task pass rate | Decoy errors | Autonomous attempts | Autonomous successes | Human interventions | Context tokens saved | Total measured cost | Mean measured cost |
+| Arm | Field accuracy | Full-task pass rate | Decoy errors | Autonomous attempts | Autonomous successes | Human interventions | Active-rule tokens saved | Total measured cost | Mean measured cost |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `full-context` | 100% | 100% | 0 | 0/3 | 0/3 | 0 | 0 | $0.275500 | $0.091833 |
-| `runtime-compaction` | 100% | 100% | 0 | 0/3 | 0/3 | 3 | 0 | $0.477789 | $0.159263 |
-| `agent-managed` | 97.2% | 66.7% | 0 | 3/3 | 2/3 | 0 | 335,830 | $0.506276 | $0.168759 |
+| `full-context` | 100% | 100% | 0 | 0/3 | 0/3 | 0 | N/A | $0.387246 | $0.129082 |
+| `runtime-compaction` | 100% | 100% | 0 | 0/3 | 0/3 | 3 | N/A | $0.521035 | $0.173678 |
+| `agent-managed` | 86.1% | 66.7% | 0 | 3/3 | 1/3 | 0 | 186,877 | $0.594945 | $0.198315 |
 
-The managed arm summarized messages 1–6 in all three trials. Active rules saved 111,943 context tokens per trial on average. One managed answer returned `null` for `queue_name`, so that trial returned 11 of 12 exact fields. The raw record does not include generated summary text, so it cannot locate the omission in summary generation or later retrieval.
+The managed arm attempted context management in all three trials. Seed 1 summarized messages 1–6, retained all 12 fields, and ended with 111,700 active-rule tokens saved. Seed 2 retained all 12 fields but restored its summary, so it ended with no active rules. Seed 3 hid messages 3–6 and 9–12, ended with 75,177 active-rule tokens saved, and returned 7 of 12 exact fields. The savings metric applies only to `manage_context` rules; it does not measure runtime compaction reduction.
 
-This run does not show a task-quality or cost win. The managed arm reduced active context without human intervention, but its full-task pass rate was 33.3 percentage points below both comparison arms. Its measured cost was 83.8% above full context and 6.0% above runtime compaction.
+This run does not show a task-quality or cost win. The managed arm's full-task pass rate was 33.3 percentage points below both comparison arms. Its field accuracy was 13.9 percentage points lower. Its measured cost was 53.6% above full context and 14.2% above runtime compaction.
 
 The raw record is [`results/2026-08-30.json`](results/2026-08-30.json). It contains every answer, score, context action, provider-usage record, and validity check.
 

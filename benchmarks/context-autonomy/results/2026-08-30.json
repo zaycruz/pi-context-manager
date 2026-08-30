@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "runAt": "2026-08-30T02:20:17.257Z",
+  "runAt": "2026-08-30T02:40:02.450Z",
   "source": {
-    "commit": "706ef33c6e6d56c875db68ea2e672a7895098816",
+    "commit": "46ef79215cec0a03a3dd8a0d73626badcdff1320",
     "dirty": false
   },
   "environment": {
@@ -33,61 +33,67 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448567
       },
       "contextPressureAfterLoad": {
-        "tokens": 98772,
+        "tokens": 98850,
         "contextWindow": 272000,
-        "percent": 36.313235294117646
+        "percent": 36.341911764705884
       },
       "noticeLevels": [],
       "answers": [
-        "{\"deployment_region\":\"eu-west-2\",\"rollback_digest\":\"sha256:017c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-01\",\"feature_flag\":\"context_cutover_01\"}",
-        "{\"queue_name\":\"agent-jobs-01\",\"retention_days\":\"31\",\"incident_channel\":\"#context-ops-01\",\"owner\":\"operator-01@example.test\"}",
-        "{\"release_window\":\"Saturday 02:01 UTC\",\"health_endpoint\":\"/health/context/01\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://context-audit-01\"}"
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-2",
-            "rollback_digest": "sha256:017c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-01",
-            "feature_flag": "context_cutover_01"
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": "agent-jobs-01",
-            "retention_days": "31",
-            "incident_channel": "#context-ops-01",
-            "owner": "operator-01@example.test"
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "release_window": "Saturday 02:01 UTC",
-            "health_endpoint": "/health/context/01",
-            "max_parallel_jobs": "5",
-            "audit_bucket": "gs://context-audit-01"
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
@@ -116,18 +122,18 @@
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 2548,
-          "output": 234,
-          "cacheRead": 591616,
+          "input": 101062,
+          "output": 315,
+          "cacheRead": 493568,
           "cacheWrite": 0,
-          "reasoning": 57,
-          "totalTokens": 594398,
+          "reasoning": 107,
+          "totalTokens": 594945,
           "cost": {
-            "input": 0.001911,
-            "output": 0.0010530000000000001,
-            "cacheRead": 0.0443712,
+            "input": 0.07579649999999999,
+            "output": 0.0014175,
+            "cacheRead": 0.0370176,
             "cacheWrite": 0,
-            "total": 0.047335199999999994
+            "total": 0.11423159999999999
           }
         },
         "summary": {
@@ -161,34 +167,34 @@
           }
         },
         "total": {
-          "input": 2548,
-          "output": 234,
-          "cacheRead": 591616,
+          "input": 101062,
+          "output": 315,
+          "cacheRead": 493568,
           "cacheWrite": 0,
-          "reasoning": 57,
-          "totalTokens": 594398,
+          "reasoning": 107,
+          "totalTokens": 594945,
           "cost": {
-            "input": 0.001911,
-            "output": 0.0010530000000000001,
-            "cacheRead": 0.0443712,
+            "input": 0.07579649999999999,
+            "output": 0.0014175,
+            "cacheRead": 0.0370176,
             "cacheWrite": 0,
-            "total": 0.047335199999999994
+            "total": 0.11423159999999999
           }
         }
       },
       "measuredUsage": {
-        "input": 2548,
-        "output": 234,
-        "cacheRead": 591616,
+        "input": 101062,
+        "output": 315,
+        "cacheRead": 493568,
         "cacheWrite": 0,
-        "reasoning": 57,
-        "totalTokens": 594398,
+        "reasoning": 107,
+        "totalTokens": 594945,
         "cost": {
-          "input": 0.001911,
-          "output": 0.0010530000000000001,
-          "cacheRead": 0.0443712,
+          "input": 0.07579649999999999,
+          "output": 0.0014175,
+          "cacheRead": 0.0370176,
           "cacheWrite": 0,
-          "total": 0.047335199999999994
+          "total": 0.11423159999999999
         }
       },
       "stderr": ""
@@ -200,61 +206,67 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448567
       },
       "contextPressureAfterLoad": {
-        "tokens": 98772,
+        "tokens": 98850,
         "contextWindow": 272000,
-        "percent": 36.313235294117646
+        "percent": 36.341911764705884
       },
       "noticeLevels": [],
       "answers": [
-        "{\"deployment_region\":\"eu-west-2\",\"rollback_digest\":\"sha256:017c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-01\",\"feature_flag\":\"context_cutover_01\"}",
-        "{\"queue_name\":\"agent-jobs-01\",\"retention_days\":\"31\",\"incident_channel\":\"#context-ops-01\",\"owner\":\"operator-01@example.test\"}",
-        "{\"release_window\":\"Saturday 02:01 UTC\",\"health_endpoint\":\"/health/context/01\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://context-audit-01\"}"
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-2",
-            "rollback_digest": "sha256:017c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-01",
-            "feature_flag": "context_cutover_01"
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": "agent-jobs-01",
-            "retention_days": "31",
-            "incident_channel": "#context-ops-01",
-            "owner": "operator-01@example.test"
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "release_window": "Saturday 02:01 UTC",
-            "health_endpoint": "/health/context/01",
-            "max_parallel_jobs": "5",
-            "audit_bucket": "gs://context-audit-01"
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
@@ -283,18 +295,18 @@
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 134470,
-          "output": 359,
+          "input": 135047,
+          "output": 283,
           "cacheRead": 265984,
           "cacheWrite": 0,
-          "reasoning": 180,
-          "totalTokens": 400813,
+          "reasoning": 73,
+          "totalTokens": 401314,
           "cost": {
-            "input": 0.10085250000000001,
-            "output": 0.0016155000000000002,
+            "input": 0.10128525000000001,
+            "output": 0.0012735000000000001,
             "cacheRead": 0.0199488,
             "cacheWrite": 0,
-            "total": 0.12241679999999999
+            "total": 0.12250754999999999
           }
         },
         "summary": {
@@ -313,49 +325,49 @@
           }
         },
         "compaction": {
-          "input": 419,
-          "output": 437,
-          "cacheRead": 64768,
+          "input": 65220,
+          "output": 415,
+          "cacheRead": 0,
           "cacheWrite": 0,
-          "reasoning": 110,
-          "totalTokens": 65624,
+          "reasoning": 18,
+          "totalTokens": 65635,
           "cost": {
-            "input": 0.00031425,
-            "output": 0.0019665,
-            "cacheRead": 0.0048576,
+            "input": 0.048915,
+            "output": 0.0018675,
+            "cacheRead": 0,
             "cacheWrite": 0,
-            "total": 0.00713835
+            "total": 0.0507825
           }
         },
         "total": {
-          "input": 134889,
-          "output": 796,
-          "cacheRead": 330752,
+          "input": 200267,
+          "output": 698,
+          "cacheRead": 265984,
           "cacheWrite": 0,
-          "reasoning": 290,
-          "totalTokens": 466437,
+          "reasoning": 91,
+          "totalTokens": 466949,
           "cost": {
-            "input": 0.10116675000000001,
-            "output": 0.003582,
-            "cacheRead": 0.0248064,
+            "input": 0.15020025,
+            "output": 0.003141,
+            "cacheRead": 0.0199488,
             "cacheWrite": 0,
-            "total": 0.12955514999999998
+            "total": 0.17329005
           }
         }
       },
       "measuredUsage": {
-        "input": 134889,
-        "output": 796,
-        "cacheRead": 330752,
+        "input": 200267,
+        "output": 698,
+        "cacheRead": 265984,
         "cacheWrite": 0,
-        "reasoning": 290,
-        "totalTokens": 466437,
+        "reasoning": 91,
+        "totalTokens": 466949,
         "cost": {
-          "input": 0.10116675000000001,
-          "output": 0.003582,
-          "cacheRead": 0.0248064,
+          "input": 0.15020025,
+          "output": 0.003141,
+          "cacheRead": 0.0199488,
           "cacheWrite": 0,
-          "total": 0.12955514999999998
+          "total": 0.17329005
         }
       },
       "stderr": ""
@@ -367,63 +379,69 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448567
       },
       "contextPressureAfterLoad": {
-        "tokens": 99206,
+        "tokens": 99284,
         "contextWindow": 272000,
-        "percent": 36.47279411764706
+        "percent": 36.50147058823529
       },
       "noticeLevels": [
         30
       ],
       "answers": [
-        "{\"deployment_region\":\"eu-west-2\",\"rollback_digest\":\"sha256:017c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-01\",\"feature_flag\":\"context_cutover_01\"}",
-        "{\"queue_name\":\"agent-jobs-01\",\"retention_days\":\"31\",\"incident_channel\":\"#context-ops-01\",\"owner\":\"operator-01@example.test\"}",
-        "{\"release_window\":\"Saturday 02:01 UTC\",\"health_endpoint\":\"/health/context/01\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://context-audit-01\"}"
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-2",
-            "rollback_digest": "sha256:017c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-01",
-            "feature_flag": "context_cutover_01"
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": "agent-jobs-01",
-            "retention_days": "31",
-            "incident_channel": "#context-ops-01",
-            "owner": "operator-01@example.test"
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "release_window": "Saturday 02:01 UTC",
-            "health_endpoint": "/health/context/01",
-            "max_parallel_jobs": "5",
-            "audit_bucket": "gs://context-audit-01"
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
@@ -440,7 +458,7 @@
       },
       "autonomyAttempted": true,
       "autonomySuccess": true,
-      "contextTokensSaved": 111935,
+      "contextTokensSaved": 111700,
       "minimumMeaningfulSavedTokens": 2720,
       "finalManagedState": {
         "hidden": 0,
@@ -449,17 +467,17 @@
       },
       "contextActions": [
         {
-          "toolCallId": "call_Twm883XaZwuB25Ku8TgYys7D|fc_0df4b71e38d1a7b4016a9392bec37487d1a857925ef6b7284b",
+          "toolCallId": "call_fvqo79pKcNbLf7321QTtR8qI|fc_0f7fae69f261924a016a9397498c0887d1a5f1c6d3114c3cad",
           "action": "stats",
           "args": {
             "action": "stats"
           },
           "ok": true,
           "savedTokens": 0,
-          "result": "Context usage: 37% of 272k (99,369 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+          "result": "Context usage: 37% of 272k (99,409 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
         },
         {
-          "toolCallId": "call_2yRudAAGqyIeRhIDirpsn1tn|fc_0df4b71e38d1a7b4016a9392bfce5c87d1b26f3800f188a4e8",
+          "toolCallId": "call_ceB3Dc6stmGniL5AWAOAVHR3|fc_0f7fae69f261924a016a93974a7fec87d1b71d394294742bf7",
           "action": "list",
           "args": {
             "action": "list",
@@ -467,61 +485,61 @@
           },
           "ok": true,
           "savedTokens": null,
-          "result": "Context: 10 message(s), ~112,300 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"\n[2] assistant: \"[thinking] LOADED 1/3\"\n[3] user: \"COMPLETED_WORK_NOTE 372 marker=033f8492. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 744 marker=ea9aee6e. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 36% of 272k (99,226 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,369 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
+          "result": "Context: 10 message(s), ~112,332 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"\n[2] assistant: \"[thinking] LOADED 1/3\"\n[3] user: \"COMPLETED_WORK_NOTE 372 marker=033f8492. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 744 marker=ea9aee6e. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 37% of 272k (99,304 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,409 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
         },
         {
-          "toolCallId": "call_5vihvZP7jwBximXepvXxsvZ4|fc_0df4b71e38d1a7b4016a9392c49e4087d195a863cbdd31ff93",
+          "toolCallId": "call_S8aBibyCFI1UOmCqbQkLZB8z|fc_0f7fae69f261924a016a93974d91cc87d1b84da1638b000333",
           "action": "summarize",
           "args": {
             "action": "summarize",
             "range": "1-6"
           },
           "ok": true,
-          "savedTokens": 111935,
-          "result": "Summarized 6 message(s) into a single context block (id:506b083f, model: openai-codex/gpt-5.4-mini). Use action=restore range=506b083f to bring them back. Active rules now save ~111,935 tokens."
+          "savedTokens": 111700,
+          "result": "Summarized 6 message(s) into a single context block (id:0463cdc5, model: openai-codex/gpt-5.4-mini). Use action=restore range=0463cdc5 to bring them back. Active rules now save ~111,700 tokens."
         },
         {
-          "toolCallId": "call_bomTJbJC1qXrs77ugnDFpBrH|fc_0df4b71e38d1a7b4016a9392cc11fc87d1bc78accef148f665",
+          "toolCallId": "call_mKDNWvA7E9i5NBb1DJBiQiEn|fc_0f7fae69f261924a016a93975ab8b087d1ae5a0cb77a19938e",
           "action": "stats",
           "args": {
             "action": "stats"
           },
           "ok": true,
-          "savedTokens": 111935,
-          "result": "Context usage: 1% of 272k (2,823 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~111,935 tokens\nMessages in session: 14"
+          "savedTokens": 111700,
+          "result": "Context usage: 1% of 272k (3,084 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~111,700 tokens\nMessages in session: 14"
         }
       ],
       "humanContextInterventions": 0,
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 7871,
-          "output": 621,
-          "cacheRead": 504320,
+          "input": 105623,
+          "output": 509,
+          "cacheRead": 408576,
           "cacheWrite": 0,
-          "reasoning": 352,
-          "totalTokens": 512812,
+          "reasoning": 211,
+          "totalTokens": 514708,
           "cost": {
-            "input": 0.005903250000000001,
-            "output": 0.0027944999999999997,
-            "cacheRead": 0.037823999999999997,
+            "input": 0.07921724999999999,
+            "output": 0.0022905,
+            "cacheRead": 0.030643200000000002,
             "cacheWrite": 0,
-            "total": 0.046521749999999994
+            "total": 0.11215095000000001
           }
         },
         "summary": {
-          "input": 100044,
-          "output": 223,
+          "input": 100122,
+          "output": 616,
           "cacheRead": 0,
           "cacheWrite": 0,
           "reasoning": 0,
-          "totalTokens": 100267,
+          "totalTokens": 100738,
           "cost": {
-            "input": 0.075033,
-            "output": 0.0010035,
+            "input": 0.0750915,
+            "output": 0.002772,
             "cacheRead": 0,
             "cacheWrite": 0,
-            "total": 0.0760365
+            "total": 0.0778635
           }
         },
         "compaction": {
@@ -540,34 +558,34 @@
           }
         },
         "total": {
-          "input": 107915,
-          "output": 844,
-          "cacheRead": 504320,
+          "input": 205745,
+          "output": 1125,
+          "cacheRead": 408576,
           "cacheWrite": 0,
-          "reasoning": 352,
-          "totalTokens": 613079,
+          "reasoning": 211,
+          "totalTokens": 615446,
           "cost": {
-            "input": 0.08093625,
-            "output": 0.0037979999999999997,
-            "cacheRead": 0.037823999999999997,
+            "input": 0.15430875,
+            "output": 0.0050625,
+            "cacheRead": 0.030643200000000002,
             "cacheWrite": 0,
-            "total": 0.12255825000000001
+            "total": 0.19001445
           }
         }
       },
       "measuredUsage": {
-        "input": 107915,
-        "output": 844,
-        "cacheRead": 504320,
+        "input": 205745,
+        "output": 1125,
+        "cacheRead": 408576,
         "cacheWrite": 0,
-        "reasoning": 352,
-        "totalTokens": 613079,
+        "reasoning": 211,
+        "totalTokens": 615446,
         "cost": {
-          "input": 0.08093625,
-          "output": 0.0037979999999999997,
-          "cacheRead": 0.037823999999999997,
+          "input": 0.15430875,
+          "output": 0.0050625,
+          "cacheRead": 0.030643200000000002,
           "cacheWrite": 0,
-          "total": 0.12255825000000001
+          "total": 0.19001445
         }
       },
       "stderr": ""
@@ -579,61 +597,67 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448568
       },
       "contextPressureAfterLoad": {
-        "tokens": 98793,
+        "tokens": 98871,
         "contextWindow": 272000,
-        "percent": 36.32095588235294
+        "percent": 36.34963235294117
       },
       "noticeLevels": [],
       "answers": [
-        "{\"deployment_region\":\"eu-west-3\",\"rollback_digest\":\"sha256:027c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-02\",\"feature_flag\":\"context_cutover_02\"}",
-        "{\"queue_name\":\"agent-jobs-02\",\"retention_days\":\"32\",\"incident_channel\":\"#context-ops-02\",\"owner\":\"operator-02@example.test\"}",
-        "{\"release_window\":\"Saturday 02:02 UTC\",\"health_endpoint\":\"/health/context/02\",\"max_parallel_jobs\":\"6\",\"audit_bucket\":\"gs://context-audit-02\"}"
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-3",
-            "rollback_digest": "sha256:027c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-02",
-            "feature_flag": "context_cutover_02"
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": "agent-jobs-02",
-            "retention_days": "32",
-            "incident_channel": "#context-ops-02",
-            "owner": "operator-02@example.test"
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "release_window": "Saturday 02:02 UTC",
-            "health_endpoint": "/health/context/02",
-            "max_parallel_jobs": "6",
-            "audit_bucket": "gs://context-audit-02"
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
@@ -662,18 +686,18 @@
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 101152,
-          "output": 277,
-          "cacheRead": 493056,
+          "input": 166913,
+          "output": 303,
+          "cacheRead": 427776,
           "cacheWrite": 0,
-          "reasoning": 100,
-          "totalTokens": 594485,
+          "reasoning": 108,
+          "totalTokens": 594992,
           "cost": {
-            "input": 0.075864,
-            "output": 0.0012465,
-            "cacheRead": 0.0369792,
+            "input": 0.12518475,
+            "output": 0.0013635000000000001,
+            "cacheRead": 0.0320832,
             "cacheWrite": 0,
-            "total": 0.11408970000000002
+            "total": 0.15863145
           }
         },
         "summary": {
@@ -707,34 +731,34 @@
           }
         },
         "total": {
-          "input": 101152,
-          "output": 277,
-          "cacheRead": 493056,
+          "input": 166913,
+          "output": 303,
+          "cacheRead": 427776,
           "cacheWrite": 0,
-          "reasoning": 100,
-          "totalTokens": 594485,
+          "reasoning": 108,
+          "totalTokens": 594992,
           "cost": {
-            "input": 0.075864,
-            "output": 0.0012465,
-            "cacheRead": 0.0369792,
+            "input": 0.12518475,
+            "output": 0.0013635000000000001,
+            "cacheRead": 0.0320832,
             "cacheWrite": 0,
-            "total": 0.11408970000000002
+            "total": 0.15863145
           }
         }
       },
       "measuredUsage": {
-        "input": 101152,
-        "output": 277,
-        "cacheRead": 493056,
+        "input": 166913,
+        "output": 303,
+        "cacheRead": 427776,
         "cacheWrite": 0,
-        "reasoning": 100,
-        "totalTokens": 594485,
+        "reasoning": 108,
+        "totalTokens": 594992,
         "cost": {
-          "input": 0.075864,
-          "output": 0.0012465,
-          "cacheRead": 0.0369792,
+          "input": 0.12518475,
+          "output": 0.0013635000000000001,
+          "cacheRead": 0.0320832,
           "cacheWrite": 0,
-          "total": 0.11408970000000002
+          "total": 0.15863145
         }
       },
       "stderr": ""
@@ -746,61 +770,67 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448568
       },
       "contextPressureAfterLoad": {
-        "tokens": 98793,
+        "tokens": 98871,
         "contextWindow": 272000,
-        "percent": 36.32095588235294
+        "percent": 36.34963235294117
       },
       "noticeLevels": [],
       "answers": [
-        "{\"deployment_region\":\"eu-west-3\",\"rollback_digest\":\"sha256:027c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-02\",\"feature_flag\":\"context_cutover_02\"}",
-        "{\"queue_name\":\"agent-jobs-02\",\"retention_days\":\"32\",\"incident_channel\":\"#context-ops-02\",\"owner\":\"operator-02@example.test\"}",
-        "{\"release_window\":\"Saturday 02:02 UTC\",\"health_endpoint\":\"/health/context/02\",\"max_parallel_jobs\":\"6\",\"audit_bucket\":\"gs://context-audit-02\"}"
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-3",
-            "rollback_digest": "sha256:027c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-02",
-            "feature_flag": "context_cutover_02"
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": "agent-jobs-02",
-            "retention_days": "32",
-            "incident_channel": "#context-ops-02",
-            "owner": "operator-02@example.test"
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "release_window": "Saturday 02:02 UTC",
-            "health_endpoint": "/health/context/02",
-            "max_parallel_jobs": "6",
-            "audit_bucket": "gs://context-audit-02"
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
@@ -829,18 +859,18 @@
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 135467,
-          "output": 323,
-          "cacheRead": 265472,
+          "input": 135029,
+          "output": 368,
+          "cacheRead": 266496,
           "cacheWrite": 0,
-          "reasoning": 144,
-          "totalTokens": 401262,
+          "reasoning": 171,
+          "totalTokens": 401893,
           "cost": {
-            "input": 0.10160024999999999,
-            "output": 0.0014535000000000001,
-            "cacheRead": 0.019910399999999998,
+            "input": 0.10127175000000002,
+            "output": 0.001656,
+            "cacheRead": 0.0199872,
             "cacheWrite": 0,
-            "total": 0.12296415000000001
+            "total": 0.12291495000000001
           }
         },
         "summary": {
@@ -859,49 +889,49 @@
           }
         },
         "compaction": {
-          "input": 65142,
-          "output": 484,
+          "input": 65185,
+          "output": 514,
           "cacheRead": 0,
           "cacheWrite": 0,
-          "reasoning": 55,
-          "totalTokens": 65626,
+          "reasoning": 7,
+          "totalTokens": 65699,
           "cost": {
-            "input": 0.048856500000000004,
-            "output": 0.0021780000000000002,
+            "input": 0.04888875,
+            "output": 0.002313,
             "cacheRead": 0,
             "cacheWrite": 0,
-            "total": 0.051034500000000003
+            "total": 0.051201750000000004
           }
         },
         "total": {
-          "input": 200609,
-          "output": 807,
-          "cacheRead": 265472,
+          "input": 200214,
+          "output": 882,
+          "cacheRead": 266496,
           "cacheWrite": 0,
-          "reasoning": 199,
-          "totalTokens": 466888,
+          "reasoning": 178,
+          "totalTokens": 467592,
           "cost": {
-            "input": 0.15045675,
-            "output": 0.0036315,
-            "cacheRead": 0.019910399999999998,
+            "input": 0.15016050000000003,
+            "output": 0.003969,
+            "cacheRead": 0.0199872,
             "cacheWrite": 0,
-            "total": 0.17399865
+            "total": 0.1741167
           }
         }
       },
       "measuredUsage": {
-        "input": 200609,
-        "output": 807,
-        "cacheRead": 265472,
+        "input": 200214,
+        "output": 882,
+        "cacheRead": 266496,
         "cacheWrite": 0,
-        "reasoning": 199,
-        "totalTokens": 466888,
+        "reasoning": 178,
+        "totalTokens": 467592,
         "cost": {
-          "input": 0.15045675,
-          "output": 0.0036315,
-          "cacheRead": 0.019910399999999998,
+          "input": 0.15016050000000003,
+          "output": 0.003969,
+          "cacheRead": 0.0199872,
           "cacheWrite": 0,
-          "total": 0.17399865
+          "total": 0.1741167
         }
       },
       "stderr": ""
@@ -913,112 +943,107 @@
       "invalidReason": null,
       "fixture": {
         "targetChars": 440000,
-        "actualChars": 448439
+        "actualChars": 448568
       },
       "contextPressureAfterLoad": {
-        "tokens": 99227,
+        "tokens": 99305,
         "contextWindow": 272000,
-        "percent": 36.48051470588236
+        "percent": 36.50919117647059
       },
       "noticeLevels": [
         30,
-        35
+        35,
+        30
       ],
       "answers": [
-        "{\"deployment_region\":\"eu-west-3\",\"rollback_digest\":\"sha256:027c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-02\",\"feature_flag\":\"context_cutover_02\"}",
-        "{\"queue_name\":null,\"retention_days\":\"32\",\"incident_channel\":\"#context-ops-02\",\"owner\":\"operator-02@example.test\"}",
-        "{\"release_window\":\"Saturday 02:02 UTC\",\"health_endpoint\":\"/health/context/02\",\"max_parallel_jobs\":\"6\",\"audit_bucket\":\"gs://context-audit-02\"}"
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
       ],
       "queryScores": [
         {
           "parsed": {
-            "deployment_region": "eu-west-3",
-            "rollback_digest": "sha256:027c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-02",
-            "feature_flag": "context_cutover_02"
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         },
         {
           "parsed": {
-            "queue_name": null,
-            "retention_days": "32",
-            "incident_channel": "#context-ops-02",
-            "owner": "operator-02@example.test"
-          },
-          "correct": 3,
-          "total": 4,
-          "accuracy": 0.75,
-          "exact": false,
-          "missing": [],
-          "wrong": [
-            {
-              "key": "queue_name",
-              "expected": "agent-jobs-02",
-              "actual": "null"
-            }
-          ],
-          "decoyErrors": []
-        },
-        {
-          "parsed": {
-            "release_window": "Saturday 02:02 UTC",
-            "health_endpoint": "/health/context/02",
-            "max_parallel_jobs": "6",
-            "audit_bucket": "gs://context-audit-02"
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
           },
           "correct": 4,
           "total": 4,
           "accuracy": 1,
           "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
           "missing": [],
           "wrong": [],
           "decoyErrors": []
         }
       ],
       "score": {
-        "correct": 11,
+        "correct": 12,
         "total": 12,
-        "accuracy": 0.9166666666666666,
-        "exact": false,
+        "accuracy": 1,
+        "exact": true,
         "decoyErrors": [],
         "missing": [],
-        "wrong": [
-          {
-            "key": "queue_name",
-            "expected": "agent-jobs-02",
-            "actual": "null"
-          }
-        ]
+        "wrong": []
       },
       "autonomyAttempted": true,
       "autonomySuccess": false,
-      "contextTokensSaved": 112011,
+      "contextTokensSaved": 0,
       "minimumMeaningfulSavedTokens": 2720,
       "finalManagedState": {
         "hidden": 0,
         "removed": 0,
-        "summaries": 1
+        "summaries": 0
       },
       "contextActions": [
         {
-          "toolCallId": "call_OTzL4kmYxfKKqRucvt4zg9gW|fc_0e3625e2b7c31c01016a93930e3fe087d2871909ea55c4141a",
+          "toolCallId": "call_M7676NMTDDF3Unn29lmwWdZX|fc_0efe88ce86e6243f016a939796805487d2a4f8496c812940bd",
           "action": "stats",
           "args": {
             "action": "stats"
           },
           "ok": true,
           "savedTokens": 0,
-          "result": "Context usage: 37% of 272k (99,351 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+          "result": "Context usage: 37% of 272k (99,420 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
         },
         {
-          "toolCallId": "call_d78tIXh26n05uhZgeCxuXbNY|fc_0e3625e2b7c31c01016a93930f808087d2b36651a709583770",
+          "toolCallId": "call_kB2Xql6Ofmegk90GL5OPnwTv|fc_0efe88ce86e6243f016a9397974e0887d2a3c66f8d0927bc89",
           "action": "list",
           "args": {
             "action": "list",
@@ -1026,545 +1051,63 @@
           },
           "ok": true,
           "savedTokens": null,
-          "result": "Context: 10 message(s), ~112,301 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"\n[2] assistant: \"[thinking] LOADED 1/3\"\n[3] user: \"COMPLETED_WORK_NOTE 371 marker=e34b41da. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 743 marker=daee3e86. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 36% of 272k (99,247 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,351 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
+          "result": "Context: 10 message(s), ~112,333 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"\n[2] assistant: \"[thinking] LOADED 1/3\"\n[3] user: \"COMPLETED_WORK_NOTE 371 marker=e34b41da. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 743 marker=daee3e86. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 37% of 272k (99,326 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,420 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
         },
         {
-          "toolCallId": "call_ywxCDoBwBwejvEfoWmpEDOOC|fc_0e3625e2b7c31c01016a939316138887d2b2b648144fc12804",
+          "toolCallId": "call_ZNh2gbFlVhkOhdm2mzu7LONd|fc_0efe88ce86e6243f016a93979f6e7487d299142619def85bdf",
           "action": "summarize",
           "args": {
             "action": "summarize",
             "range": "1-6"
           },
           "ok": true,
-          "savedTokens": 112011,
-          "result": "Summarized 6 message(s) into a single context block (id:25bd8794, model: openai-codex/gpt-5.4-mini). Use action=restore range=25bd8794 to bring them back. Active rules now save ~112,011 tokens."
+          "savedTokens": 111890,
+          "result": "Summarized 6 message(s) into a single context block (id:66c163c4, model: openai-codex/gpt-5.4-mini). Use action=restore range=66c163c4 to bring them back. Active rules now save ~111,890 tokens."
         },
         {
-          "toolCallId": "call_R5cLCCTzFwx7S1SBwSOxpSq7|fc_0e3625e2b7c31c01016a93931bac9487d298bef7aca3489594",
+          "toolCallId": "call_tIdTjbpx6tUJfWAfrS6pG9nY|fc_0efe88ce86e6243f016a9397a7737887d2b86652e4bf073c0e",
           "action": "stats",
           "args": {
             "action": "stats"
           },
           "ok": true,
-          "savedTokens": 112011,
-          "result": "Context usage: 1% of 272k (2,831 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~112,011 tokens\nMessages in session: 17"
-        }
-      ],
-      "humanContextInterventions": 0,
-      "providerErrors": [],
-      "usage": {
-        "main": {
-          "input": 105231,
-          "output": 739,
-          "cacheRead": 504320,
-          "cacheWrite": 0,
-          "reasoning": 476,
-          "totalTokens": 610290,
-          "cost": {
-            "input": 0.07892324999999999,
-            "output": 0.0033255000000000003,
-            "cacheRead": 0.037823999999999997,
-            "cacheWrite": 0,
-            "total": 0.12007275
-          }
+          "savedTokens": 111890,
+          "result": "Context usage: 1% of 272k (3,024 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~111,890 tokens\nMessages in session: 17"
         },
-        "summary": {
-          "input": 100065,
-          "output": 153,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 0,
-          "totalTokens": 100218,
-          "cost": {
-            "input": 0.07504875,
-            "output": 0.0006885,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0.07573724999999999
-          }
-        },
-        "compaction": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 0,
-          "totalTokens": 0,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-          }
-        },
-        "total": {
-          "input": 205296,
-          "output": 892,
-          "cacheRead": 504320,
-          "cacheWrite": 0,
-          "reasoning": 476,
-          "totalTokens": 710508,
-          "cost": {
-            "input": 0.153972,
-            "output": 0.004014,
-            "cacheRead": 0.037823999999999997,
-            "cacheWrite": 0,
-            "total": 0.19580999999999998
-          }
-        }
-      },
-      "measuredUsage": {
-        "input": 205296,
-        "output": 892,
-        "cacheRead": 504320,
-        "cacheWrite": 0,
-        "reasoning": 476,
-        "totalTokens": 710508,
-        "cost": {
-          "input": 0.153972,
-          "output": 0.004014,
-          "cacheRead": 0.037823999999999997,
-          "cacheWrite": 0,
-          "total": 0.19580999999999998
-        }
-      },
-      "stderr": ""
-    },
-    {
-      "arm": "full-context",
-      "seed": 3,
-      "valid": true,
-      "invalidReason": null,
-      "fixture": {
-        "targetChars": 440000,
-        "actualChars": 448439
-      },
-      "contextPressureAfterLoad": {
-        "tokens": 98774,
-        "contextWindow": 272000,
-        "percent": 36.31397058823529
-      },
-      "noticeLevels": [],
-      "answers": [
-        "{\"deployment_region\":\"eu-west-1\",\"rollback_digest\":\"sha256:037c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-03\",\"feature_flag\":\"context_cutover_03\"}",
-        "{\"queue_name\":\"agent-jobs-03\",\"retention_days\":\"33\",\"incident_channel\":\"#context-ops-03\",\"owner\":\"operator-03@example.test\"}",
-        "{\"release_window\":\"Saturday 02:03 UTC\",\"health_endpoint\":\"/health/context/03\",\"max_parallel_jobs\":\"7\",\"audit_bucket\":\"gs://context-audit-03\"}"
-      ],
-      "queryScores": [
         {
-          "parsed": {
-            "deployment_region": "eu-west-1",
-            "rollback_digest": "sha256:037c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-03",
-            "feature_flag": "context_cutover_03"
+          "toolCallId": "call_DtoKUJajbL2WE5xkewAuedix|fc_0efe88ce86e6243f016a9397af6c1087d28798e92850649ffd",
+          "action": "restore",
+          "args": {
+            "action": "restore",
+            "range": "66c163c4"
           },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
+          "ok": true,
+          "savedTokens": 0,
+          "result": "Restored the summarized messages. They are back in context. Active rules now save ~0 tokens."
         },
         {
-          "parsed": {
-            "queue_name": "agent-jobs-03",
-            "retention_days": "33",
-            "incident_channel": "#context-ops-03",
-            "owner": "operator-03@example.test"
+          "toolCallId": "call_E1EOJEnLDJl8P9zOPkgzyKYw|fc_0efe88ce86e6243f016a9397b10f8c87d2b2d03518293d4876",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 12
           },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
+          "ok": true,
+          "savedTokens": null,
+          "result": "Context: 23 message(s), ~113,160 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[12] toolResult: \"Context: 10 message(s), ~112,333 tokens (est.) Rules: 0 hidden, 0 removed, 0 summaries [1] user: \"LONG-RUNNING PROJECT T…\"\n[13] assistant: \"[thinking] READY\"\n[14] user: \"Return the current canonical values for these keys: deployment_region, rollback_digest, database_mode, feature_flag. Ret…\"\n[15] custom: \"[Context usage: 37% of 272k (100,003 tokens). Usage reached 35%. Call manage_context action=stats now, then action=list,…\"\n[16] assistant: \"[thinking] toolCall: manage_context({\"action\":\"summarize\",\"range\":\"1-6\"})\"\n[17] toolResult: \"Summarized 6 message(s) into a single context block (id:66c163c4, model: openai-codex/gpt-5.4-mini). Use action=restore …\"\n[18] assistant: \"toolCall: manage_context({\"action\":\"stats\"})\"\n[19] toolResult: \"Context usage: 1% of 272k (3,024 tokens) Rules: 0 hidden, 0 removed, 1 summary Saved by rules: ~111,890 tokens Messages …\"\n[20] assistant: \"[thinking] {\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"p…\"\n[21] user: \"Return the current canonical values for these keys: queue_name, retention_days, incident_channel, owner. Return one JSON…\"\n[22] assistant: \"[thinking] toolCall: manage_context({\"action\":\"restore\",\"range\":\"66c163c4\"})\"\n[23] toolResult: \"Restored the summarized messages. They are back in context. Active rules now save ~0 tokens.\"\n… 11 earlier message(s) omitted (use limit to see more)\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
         },
         {
-          "parsed": {
-            "release_window": "Saturday 02:03 UTC",
-            "health_endpoint": "/health/context/03",
-            "max_parallel_jobs": "7",
-            "audit_bucket": "gs://context-audit-03"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        }
-      ],
-      "score": {
-        "correct": 12,
-        "total": 12,
-        "accuracy": 1,
-        "exact": true,
-        "decoyErrors": [],
-        "missing": [],
-        "wrong": []
-      },
-      "autonomyAttempted": false,
-      "autonomySuccess": false,
-      "contextTokensSaved": 0,
-      "minimumMeaningfulSavedTokens": 2720,
-      "finalManagedState": {
-        "hidden": 0,
-        "removed": 0,
-        "summaries": 0
-      },
-      "contextActions": [],
-      "humanContextInterventions": 0,
-      "providerErrors": [],
-      "usage": {
-        "main": {
-          "input": 101060,
-          "output": 289,
-          "cacheRead": 493056,
-          "cacheWrite": 0,
-          "reasoning": 110,
-          "totalTokens": 594405,
-          "cost": {
-            "input": 0.07579500000000002,
-            "output": 0.0013005,
-            "cacheRead": 0.0369792,
-            "cacheWrite": 0,
-            "total": 0.1140747
-          }
-        },
-        "summary": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 0,
-          "totalTokens": 0,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-          }
-        },
-        "compaction": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 0,
-          "totalTokens": 0,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-          }
-        },
-        "total": {
-          "input": 101060,
-          "output": 289,
-          "cacheRead": 493056,
-          "cacheWrite": 0,
-          "reasoning": 110,
-          "totalTokens": 594405,
-          "cost": {
-            "input": 0.07579500000000002,
-            "output": 0.0013005,
-            "cacheRead": 0.0369792,
-            "cacheWrite": 0,
-            "total": 0.1140747
-          }
-        }
-      },
-      "measuredUsage": {
-        "input": 101060,
-        "output": 289,
-        "cacheRead": 493056,
-        "cacheWrite": 0,
-        "reasoning": 110,
-        "totalTokens": 594405,
-        "cost": {
-          "input": 0.07579500000000002,
-          "output": 0.0013005,
-          "cacheRead": 0.0369792,
-          "cacheWrite": 0,
-          "total": 0.1140747
-        }
-      },
-      "stderr": ""
-    },
-    {
-      "arm": "runtime-compaction",
-      "seed": 3,
-      "valid": true,
-      "invalidReason": null,
-      "fixture": {
-        "targetChars": 440000,
-        "actualChars": 448439
-      },
-      "contextPressureAfterLoad": {
-        "tokens": 98774,
-        "contextWindow": 272000,
-        "percent": 36.31397058823529
-      },
-      "noticeLevels": [],
-      "answers": [
-        "{\"deployment_region\":\"eu-west-1\",\"rollback_digest\":\"sha256:037c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-03\",\"feature_flag\":\"context_cutover_03\"}",
-        "{\"queue_name\":\"agent-jobs-03\",\"retention_days\":\"33\",\"incident_channel\":\"#context-ops-03\",\"owner\":\"operator-03@example.test\"}",
-        "{\"release_window\":\"Saturday 02:03 UTC\",\"health_endpoint\":\"/health/context/03\",\"max_parallel_jobs\":\"7\",\"audit_bucket\":\"gs://context-audit-03\"}"
-      ],
-      "queryScores": [
-        {
-          "parsed": {
-            "deployment_region": "eu-west-1",
-            "rollback_digest": "sha256:037c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-03",
-            "feature_flag": "context_cutover_03"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        },
-        {
-          "parsed": {
-            "queue_name": "agent-jobs-03",
-            "retention_days": "33",
-            "incident_channel": "#context-ops-03",
-            "owner": "operator-03@example.test"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        },
-        {
-          "parsed": {
-            "release_window": "Saturday 02:03 UTC",
-            "health_endpoint": "/health/context/03",
-            "max_parallel_jobs": "7",
-            "audit_bucket": "gs://context-audit-03"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        }
-      ],
-      "score": {
-        "correct": 12,
-        "total": 12,
-        "accuracy": 1,
-        "exact": true,
-        "decoyErrors": [],
-        "missing": [],
-        "wrong": []
-      },
-      "autonomyAttempted": false,
-      "autonomySuccess": false,
-      "contextTokensSaved": 0,
-      "minimumMeaningfulSavedTokens": 2720,
-      "finalManagedState": {
-        "hidden": 0,
-        "removed": 0,
-        "summaries": 0
-      },
-      "contextActions": [],
-      "humanContextInterventions": 1,
-      "providerErrors": [],
-      "usage": {
-        "main": {
-          "input": 135597,
-          "output": 304,
-          "cacheRead": 265472,
-          "cacheWrite": 0,
-          "reasoning": 125,
-          "totalTokens": 401373,
-          "cost": {
-            "input": 0.10169775000000002,
-            "output": 0.0013679999999999999,
-            "cacheRead": 0.019910399999999998,
-            "cacheWrite": 0,
-            "total": 0.12297614999999999
-          }
-        },
-        "summary": {
-          "input": 0,
-          "output": 0,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 0,
-          "totalTokens": 0,
-          "cost": {
-            "input": 0,
-            "output": 0,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0
-          }
-        },
-        "compaction": {
-          "input": 65147,
-          "output": 533,
-          "cacheRead": 0,
-          "cacheWrite": 0,
-          "reasoning": 25,
-          "totalTokens": 65680,
-          "cost": {
-            "input": 0.04886025,
-            "output": 0.0023985,
-            "cacheRead": 0,
-            "cacheWrite": 0,
-            "total": 0.05125875
-          }
-        },
-        "total": {
-          "input": 200744,
-          "output": 837,
-          "cacheRead": 265472,
-          "cacheWrite": 0,
-          "reasoning": 150,
-          "totalTokens": 467053,
-          "cost": {
-            "input": 0.15055800000000003,
-            "output": 0.0037665,
-            "cacheRead": 0.019910399999999998,
-            "cacheWrite": 0,
-            "total": 0.1742349
-          }
-        }
-      },
-      "measuredUsage": {
-        "input": 200744,
-        "output": 837,
-        "cacheRead": 265472,
-        "cacheWrite": 0,
-        "reasoning": 150,
-        "totalTokens": 467053,
-        "cost": {
-          "input": 0.15055800000000003,
-          "output": 0.0037665,
-          "cacheRead": 0.019910399999999998,
-          "cacheWrite": 0,
-          "total": 0.1742349
-        }
-      },
-      "stderr": ""
-    },
-    {
-      "arm": "agent-managed",
-      "seed": 3,
-      "valid": true,
-      "invalidReason": null,
-      "fixture": {
-        "targetChars": 440000,
-        "actualChars": 448439
-      },
-      "contextPressureAfterLoad": {
-        "tokens": 99208,
-        "contextWindow": 272000,
-        "percent": 36.4735294117647
-      },
-      "noticeLevels": [
-        30
-      ],
-      "answers": [
-        "{\"deployment_region\":\"eu-west-1\",\"rollback_digest\":\"sha256:037c91b4e2d8a6f305\",\"database_mode\":\"read-write-primary-03\",\"feature_flag\":\"context_cutover_03\"}",
-        "{\"queue_name\":\"agent-jobs-03\",\"retention_days\":\"33\",\"incident_channel\":\"#context-ops-03\",\"owner\":\"operator-03@example.test\"}",
-        "{\"release_window\":\"Saturday 02:03 UTC\",\"health_endpoint\":\"/health/context/03\",\"max_parallel_jobs\":\"7\",\"audit_bucket\":\"gs://context-audit-03\"}"
-      ],
-      "queryScores": [
-        {
-          "parsed": {
-            "deployment_region": "eu-west-1",
-            "rollback_digest": "sha256:037c91b4e2d8a6f305",
-            "database_mode": "read-write-primary-03",
-            "feature_flag": "context_cutover_03"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        },
-        {
-          "parsed": {
-            "queue_name": "agent-jobs-03",
-            "retention_days": "33",
-            "incident_channel": "#context-ops-03",
-            "owner": "operator-03@example.test"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        },
-        {
-          "parsed": {
-            "release_window": "Saturday 02:03 UTC",
-            "health_endpoint": "/health/context/03",
-            "max_parallel_jobs": "7",
-            "audit_bucket": "gs://context-audit-03"
-          },
-          "correct": 4,
-          "total": 4,
-          "accuracy": 1,
-          "exact": true,
-          "missing": [],
-          "wrong": [],
-          "decoyErrors": []
-        }
-      ],
-      "score": {
-        "correct": 12,
-        "total": 12,
-        "accuracy": 1,
-        "exact": true,
-        "decoyErrors": [],
-        "missing": [],
-        "wrong": []
-      },
-      "autonomyAttempted": true,
-      "autonomySuccess": true,
-      "contextTokensSaved": 111884,
-      "minimumMeaningfulSavedTokens": 2720,
-      "finalManagedState": {
-        "hidden": 0,
-        "removed": 0,
-        "summaries": 1
-      },
-      "contextActions": [
-        {
-          "toolCallId": "call_jMq4JK9yGmf0NM9voGXQJXMV|fc_084c53839ecf75ee016a93934f943c87d29a6b8853f660d271",
+          "toolCallId": "call_jjyQE6QiSYNpUjP8j4RkNRxO|fc_0efe88ce86e6243f016a9397b7a8dc87d2a0634d41e73494c2",
           "action": "stats",
           "args": {
             "action": "stats"
           },
           "ok": true,
           "savedTokens": 0,
-          "result": "Context usage: 37% of 272k (99,330 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+          "result": "Context usage: 37% of 272k (101,172 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 28"
         },
         {
-          "toolCallId": "call_nR1itFUR4STpjIzTejZShNDk|fc_084c53839ecf75ee016a9393509af487d2b5e905a78634d000",
+          "toolCallId": "call_dw1rWkzkz1mNtRM8Lbm44fE7|fc_0efe88ce86e6243f016a9397b8b17087d2b52c41ddf30d696c",
           "action": "list",
           "args": {
             "action": "list",
@@ -1572,51 +1115,40 @@
           },
           "ok": true,
           "savedTokens": null,
-          "result": "Context: 10 message(s), ~112,302 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"\n[2] assistant: \"[thinking] LOADED 1/3\"\n[3] user: \"COMPLETED_WORK_NOTE 369 marker=3deebeb7. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 741 marker=0509e863. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 36% of 272k (99,218 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,330 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
-        },
-        {
-          "toolCallId": "call_rlZxKq6OE5AAwt3uvS3m5PI9|fc_084c53839ecf75ee016a939353ac0087d2a7789933fab9e1be",
-          "action": "summarize",
-          "args": {
-            "action": "summarize",
-            "range": "1-6"
-          },
-          "ok": true,
-          "savedTokens": 111884,
-          "result": "Summarized 6 message(s) into a single context block (id:534f3b5a, model: openai-codex/gpt-5.4-mini). Use action=restore range=534f3b5a to bring them back. Active rules now save ~111,884 tokens."
+          "result": "Context: 30 message(s), ~113,798 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[21] user: \"Return the current canonical values for these keys: queue_name, retention_days, incident_channel, owner. Return one JSON…\"\n[22] assistant: \"[thinking] toolCall: manage_context({\"action\":\"restore\",\"range\":\"66c163c4\"})\"\n[23] toolResult: \"Restored the summarized messages. They are back in context. Active rules now save ~0 tokens.\"\n[24] assistant: \"[thinking] toolCall: manage_context({\"action\":\"list\",\"limit\":12})\"\n[25] toolResult: \"Context: 23 message(s), ~113,160 tokens (est.) Rules: 0 hidden, 0 removed, 0 summaries [12] toolResult: \"Context: 10 mes…\"\n[26] assistant: \"[thinking] {\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9…\"\n[27] user: \"Return the current canonical values for these keys: release_window, health_endpoint, max_parallel_jobs, audit_bucket. Re…\"\n[28] custom: \"[Context usage: 37% of 272k (101,345 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and…\"\n[29] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[30] toolResult: \"Context usage: 37% of 272k (101,172 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages i…\"\n… 20 earlier message(s) omitted (use limit to see more)\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
         }
       ],
       "humanContextInterventions": 0,
       "providerErrors": [],
       "usage": {
         "main": {
-          "input": 105653,
-          "output": 456,
-          "cacheRead": 403456,
+          "input": 110540,
+          "output": 1348,
+          "cacheRead": 1003008,
           "cacheWrite": 0,
-          "reasoning": 209,
-          "totalTokens": 509565,
+          "reasoning": 971,
+          "totalTokens": 1114896,
           "cost": {
-            "input": 0.07923975000000001,
-            "output": 0.002052,
-            "cacheRead": 0.030259200000000003,
+            "input": 0.082905,
+            "output": 0.006065999999999999,
+            "cacheRead": 0.07522559999999999,
             "cacheWrite": 0,
-            "total": 0.11155095000000001
+            "total": 0.1641966
           }
         },
         "summary": {
-          "input": 100039,
-          "output": 295,
+          "input": 100143,
+          "output": 329,
           "cacheRead": 0,
           "cacheWrite": 0,
           "reasoning": 0,
-          "totalTokens": 100334,
+          "totalTokens": 100472,
           "cost": {
-            "input": 0.07502925,
-            "output": 0.0013275000000000001,
+            "input": 0.07510725,
+            "output": 0.0014805,
             "cacheRead": 0,
             "cacheWrite": 0,
-            "total": 0.07635675
+            "total": 0.07658775
           }
         },
         "compaction": {
@@ -1635,34 +1167,674 @@
           }
         },
         "total": {
-          "input": 205692,
-          "output": 751,
-          "cacheRead": 403456,
+          "input": 210683,
+          "output": 1677,
+          "cacheRead": 1003008,
           "cacheWrite": 0,
-          "reasoning": 209,
-          "totalTokens": 609899,
+          "reasoning": 971,
+          "totalTokens": 1215368,
           "cost": {
-            "input": 0.15426900000000002,
-            "output": 0.0033795,
-            "cacheRead": 0.030259200000000003,
+            "input": 0.15801225000000002,
+            "output": 0.007546499999999999,
+            "cacheRead": 0.07522559999999999,
             "cacheWrite": 0,
-            "total": 0.1879077
+            "total": 0.24078434999999998
           }
         }
       },
       "measuredUsage": {
-        "input": 205692,
-        "output": 751,
-        "cacheRead": 403456,
+        "input": 210683,
+        "output": 1677,
+        "cacheRead": 1003008,
         "cacheWrite": 0,
-        "reasoning": 209,
-        "totalTokens": 609899,
+        "reasoning": 971,
+        "totalTokens": 1215368,
         "cost": {
-          "input": 0.15426900000000002,
-          "output": 0.0033795,
-          "cacheRead": 0.030259200000000003,
+          "input": 0.15801225000000002,
+          "output": 0.007546499999999999,
+          "cacheRead": 0.07522559999999999,
           "cacheWrite": 0,
-          "total": 0.1879077
+          "total": 0.24078434999999998
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "full-context",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448568
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 98873,
+        "contextWindow": 272000,
+        "percent": 36.350367647058825
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 101204,
+          "output": 325,
+          "cacheRead": 493568,
+          "cacheWrite": 0,
+          "reasoning": 116,
+          "totalTokens": 595097,
+          "cost": {
+            "input": 0.07590300000000001,
+            "output": 0.0014625000000000003,
+            "cacheRead": 0.0370176,
+            "cacheWrite": 0,
+            "total": 0.1143831
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 101204,
+          "output": 325,
+          "cacheRead": 493568,
+          "cacheWrite": 0,
+          "reasoning": 116,
+          "totalTokens": 595097,
+          "cost": {
+            "input": 0.07590300000000001,
+            "output": 0.0014625000000000003,
+            "cacheRead": 0.0370176,
+            "cacheWrite": 0,
+            "total": 0.1143831
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 101204,
+        "output": 325,
+        "cacheRead": 493568,
+        "cacheWrite": 0,
+        "reasoning": 116,
+        "totalTokens": 595097,
+        "cost": {
+          "input": 0.07590300000000001,
+          "output": 0.0014625000000000003,
+          "cacheRead": 0.0370176,
+          "cacheWrite": 0,
+          "total": 0.1143831
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "runtime-compaction",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448568
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 98873,
+        "contextWindow": 272000,
+        "percent": 36.350367647058825
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 1,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 135234,
+          "output": 295,
+          "cacheRead": 265984,
+          "cacheWrite": 0,
+          "reasoning": 86,
+          "totalTokens": 401513,
+          "cost": {
+            "input": 0.1014255,
+            "output": 0.0013275000000000001,
+            "cacheRead": 0.0199488,
+            "cacheWrite": 0,
+            "total": 0.1227018
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 65220,
+          "output": 447,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 35,
+          "totalTokens": 65667,
+          "cost": {
+            "input": 0.048915,
+            "output": 0.0020115000000000003,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.0509265
+          }
+        },
+        "total": {
+          "input": 200454,
+          "output": 742,
+          "cacheRead": 265984,
+          "cacheWrite": 0,
+          "reasoning": 121,
+          "totalTokens": 467180,
+          "cost": {
+            "input": 0.1503405,
+            "output": 0.0033390000000000004,
+            "cacheRead": 0.0199488,
+            "cacheWrite": 0,
+            "total": 0.1736283
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 200454,
+        "output": 742,
+        "cacheRead": 265984,
+        "cacheWrite": 0,
+        "reasoning": 121,
+        "totalTokens": 467180,
+        "cost": {
+          "input": 0.1503405,
+          "output": 0.0033390000000000004,
+          "cacheRead": 0.0199488,
+          "cacheWrite": 0,
+          "total": 0.1736283
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448568
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99307,
+        "contextWindow": 272000,
+        "percent": 36.50992647058823
+      },
+      "noticeLevels": [
+        30,
+        35
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":null,\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":null,\"owner\":null}",
+        "{\"release_window\":null,\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":null}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": null,
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 3,
+          "total": 4,
+          "accuracy": 0.75,
+          "exact": false,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [
+            {
+              "key": "rollback_digest",
+              "expected": "sha256:7df2aa2fc1fd1b5960dd4824",
+              "actual": null
+            }
+          ],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": null,
+            "owner": null
+          },
+          "correct": 2,
+          "total": 4,
+          "accuracy": 0.5,
+          "exact": false,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [
+            {
+              "key": "incident_channel",
+              "expected": "#ops-60e6053742",
+              "actual": null
+            },
+            {
+              "key": "owner",
+              "expected": "e9ede54d1b@example.test",
+              "actual": null
+            }
+          ],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": null,
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": null
+          },
+          "correct": 2,
+          "total": 4,
+          "accuracy": 0.5,
+          "exact": false,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [
+            {
+              "key": "release_window",
+              "expected": "Saturday 12:00 UTC",
+              "actual": null
+            },
+            {
+              "key": "audit_bucket",
+              "expected": "gs://audit-14c9c8c42a87",
+              "actual": null
+            }
+          ],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 7,
+        "total": 12,
+        "accuracy": 0.5833333333333334,
+        "exact": false,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": [
+          {
+            "key": "rollback_digest",
+            "expected": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "actual": null
+          },
+          {
+            "key": "incident_channel",
+            "expected": "#ops-60e6053742",
+            "actual": null
+          },
+          {
+            "key": "owner",
+            "expected": "e9ede54d1b@example.test",
+            "actual": null
+          },
+          {
+            "key": "release_window",
+            "expected": "Saturday 12:00 UTC",
+            "actual": null
+          },
+          {
+            "key": "audit_bucket",
+            "expected": "gs://audit-14c9c8c42a87",
+            "actual": null
+          }
+        ]
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": false,
+      "contextTokensSaved": 75177,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 8,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_GzhmippEtY7gLvL7qk0DuIRi|fc_0541f8e9e052fa6c016a9397e6971887d2ba3a10d599250d86",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,436 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+        },
+        {
+          "toolCallId": "call_ElCLzx4NSvaGephLpUZd5JTM|fc_0541f8e9e052fa6c016a9397e78ec487d28e990bb3a72f6ecd",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 8
+          },
+          "ok": true,
+          "savedTokens": null,
+          "result": "Context: 10 message(s), ~112,322 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[3] user: \"COMPLETED_WORK_NOTE 369 marker=3deebeb7. This historical execution note is closed and does not change any canonical cons…\"\n[4] assistant: \"[thinking] LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 741 marker=0509e863. This historical execution note is closed and does not change any canonical cons…\"\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 37% of 272k (99,327 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,436 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n… 2 earlier message(s) omitted (use limit to see more)\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
+        },
+        {
+          "toolCallId": "call_93vYBp8FDhcpduhH5yUSL39v|fc_0541f8e9e052fa6c016a9397f067f087d280ee899659a97b49",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (100,232 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 15"
+        },
+        {
+          "toolCallId": "call_0L3zB8CG9PuPjIjh16YuWTfC|fc_0541f8e9e052fa6c016a9397f18ed887d2afd20d696c250c24",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 12
+          },
+          "ok": true,
+          "savedTokens": null,
+          "result": "Context: 17 message(s), ~112,876 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[6] assistant: \"[thinking] LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"\n[8] custom: \"[Context usage: 37% of 272k (99,327 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[10] toolResult: \"Context usage: 37% of 272k (99,436 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"\n[11] assistant: \"toolCall: manage_context({\"action\":\"list\",\"limit\":8})\"\n[12] toolResult: \"Context: 10 message(s), ~112,322 tokens (est.) Rules: 0 hidden, 0 removed, 0 summaries [3] user: \"COMPLETED_WORK_NOTE 36…\"\n[13] assistant: \"[thinking] READY\"\n[14] user: \"Return the current canonical values for these keys: deployment_region, rollback_digest, database_mode, feature_flag. Ret…\"\n[15] custom: \"[Context usage: 37% of 272k (99,964 tokens). Usage reached 35%. Call manage_context action=stats now, then action=list, …\"\n[16] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"\n[17] toolResult: \"Context usage: 37% of 272k (100,232 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages i…\"\n… 5 earlier message(s) omitted (use limit to see more)\n\nUse manage_context with action=hide|unhide|remove|summarize and range like \"3-10\" or \"3,5,7\" or \"all\". Use action=restore with a summary id to bring messages back."
+        },
+        {
+          "toolCallId": "call_3zatQok29u5ePhh4l1YHTar2|fc_0541f8e9e052fa6c016a9397f391a487d2b5040692d9a9ee59",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "3-6,9-12"
+          },
+          "ok": true,
+          "savedTokens": 75177,
+          "result": "Hidden 8 message(s). They are excluded from context until unhidden. Active rules now save ~75,177 tokens."
+        },
+        {
+          "toolCallId": "call_PrpLZNUhPOYpPl6fvXeuzL5i|fc_0541f8e9e052fa6c016a9397f4ab6487d28992d016de2dae82",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "savedTokens": 75177,
+          "result": "Context usage: 13% of 272k (35,282 tokens)\nRules: 8 hidden, 0 removed, 0 summaries\nSaved by rules: ~75,177 tokens\nMessages in session: 21"
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 129775,
+          "output": 1331,
+          "cacheRead": 811008,
+          "cacheWrite": 0,
+          "reasoning": 1039,
+          "totalTokens": 942114,
+          "cost": {
+            "input": 0.09733125000000001,
+            "output": 0.0059895,
+            "cacheRead": 0.0608256,
+            "cacheWrite": 0,
+            "total": 0.16414635
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 129775,
+          "output": 1331,
+          "cacheRead": 811008,
+          "cacheWrite": 0,
+          "reasoning": 1039,
+          "totalTokens": 942114,
+          "cost": {
+            "input": 0.09733125000000001,
+            "output": 0.0059895,
+            "cacheRead": 0.0608256,
+            "cacheWrite": 0,
+            "total": 0.16414635
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 129775,
+        "output": 1331,
+        "cacheRead": 811008,
+        "cacheWrite": 0,
+        "reasoning": 1039,
+        "totalTokens": 942114,
+        "cost": {
+          "input": 0.09733125000000001,
+          "output": 0.0059895,
+          "cacheRead": 0.0608256,
+          "cacheWrite": 0,
+          "total": 0.16414635
         }
       },
       "stderr": ""
@@ -1681,18 +1853,18 @@
       "contextTokensSaved": 0,
       "providerErrors": 0,
       "usage": {
-        "input": 204760,
-        "output": 800,
-        "cacheRead": 1577728,
+        "input": 369179,
+        "output": 943,
+        "cacheRead": 1414912,
         "cacheWrite": 0,
-        "reasoning": 267,
-        "totalTokens": 1783288,
+        "reasoning": 331,
+        "totalTokens": 1785034,
         "cost": {
-          "input": 0.15357,
-          "output": 0.0036000000000000003,
-          "cacheRead": 0.11832959999999998,
+          "input": 0.27688425,
+          "output": 0.004243500000000001,
+          "cacheRead": 0.10611839999999999,
           "cacheWrite": 0,
-          "total": 0.2754996
+          "total": 0.38724615
         }
       }
     },
@@ -1708,18 +1880,18 @@
       "contextTokensSaved": 0,
       "providerErrors": 0,
       "usage": {
-        "input": 536242,
-        "output": 2440,
-        "cacheRead": 861696,
+        "input": 600935,
+        "output": 2322,
+        "cacheRead": 798464,
         "cacheWrite": 0,
-        "reasoning": 639,
-        "totalTokens": 1400378,
+        "reasoning": 390,
+        "totalTokens": 1401721,
         "cost": {
-          "input": 0.4021815,
-          "output": 0.01098,
-          "cacheRead": 0.0646272,
+          "input": 0.45070125000000005,
+          "output": 0.010449,
+          "cacheRead": 0.0598848,
           "cacheWrite": 0,
-          "total": 0.47778869999999996
+          "total": 0.52103505
         }
       }
     },
@@ -1727,26 +1899,26 @@
       "trials": 3,
       "validTrials": 3,
       "invalidTrials": 0,
-      "fieldAccuracy": 0.9722222222222222,
+      "fieldAccuracy": 0.8611111111111112,
       "fullTaskPassRate": 0.6666666666666666,
       "decoyErrors": 0,
       "autonomyAttemptRate": 1,
-      "autonomySuccessRate": 0.6666666666666666,
-      "contextTokensSaved": 335830,
+      "autonomySuccessRate": 0.3333333333333333,
+      "contextTokensSaved": 186877,
       "providerErrors": 0,
       "usage": {
-        "input": 518903,
-        "output": 2487,
-        "cacheRead": 1412096,
+        "input": 546203,
+        "output": 4133,
+        "cacheRead": 2222592,
         "cacheWrite": 0,
-        "reasoning": 1037,
-        "totalTokens": 1933486,
+        "reasoning": 2221,
+        "totalTokens": 2772928,
         "cost": {
-          "input": 0.38917725000000003,
-          "output": 0.0111915,
-          "cacheRead": 0.10590719999999999,
+          "input": 0.40965225000000005,
+          "output": 0.018598499999999997,
+          "cacheRead": 0.1666944,
           "cacheWrite": 0,
-          "total": 0.50627595
+          "total": 0.59494515
         }
       }
     }
