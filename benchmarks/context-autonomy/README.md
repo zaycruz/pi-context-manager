@@ -86,15 +86,15 @@ The raw record is [`results/2026-08-30.json`](results/2026-08-30.json). It conta
 
 ## Lossless-selection follow-up
 
-The 2026-08-30 follow-up ran only the `agent-managed` arm from clean commit `776ff1f6f938aab1f244cb99487e7d7b752ecdd7`. That commit rejects lossy `hide` and `remove` selections unless every selected message is short plain assistant text. The threshold notice directs durable context to `summarize`.
+The 2026-08-30 follow-up ran only the `agent-managed` arm from clean commit `5790f7763c3ad8bbba71e7172e1569bfe93827eb`. That commit rejects lossy `hide` and `remove` selections unless every selected message is short plain assistant text. The implementation directs durable context to `summarize`.
 
 | Field accuracy | Full-task pass rate | Decoy errors | Autonomous attempts | Autonomous successes | Active-rule tokens saved | Total measured cost |
 |---:|---:|---:|---:|---:|---:|---:|
-| 97.2% | 66.7% | 0 | 3/3 | 2/3 | 335,780 | $0.590604 |
+| 97.2% | 66.7% | 0 | 3/3 | 2/3 | 335,476 | $0.621713 |
 
 All three trials created one summary and retained it. Seeds 1 and 3 returned all twelve fields. Seed 2 returned eleven fields and reported `queue_name` as `null`. No trial used `hide` or `remove`.
 
-Compared with the earlier managed-arm observation, field accuracy increased from 86.1% to 97.2%, autonomous success increased from 1 of 3 trials to 2 of 3, and active-rule savings increased from 186,877 to 335,780 tokens. The full-task pass rate stayed at 66.7%.
+Compared with the earlier managed-arm observation, field accuracy increased from 86.1% to 97.2%, autonomous success increased from 1 of 3 trials to 2 of 3, and active-rule savings increased from 186,877 to 335,476 tokens. The full-task pass rate stayed at 66.7%.
 
 This one-arm follow-up is directional evidence, not a causal estimate. Provider behavior is nondeterministic, and the comparison did not rerun the other arms. The result is consistent with the selection guard's intended effect because the previous range-hiding failure did not recur. Summary fidelity remains the unresolved failure boundary.
 
