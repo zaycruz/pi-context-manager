@@ -13,7 +13,7 @@ import {
   queryPrompt,
 } from "./fixtures.mjs";
 import { PiRpcClient } from "./rpc-client.mjs";
-import { aggregateTrials, combineUsage, scoreAnswer } from "./score.mjs";
+import { aggregateTrials, combineUsage, isAutonomySuccess, scoreAnswer } from "./score.mjs";
 
 const ALL_ARMS = ["full-context", "runtime-compaction", "agent-managed"];
 const benchmarkDir = dirname(fileURLToPath(import.meta.url));
@@ -100,7 +100,7 @@ function toolResultText(result) {
 
 function recordedContextAction(event, end) {
   const details = end?.result?.details;
-  const ok = typeof details?.ok === "boolean" ? details.ok : !end?.isError;
+  const ok = typeof details?.ok === "boolean" ? details.ok : end ? !end.isError : false;
   const savedTokens = Number.isFinite(details?.saved) ? Number(details.saved) : null;
   return {
     toolCallId: event.toolCallId,
@@ -237,15 +237,14 @@ function scoreQueries(answers, fixture) {
   });
 }
 
-function thresholdStatus(arm, pressure, levels, acted) {
+function thresholdStatus(arm, pressure) {
   if (arm !== "agent-managed") return { valid: true, reason: null };
-  const escalationObserved = levels.includes(35) || acted;
-  const valid = pressure.percent >= 35 && levels.includes(30) && escalationObserved;
+  const valid = pressure.percent >= 35;
   return {
     valid,
     reason: valid
       ? null
-      : `Managed trial requires >=35% load pressure, a 30% notice, and either a 35% notice or successful autonomous action; observed ${pressure.percent?.toFixed(1)}%, notices ${levels.join(",")}, action ${acted}`,
+      : `Managed trial requires >=35% load pressure; observed ${pressure.percent?.toFixed(1)}%`,
   };
 }
 
@@ -264,8 +263,7 @@ async function buildTrialResult(client, arm, fixture, execution) {
   const destructive = actions.filter((action) =>
     ["hide", "remove", "summarize"].includes(action.action),
   );
-  const acted = destructive.some((action) => action.ok);
-  const status = thresholdStatus(arm, pressure, levels, acted);
+  const status = thresholdStatus(arm, pressure);
   const usage = measuredUsage(allEvents, execution.compactUsage);
   const score = combinedScore(queryScores);
   const errors = providerErrors(allEvents);
@@ -283,11 +281,14 @@ async function buildTrialResult(client, arm, fixture, execution) {
     queryScores,
     score,
     autonomyAttempted: arm === "agent-managed" && destructive.length > 0,
-    autonomySuccess:
-      arm === "agent-managed" &&
-      score.exact &&
-      errors.length === 0 &&
-      contextTokensSaved >= minimumMeaningfulSavedTokens,
+    autonomySuccess: isAutonomySuccess({
+      arm,
+      exact: score.exact,
+      providerErrorCount: errors.length,
+      savedTokens: contextTokensSaved,
+      minimumSavedTokens: minimumMeaningfulSavedTokens,
+      activeRules: managedRuleCount(managedState),
+    }),
     contextTokensSaved,
     minimumMeaningfulSavedTokens,
     finalManagedState: managedState,

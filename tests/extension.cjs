@@ -68,6 +68,7 @@ function responseText(response) {
     "session_compact",
     "context",
     "before_agent_start",
+    "agent_end",
   ]) {
     assert.ok(handlers.has(event), `missing ${event} handler`);
   }
@@ -499,15 +500,20 @@ function responseText(response) {
   assert.equal("systemPrompt" in reviewNotice, false);
   assert.equal(reviewNotice.message.customType, "context-manager-threshold");
   assert.match(reviewNotice.message.content, /Usage reached 30%/);
-  assert.equal(branch.length, branchLengthBeforeNotice + 1);
-  assert.equal(branch.at(-1).data.notificationLevel, 30);
+  assert.equal(branch.length, branchLengthBeforeNotice);
 
   const ompPrompt = Object.freeze(["OMP BASE", "SECOND BLOCK"]);
   assert.equal(
     await handlers.get("before_agent_start")({ systemPrompt: ompPrompt }, context),
     undefined,
   );
-  commitNotice(reviewNotice);
+  await handlers.get("agent_end")({}, context);
+  const retriedReviewNotice = await handlers.get("before_agent_start")(
+    { systemPrompt: ompPrompt },
+    context,
+  );
+  assert.match(retriedReviewNotice.message.content, /Usage reached 30%/);
+  commitNotice(retriedReviewNotice);
 
   usageTokens = 44_800;
   const actionNotice = await handlers.get("before_agent_start")(

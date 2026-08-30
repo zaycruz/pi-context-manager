@@ -9,14 +9,20 @@ function jsonCandidates(text) {
   return [...new Set(candidates)];
 }
 
+function parseJsonObject(candidate) {
+  try {
+    const parsed = JSON.parse(candidate);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
+  } catch {
+    // The caller can try another bounded candidate.
+  }
+  return undefined;
+}
+
 export function extractJsonObject(text) {
   for (const candidate of jsonCandidates(text)) {
-    try {
-      const parsed = JSON.parse(candidate);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed;
-    } catch {
-      // Try the next bounded candidate.
-    }
+    const parsed = parseJsonObject(candidate);
+    if (parsed) return parsed;
   }
   return undefined;
 }
@@ -28,8 +34,8 @@ function decoyMatch(value, decoys) {
 
 function scoreField(key, parsed, expected, decoysByKey) {
   if (!parsed || !(key in parsed)) return { key, status: "missing" };
-  const actual = String(parsed[key]);
-  const expectedValue = String(expected[key]);
+  const actual = parsed[key];
+  const expectedValue = expected[key];
   if (actual === expectedValue) return { key, status: "correct" };
   return {
     key,
@@ -40,8 +46,20 @@ function scoreField(key, parsed, expected, decoysByKey) {
   };
 }
 
+function extraKeys(parsed, expected) {
+  if (!parsed) return [];
+  return Object.keys(parsed).filter((key) => !(key in expected));
+}
+
+function extraDecoyErrors(parsed, extras, decoysByKey) {
+  const allDecoys = Object.values(decoysByKey).flat();
+  return extras.filter((key) => decoyMatch(parsed[key], allDecoys));
+}
+
 export function scoreAnswer(text, expected, decoysByKey = {}) {
-  const parsed = extractJsonObject(text);
+  const source = String(text ?? "").trim();
+  const parsed = extractJsonObject(source);
+  const formatExact = parseJsonObject(source) !== undefined;
   const fields = Object.keys(expected).map((key) =>
     scoreField(key, parsed, expected, decoysByKey),
   );
@@ -55,15 +73,25 @@ export function scoreAnswer(text, expected, decoysByKey = {}) {
       expected: expectedValue,
       actual,
     }));
-  const decoyErrors = fields
-    .filter((field) => field.status === "wrong" && field.decoy)
-    .map((field) => field.key);
+  const extras = extraKeys(parsed, expected);
+  const decoyErrors = [
+    ...fields
+      .filter((field) => field.status === "wrong" && field.decoy)
+      .map((field) => field.key),
+    ...extraDecoyErrors(parsed, extras, decoysByKey),
+  ];
   return {
     parsed: parsed ?? null,
     correct,
     total,
     accuracy: total === 0 ? 1 : correct / total,
-    exact: correct === total,
+    exact:
+      correct === total &&
+      formatExact &&
+      extras.length === 0 &&
+      decoyErrors.length === 0,
+    formatExact,
+    extra: extras,
     missing,
     wrong,
     decoyErrors,
@@ -96,6 +124,23 @@ export function emptyUsage() {
 
 export function combineUsage(usages) {
   return usages.reduce((total, usage) => sumUsage(total, usage), emptyUsage());
+}
+
+export function isAutonomySuccess({
+  arm,
+  exact,
+  providerErrorCount,
+  savedTokens,
+  minimumSavedTokens,
+  activeRules,
+}) {
+  return (
+    arm === "agent-managed" &&
+    exact &&
+    providerErrorCount === 0 &&
+    savedTokens >= minimumSavedTokens &&
+    activeRules > 0
+  );
 }
 
 export function aggregateTrials(trials) {

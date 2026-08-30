@@ -352,11 +352,18 @@ function findOverlappingSummary(state: State, fps: string[]): SummaryRule | unde
   return state.summaries.find((s) => fps.some((f) => s.fingerprints.includes(f)));
 }
 
+interface ContextStats {
+  tokens: number;
+  cap: number | undefined;
+  pct: number | undefined;
+  saved: number;
+}
+
 function contextStats(
   ctx: ExtensionContext,
   messages: AgentMessage[],
   state: State,
-): { tokens: number; cap: number | undefined; pct: number | undefined; saved: number } {
+): ContextStats {
   const usage = ctx.getContextUsage();
   const originalTokens = messages.reduce((sum, message) => sum + estimateTokens(message), 0);
   const tokens = usage?.tokens && usage.tokens > 0 ? usage.tokens : originalTokens;
@@ -954,9 +961,13 @@ function handleUnhide(
   const result = applyUnhide(state, messages, params.range);
   if ("error" in result) return toolError(params.action, result.error);
   saveState(pi, state);
+  const savings = stateChangeSavings(ctx, messages, state);
   const text =
     result.count === 0 ? "No hidden messages in that range." : `Unhidden ${result.count} message(s).`;
-  return toolSuccess(params.action, text, result);
+  return toolSuccess(params.action, `${text}${savings.text}`, {
+    ...result,
+    saved: savings.saved,
+  });
 }
 
 function handleRemove(
@@ -1007,26 +1018,40 @@ function handleRestore(
   pi: ExtensionAPI,
   params: ManageParams,
   state: State,
+  messages: AgentMessage[],
   ctx: ExtensionContext,
 ): ToolResponse {
   const result = applyRestore(state, params.range);
   if ("error" in result) return toolError(params.action, result.error);
   saveState(pi, state);
-  return toolSuccess(params.action, "Restored the summarized messages. They are back in context.");
+  const savings = stateChangeSavings(ctx, messages, state);
+  return toolSuccess(
+    params.action,
+    `Restored the summarized messages. They are back in context.${savings.text}`,
+    { saved: savings.saved },
+  );
 }
 
 function handleReset(
   pi: ExtensionAPI,
   params: ManageParams,
   state: State,
+  messages: AgentMessage[],
+  ctx: ExtensionContext,
 ): ToolResponse {
-  saveState(pi, {
+  const resetState: State = {
     hidden: [],
     removed: [],
     summaries: [],
     notificationLevel: state.notificationLevel,
-  });
-  return toolSuccess(params.action, "Reset all context rules. All messages are back in context.");
+  };
+  saveState(pi, resetState);
+  const savings = stateChangeSavings(ctx, messages, resetState);
+  return toolSuccess(
+    params.action,
+    `Reset all context rules. All messages are back in context.${savings.text}`,
+    { saved: savings.saved },
+  );
 }
 
 async function executeContextAction(
@@ -1057,17 +1082,42 @@ async function executeContextAction(
     case "summarize":
       return handleSummarize(pi, params, state, messages, signal, ctx);
     case "restore":
-      return handleRestore(pi, params, state, ctx);
+      return handleRestore(pi, params, state, messages, ctx);
     case "reset":
-      return handleReset(pi, params, state);
+      return handleReset(pi, params, state, messages, ctx);
   }
+}
+
+function currentNotificationLevel(
+  pendingLevels: Map<string, Exclude<ContextNotificationLevel, 0>>,
+  key: string,
+  persistedLevel: ContextNotificationLevel,
+): ContextNotificationLevel {
+  const pendingLevel = pendingLevels.get(key);
+  if (pendingLevel !== undefined && persistedLevel >= pendingLevel) {
+    pendingLevels.delete(key);
+  }
+  return Math.max(persistedLevel, pendingLevels.get(key) ?? 0) as ContextNotificationLevel;
+}
+
+function notificationUsageText(stats: ContextStats): string {
+  if (!stats.cap) return `${stats.tokens.toLocaleString()} tokens`;
+  return `${stats.pct}% of ${(stats.cap / 1000).toFixed(0)}k (${stats.tokens.toLocaleString()} tokens)`;
+}
+
+function notificationSavedText(saved: number): string {
+  if (saved === 0) return "";
+  return `, ${saved.toLocaleString()} saved by context rules`;
 }
 
 export default function (pi: ExtensionAPI) {
   const contextSnapshots = new Map<string, AgentMessage[]>();
+  const pendingNotificationLevels = new Map<string, Exclude<ContextNotificationLevel, 0>>();
 
   pi.on("session_start", (_event, ctx) => {
-    contextSnapshots.delete(sessionKey(ctx));
+    const key = sessionKey(ctx);
+    contextSnapshots.delete(key);
+    pendingNotificationLevels.delete(key);
   });
 
   pi.on("session_before_compact", (event, ctx) => {
@@ -1086,7 +1136,13 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on("session_compact", (_event, ctx) => {
-    contextSnapshots.delete(sessionKey(ctx));
+    const key = sessionKey(ctx);
+    contextSnapshots.delete(key);
+    pendingNotificationLevels.delete(key);
+  });
+
+  pi.on("agent_end", (_event, ctx) => {
+    pendingNotificationLevels.delete(sessionKey(ctx));
   });
 
   pi.on("context", (event, ctx) => {
@@ -1106,22 +1162,24 @@ export default function (pi: ExtensionAPI) {
       ? loadManagedState(pi, ctx, snapshot)
       : stored.state;
     const stats = contextStats(ctx, messages, state);
-    const nextLevel = nextNotificationLevel(stats.pct, state.notificationLevel);
+    const key = sessionKey(ctx);
+    const currentLevel = currentNotificationLevel(
+      pendingNotificationLevels,
+      key,
+      state.notificationLevel,
+    );
+    const nextLevel = nextNotificationLevel(stats.pct, currentLevel);
     if (nextLevel === undefined) return;
     if (nextLevel === 0) {
+      pendingNotificationLevels.delete(key);
       state.notificationLevel = 0;
       saveState(pi, state);
       return;
     }
 
-    const usageText = stats.cap
-      ? `${stats.pct}% of ${(stats.cap / 1000).toFixed(0)}k (${stats.tokens.toLocaleString()} tokens)`
-      : `${stats.tokens.toLocaleString()} tokens`;
-    const savedText = stats.saved
-      ? `, ${stats.saved.toLocaleString()} saved by context rules`
-      : "";
-    state.notificationLevel = nextLevel;
-    saveState(pi, state);
+    const usageText = notificationUsageText(stats);
+    const savedText = notificationSavedText(stats.saved);
+    pendingNotificationLevels.set(key, nextLevel);
     return {
       message: {
         customType: THRESHOLD_CUSTOM_TYPE,

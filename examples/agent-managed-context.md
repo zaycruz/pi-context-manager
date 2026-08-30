@@ -110,4 +110,6 @@ The evaluation measures:
 - human context interventions; and
 - provider failures.
 
-Do not claim a task-quality improvement until repeated valid runs show that the managed arm reduces context cost without reducing canonical-field accuracy.
+The first clean-commit three-seed run did not meet that bar. Full context and manual runtime compaction each returned 36 of 36 fields. Agent-managed context returned 35 of 36 fields and passed 2 of 3 complete tasks. It attempted autonomous management in all three trials and saved 111,943 active-context tokens per trial on average, but one managed answer returned `null` for `queue_name`. The run does not isolate whether summary generation or later retrieval caused the omission. Its measured cost was also higher than both comparison arms in this run.
+
+Do not claim a task-quality or cost improvement from this result. The measured win is narrower: the agent autonomously reduced active context in all three trials while preserving every field in two of them. The failed trial shows that constraint fidelity after management is now the load-bearing unproven boundary.

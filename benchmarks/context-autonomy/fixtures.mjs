@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 const FACT_KEYS = [
   "deployment_region",
   "rollback_digest",
@@ -33,32 +35,41 @@ function shuffled(values, random) {
   return copy;
 }
 
+function opaqueValue(seed, key, length = 12) {
+  return createHash("sha256")
+    .update(`pi-context-autonomy-v2:${seed}:${key}`)
+    .digest("hex")
+    .slice(0, length);
+}
+
+function boundedValue(seed, key, minimum, span) {
+  return minimum + (Number.parseInt(opaqueValue(seed, key, 8), 16) % span);
+}
+
 function canonicalFacts(seed) {
-  const suffix = String(seed).padStart(2, "0");
   return {
-    deployment_region: `eu-west-${(seed % 3) + 1}`,
-    rollback_digest: `sha256:${suffix}7c91b4e2d8a6f305`,
-    database_mode: `read-write-primary-${suffix}`,
-    feature_flag: `context_cutover_${suffix}`,
-    queue_name: `agent-jobs-${suffix}`,
-    retention_days: String(30 + seed),
-    incident_channel: `#context-ops-${suffix}`,
-    owner: `operator-${suffix}@example.test`,
-    release_window: `Saturday 02:${suffix} UTC`,
-    health_endpoint: `/health/context/${suffix}`,
-    max_parallel_jobs: String(4 + (seed % 5)),
-    audit_bucket: `gs://context-audit-${suffix}`,
+    deployment_region: `region-${opaqueValue(seed, "deployment_region", 8)}`,
+    rollback_digest: `sha256:${opaqueValue(seed, "rollback_digest", 24)}`,
+    database_mode: `primary-${opaqueValue(seed, "database_mode", 10)}`,
+    feature_flag: `flag-${opaqueValue(seed, "feature_flag", 10)}`,
+    queue_name: `queue-${opaqueValue(seed, "queue_name", 10)}`,
+    retention_days: String(boundedValue(seed, "retention_days", 17, 180)),
+    incident_channel: `#ops-${opaqueValue(seed, "incident_channel", 10)}`,
+    owner: `${opaqueValue(seed, "owner", 10)}@example.test`,
+    release_window: `Saturday ${String(boundedValue(seed, "release_hour", 0, 24)).padStart(2, "0")}:${String(boundedValue(seed, "release_minute", 0, 60)).padStart(2, "0")} UTC`,
+    health_endpoint: `/health/${opaqueValue(seed, "health_endpoint", 10)}`,
+    max_parallel_jobs: String(boundedValue(seed, "max_parallel_jobs", 2, 15)),
+    audit_bucket: `gs://audit-${opaqueValue(seed, "audit_bucket", 12)}`,
   };
 }
 
 function decoyFacts(seed) {
-  const suffix = String(seed).padStart(2, "0");
   return Object.fromEntries(
-    FACT_KEYS.map((key, index) => [
+    FACT_KEYS.map((key) => [
       key,
       [
-        `superseded-${key}-${suffix}-a`,
-        `obsolete-${key}-${index}-${suffix}-b`,
+        `superseded-${key}-${opaqueValue(seed, `${key}:decoy:a`, 10)}`,
+        `obsolete-${key}-${opaqueValue(seed, `${key}:decoy:b`, 10)}`,
       ],
     ]),
   );

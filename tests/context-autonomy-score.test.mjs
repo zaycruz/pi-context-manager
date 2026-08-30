@@ -4,6 +4,7 @@ import {
   aggregateTrials,
   combineUsage,
   extractJsonObject,
+  isAutonomySuccess,
   scoreAnswer,
 } from "../benchmarks/context-autonomy/score.mjs";
 import { createFixture } from "../benchmarks/context-autonomy/fixtures.mjs";
@@ -26,6 +27,29 @@ test("scoreAnswer reports exact, missing, wrong, and decoy fields", () => {
   assert.deepEqual(score.wrong, [{ key: "b", expected: "current-b", actual: "old-b" }]);
   assert.deepEqual(score.decoyErrors, ["b"]);
 });
+test("scoreAnswer requires strict JSON types, no prose, and no extra decoys for exact pass", () => {
+  const expected = { retention_days: "32" };
+  const decoys = { retention_days: ["obsolete-days"] };
+  const numeric = scoreAnswer('{"retention_days":32}', expected, decoys);
+  assert.equal(numeric.correct, 0);
+  assert.equal(numeric.exact, false);
+
+  const prose = scoreAnswer('Result: {"retention_days":"32"}', expected, decoys);
+  assert.equal(prose.correct, 1);
+  assert.equal(prose.formatExact, false);
+  assert.equal(prose.exact, false);
+
+  const extra = scoreAnswer(
+    '{"retention_days":"32","legacy":"obsolete-days"}',
+    expected,
+    decoys,
+  );
+  assert.equal(extra.correct, 1);
+  assert.deepEqual(extra.extra, ["legacy"]);
+  assert.deepEqual(extra.decoyErrors, ["legacy"]);
+  assert.equal(extra.exact, false);
+});
+
 
 test("fixtures retain every canonical fact and superseded decoy across insertion collisions", () => {
   for (const seed of [1, 2, 3]) {
@@ -49,6 +73,21 @@ test("combineUsage sums provider tokens and costs", () => {
     { input: usage.input, output: usage.output, cacheRead: usage.cacheRead, reasoning: usage.reasoning, totalTokens: usage.totalTokens, totalCost: usage.cost.total },
     { input: 30, output: 5, cacheRead: 12, reasoning: 1, totalTokens: 48, totalCost: 0.30000000000000004 },
   );
+});
+
+test("autonomy success requires exact output, meaningful savings, and active final rules", () => {
+  const successful = {
+    arm: "agent-managed",
+    exact: true,
+    providerErrorCount: 0,
+    savedTokens: 10_000,
+    minimumSavedTokens: 2_720,
+    activeRules: 1,
+  };
+  assert.equal(isAutonomySuccess(successful), true);
+  assert.equal(isAutonomySuccess({ ...successful, exact: false }), false);
+  assert.equal(isAutonomySuccess({ ...successful, savedTokens: 9 }), false);
+  assert.equal(isAutonomySuccess({ ...successful, activeRules: 0 }), false);
 });
 
 test("aggregateTrials excludes invalid trials and computes outcome rates", () => {
