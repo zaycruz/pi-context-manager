@@ -1,0 +1,729 @@
+{
+  "schemaVersion": 1,
+  "runAt": "2026-08-30T04:33:10.785Z",
+  "source": {
+    "commit": "776ff1f6f938aab1f244cb99487e7d7b752ecdd7",
+    "dirty": false
+  },
+  "environment": {
+    "piVersion": "0.84.3",
+    "nodeVersion": "v25.5.0",
+    "model": "openai-codex/gpt-5.4-mini"
+  },
+  "config": {
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "arms": [
+      "agent-managed"
+    ],
+    "targetChars": 440000,
+    "timeoutMs": 300000,
+    "identicalPromptsBySeed": true
+  },
+  "trials": [
+    {
+      "arm": "agent-managed",
+      "seed": 1,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448567
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99284,
+        "contextWindow": 272000,
+        "percent": 36.50147058823529
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": true,
+      "contextTokensSaved": 111903,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 1
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_TZbCQ8fR0M5KoTMshfE67g0f|fc_084ddf8d068eef51016a93b23f532487d2a8ac66523a1ad092",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,443 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+        },
+        {
+          "toolCallId": "call_5x2saMUJ60nHEw7elhn31nW3|fc_084ddf8d068eef51016a93b240495487d2b364bb5920ad77e2",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 10 message(s), ~112,333 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"  [SUMMARIZE-ONLY]\n[2] assistant: \"[thinking] LOADED 1/3\"  [SUMMARIZE-ONLY]\n[3] user: \"COMPLETED_WORK_NOTE 372 marker=033f8492. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[4] assistant: \"[thinking] LOADED 2/3\"  [SUMMARIZE-ONLY]\n[5] user: \"COMPLETED_WORK_NOTE 744 marker=ea9aee6e. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[6] assistant: \"[thinking] LOADED 3/3\"  [SUMMARIZE-ONLY]\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[8] custom: \"[Context usage: 37% of 272k (99,305 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[10] toolResult: \"Context usage: 37% of 272k (99,443 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nUse summarize for every [SUMMARIZE-ONLY] message and for meaningful context reduction. Hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total. Use action=restore with a summary id to bring messages back."
+        },
+        {
+          "toolCallId": "call_Zf8j4edcVkLF6G2ZeITdHXNz|fc_084ddf8d068eef51016a93b2437f4887d28d46f96e24517222",
+          "action": "summarize",
+          "args": {
+            "action": "summarize",
+            "range": "1-6"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111903,
+          "result": "Summarized 6 message(s) into a single context block (id:b7b754a6, model: openai-codex/gpt-5.4-mini). Use action=restore range=b7b754a6 to bring them back. Active rules now save ~111,903 tokens."
+        },
+        {
+          "toolCallId": "call_8Gzt2Qv0wvcbBUANdZJBRaPX|fc_084ddf8d068eef51016a93b24c969887d28398384973a4310a",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111903,
+          "result": "Context usage: 1% of 272k (2,872 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~111,903 tokens\nMessages in session: 14"
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 108299,
+          "output": 501,
+          "cacheRead": 404992,
+          "cacheWrite": 0,
+          "reasoning": 207,
+          "totalTokens": 513792,
+          "cost": {
+            "input": 0.08122425000000001,
+            "output": 0.0022545,
+            "cacheRead": 0.030374400000000003,
+            "cacheWrite": 0,
+            "total": 0.11385315000000003
+          }
+        },
+        "summary": {
+          "input": 100122,
+          "output": 320,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 100442,
+          "cost": {
+            "input": 0.0750915,
+            "output": 0.00144,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.0765315
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 208421,
+          "output": 821,
+          "cacheRead": 404992,
+          "cacheWrite": 0,
+          "reasoning": 207,
+          "totalTokens": 614234,
+          "cost": {
+            "input": 0.15631575000000003,
+            "output": 0.0036945,
+            "cacheRead": 0.030374400000000003,
+            "cacheWrite": 0,
+            "total": 0.19038465000000004
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 208421,
+        "output": 821,
+        "cacheRead": 404992,
+        "cacheWrite": 0,
+        "reasoning": 207,
+        "totalTokens": 614234,
+        "cost": {
+          "input": 0.15631575000000003,
+          "output": 0.0036945,
+          "cacheRead": 0.030374400000000003,
+          "cacheWrite": 0,
+          "total": 0.19038465000000004
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 2,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448568
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99305,
+        "contextWindow": 272000,
+        "percent": 36.50919117647059
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":null,\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": null,
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
+          },
+          "correct": 3,
+          "total": 4,
+          "accuracy": 0.75,
+          "exact": false,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [
+            {
+              "key": "queue_name",
+              "expected": "queue-effb2a18ec",
+              "actual": null
+            }
+          ],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 11,
+        "total": 12,
+        "accuracy": 0.9166666666666666,
+        "exact": false,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": [
+          {
+            "key": "queue_name",
+            "expected": "queue-effb2a18ec",
+            "actual": null
+          }
+        ]
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": false,
+      "contextTokensSaved": 111981,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 1
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_qzYJzepEPcWsapLJr85fxK4r|fc_0266b078a45c3f0a016a93b259ab1487d299da6789bf6ee6b5",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,449 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+        },
+        {
+          "toolCallId": "call_OeTKe6Yt3JI3eOQG0yzzrlVo|fc_0266b078a45c3f0a016a93b25a915487d2bafd381100290830",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 10 message(s), ~112,333 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"  [SUMMARIZE-ONLY]\n[2] assistant: \"[thinking] LOADED 1/3\"  [SUMMARIZE-ONLY]\n[3] user: \"COMPLETED_WORK_NOTE 371 marker=e34b41da. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[4] assistant: \"LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 743 marker=daee3e86. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[6] assistant: \"[thinking] LOADED 3/3\"  [SUMMARIZE-ONLY]\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[8] custom: \"[Context usage: 37% of 272k (99,325 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[10] toolResult: \"Context usage: 37% of 272k (99,449 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nUse summarize for every [SUMMARIZE-ONLY] message and for meaningful context reduction. Hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total. Use action=restore with a summary id to bring messages back."
+        },
+        {
+          "toolCallId": "call_HSpBJNdhMxRWVsrTOlxeBTbH|fc_0266b078a45c3f0a016a93b25d60bc87d29e606ba973ad8e20",
+          "action": "summarize",
+          "args": {
+            "action": "summarize",
+            "range": "1-6"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111981,
+          "result": "Summarized 6 message(s) into a single context block (id:3c0f84cc, model: openai-codex/gpt-5.4-mini). Use action=restore range=3c0f84cc to bring them back. Active rules now save ~111,981 tokens."
+        },
+        {
+          "toolCallId": "call_aUz21oaYTZ4lXyMBlT0JgDGL|fc_0266b078a45c3f0a016a93b265fa0887d2b3caec6d26029c44",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111981,
+          "result": "Context usage: 1% of 272k (2,779 tokens)\nRules: 0 hidden, 0 removed, 1 summary\nSaved by rules: ~111,981 tokens\nMessages in session: 14"
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 106269,
+          "output": 595,
+          "cacheRead": 406528,
+          "cacheWrite": 0,
+          "reasoning": 316,
+          "totalTokens": 513392,
+          "cost": {
+            "input": 0.07970175,
+            "output": 0.0026775,
+            "cacheRead": 0.030489600000000002,
+            "cacheWrite": 0,
+            "total": 0.11286884999999999
+          }
+        },
+        "summary": {
+          "input": 100136,
+          "output": 234,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 100370,
+          "cost": {
+            "input": 0.075102,
+            "output": 0.0010530000000000001,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.076155
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 206405,
+          "output": 829,
+          "cacheRead": 406528,
+          "cacheWrite": 0,
+          "reasoning": 316,
+          "totalTokens": 613762,
+          "cost": {
+            "input": 0.15480375000000002,
+            "output": 0.0037305000000000003,
+            "cacheRead": 0.030489600000000002,
+            "cacheWrite": 0,
+            "total": 0.18902385
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 206405,
+        "output": 829,
+        "cacheRead": 406528,
+        "cacheWrite": 0,
+        "reasoning": 316,
+        "totalTokens": 613762,
+        "cost": {
+          "input": 0.15480375000000002,
+          "output": 0.0037305000000000003,
+          "cacheRead": 0.030489600000000002,
+          "cacheWrite": 0,
+          "total": 0.18902385
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 448568
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99307,
+        "contextWindow": 272000,
+        "percent": 36.50992647058823
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": true,
+      "contextTokensSaved": 111896,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 1
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_vGLVBxM6k9CPUcxZn26hmmK4|fc_0420573dec82b085016a93b27503ac87d2bc6b611c51c2cb37",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,425 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 8"
+        },
+        {
+          "toolCallId": "call_yDmltcWCs7nKNNn8NQiG3hHz|fc_0420573dec82b085016a93b27620c487d280c4488ae152bf8f",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 10 message(s), ~112,332 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user: \"LONG-RUNNING PROJECT TRANSCRIPT The transcript contains closed work, superseded values, and twelve CANONICAL_FACT record…\"  [SUMMARIZE-ONLY]\n[2] assistant: \"[thinking] LOADED 1/3\"  [SUMMARIZE-ONLY]\n[3] user: \"COMPLETED_WORK_NOTE 369 marker=3deebeb7. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[4] assistant: \"LOADED 2/3\"\n[5] user: \"COMPLETED_WORK_NOTE 741 marker=0509e863. This historical execution note is closed and does not change any canonical cons…\"  [SUMMARIZE-ONLY]\n[6] assistant: \"LOADED 3/3\"\n[7] user: \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[8] custom: \"[Context usage: 37% of 272k (99,317 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[9] assistant: \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[10] toolResult: \"Context usage: 37% of 272k (99,425 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nUse summarize for every [SUMMARIZE-ONLY] message and for meaningful context reduction. Hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total. Use action=restore with a summary id to bring messages back."
+        },
+        {
+          "toolCallId": "call_KDoqGzV8SElmoFy3EFRspx1n|fc_0420573dec82b085016a93b278cd5c87d28fa1fd3c4d1fdc4b",
+          "action": "summarize",
+          "args": {
+            "action": "summarize",
+            "range": "1-6"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111896,
+          "result": "Summarized 6 message(s) into a single context block (id:11dd1373, model: openai-codex/gpt-5.4-mini). Use action=restore range=11dd1373 to bring them back. Active rules now save ~111,896 tokens."
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 139867,
+          "output": 434,
+          "cacheRead": 370176,
+          "cacheWrite": 0,
+          "reasoning": 159,
+          "totalTokens": 510477,
+          "cost": {
+            "input": 0.10490024999999999,
+            "output": 0.001953,
+            "cacheRead": 0.027763200000000002,
+            "cacheWrite": 0,
+            "total": 0.13461645000000003
+          }
+        },
+        "summary": {
+          "input": 100131,
+          "output": 329,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 100460,
+          "cost": {
+            "input": 0.07509825,
+            "output": 0.0014805,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.07657875
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 239998,
+          "output": 763,
+          "cacheRead": 370176,
+          "cacheWrite": 0,
+          "reasoning": 159,
+          "totalTokens": 610937,
+          "cost": {
+            "input": 0.1799985,
+            "output": 0.0034335,
+            "cacheRead": 0.027763200000000002,
+            "cacheWrite": 0,
+            "total": 0.21119520000000003
+          }
+        }
+      },
+      "measuredUsage": {
+        "input": 239998,
+        "output": 763,
+        "cacheRead": 370176,
+        "cacheWrite": 0,
+        "reasoning": 159,
+        "totalTokens": 610937,
+        "cost": {
+          "input": 0.1799985,
+          "output": 0.0034335,
+          "cacheRead": 0.027763200000000002,
+          "cacheWrite": 0,
+          "total": 0.21119520000000003
+        }
+      },
+      "stderr": ""
+    }
+  ],
+  "aggregate": {
+    "agent-managed": {
+      "trials": 3,
+      "validTrials": 3,
+      "invalidTrials": 0,
+      "fieldAccuracy": 0.9722222222222222,
+      "fullTaskPassRate": 0.6666666666666666,
+      "decoyErrors": 0,
+      "autonomyAttemptRate": 1,
+      "autonomySuccessRate": 0.6666666666666666,
+      "contextTokensSaved": 335780,
+      "providerErrors": 0,
+      "usage": {
+        "input": 654824,
+        "output": 2413,
+        "cacheRead": 1181696,
+        "cacheWrite": 0,
+        "reasoning": 682,
+        "totalTokens": 1838933,
+        "cost": {
+          "input": 0.49111800000000005,
+          "output": 0.0108585,
+          "cacheRead": 0.0886272,
+          "cacheWrite": 0,
+          "total": 0.5906037000000001
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Provider and model behavior are nondeterministic.",
+    "Nested summary usage is counted only when the provider returns it through the extension.",
+    "A small number of seeds is preliminary evidence, not a provider-wide performance claim."
+  ]
+}
