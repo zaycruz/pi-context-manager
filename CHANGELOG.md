@@ -7,6 +7,7 @@
 - Report active-rule token savings on every state-changing context action.
 - Preserve nested summary usage and provider failures in benchmark accounting.
 - Strengthen summary guidance for exact durable constraints and meaningful context reduction.
+- Restrict lossy `hide` and `remove` actions to short plain assistant text, and direct durable context to `summarize`.
 
 ## 1.1.0
 

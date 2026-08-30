@@ -2,13 +2,14 @@
 
 `pi-context-manager` gives an agent a bounded control loop for its own working context:
 
-1. Observe context use with `stats` and inspect messages with `list`.
-2. Decide which completed messages are no longer useful for the active task.
-3. Apply `hide`, `remove`, or `summarize` to only those messages.
-4. Verify the reduced working set with `stats` and `list`.
-5. Recover with `unhide`, `restore`, or `reset` if the removed material becomes relevant.
+1. Observe context use with `stats`.
+2. Inspect messages and safety tags with `list`.
+3. Summarize completed durable context.
+4. Use `hide` or `remove` only for short plain assistant text.
+5. Verify the reduced working set with `stats` and `list`.
+6. Recover with `unhide`, `restore`, or `reset` if the managed material becomes relevant.
 
-This is different from whole-session compaction. The agent selects the working set before the runtime must compact the full conversation. The runtime remains the sole owner of compaction.
+This process is different from whole-session compaction. The agent selects the working set before the runtime must compact the full conversation. The runtime remains the sole owner of compaction.
 
 ## Reproduce the control loop
 
@@ -27,20 +28,23 @@ The agent can then use this sequence:
 ```text
 manage_context(action="stats")
 manage_context(action="list", limit=25)
-manage_context(action="hide", range="<completed-message-range>")
+manage_context(action="summarize", range="<completed-durable-range>")
 manage_context(action="stats")
 ```
+
+This sequence requires Pi. OMP cannot summarize because its extension API does not expose model completion. On OMP, the extension can remove only short plain assistant text.
 
 A successful run has these observable properties:
 
 - The second `stats` result reports tokens saved by context rules.
-- The next provider request excludes the selected messages.
+- The next provider request replaces the selected messages with one summary.
 - The current user request and active turn remain present.
-- A selection containing one side of a tool exchange automatically includes its paired tool call or tool result.
-- `unhide` or `reset` restores hidden messages.
+- A summary selection containing one side of a tool exchange automatically includes its paired tool call or tool result.
+- `restore` or `reset` restores summarized messages.
+- `hide` and `remove` reject messages tagged `SUMMARIZE-ONLY`.
 - The rules survive process restart and session continuation.
 
-At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it appends one persisted message that requires safe context management. Passive monitoring never replaces or modifies the system prompt.
+At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it tells the agent to summarize durable completed context. It limits `hide` and `remove` to plain assistant text with at most 128 estimated tokens per message and 512 estimated tokens per selection. Passive monitoring never replaces or modifies the system prompt.
 
 ## What the automated tests prove
 
@@ -55,6 +59,7 @@ The behavioral suite verifies these contracts:
 
 - `stats` and `list` expose the canonical host context.
 - `hide`, `remove`, `unhide`, `restore`, and `reset` persist and reconcile correctly.
+- `hide` and `remove` reject user content, tool exchanges, summaries, rich content, large messages, and large selections.
 - Pi can summarize a selected range and restore its original messages.
 - OMP rejects `summarize` without changing state because OMP does not expose model completion to extensions.
 - The extension rejects changes to the active turn.

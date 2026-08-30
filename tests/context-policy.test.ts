@@ -81,5 +81,7 @@ test("notification text describes the crossed threshold", () => {
   assert.match(contextNotificationText(30, "30%", ""), /Usage reached 30%/);
   assert.match(contextNotificationText(35, "35%", ""), /Usage reached 35%/);
   assert.match(contextNotificationText(35, "35%", ""), /runtime-owned compaction/);
-  assert.match(contextNotificationText(35, "35%", ""), /facts or constraints needed later/);
+  assert.match(contextNotificationText(35, "35%", ""), /plain assistant text/);
+  assert.match(contextNotificationText(35, "35%", ""), /128 tokens/);
+  assert.match(contextNotificationText(35, "35%", ""), /512 tokens total/);
 });

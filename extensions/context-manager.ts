@@ -24,6 +24,8 @@ import {
 const STATE_CUSTOM_TYPE = "pi-context-manager-state";
 const LEGACY_STATE_CUSTOM_TYPE = "context-manager-state";
 const THRESHOLD_CUSTOM_TYPE = "context-manager-threshold";
+const LOSSY_MESSAGE_MAX_TOKENS = 128;
+const LOSSY_SELECTION_MAX_TOKENS = 512;
 
 function fingerprint(msg: AgentMessage): string {
   return createHash("sha256")
@@ -310,6 +312,40 @@ function preview(msg: AgentMessage, maxLen = 120): string {
   return text.length > maxLen ? text.slice(0, maxLen) + "…" : text;
 }
 
+function isPlainAssistantText(message: AgentMessage): boolean {
+  if (message.role !== "assistant") return false;
+  const content = "content" in message ? message.content : undefined;
+  if (typeof content === "string") return true;
+  if (!Array.isArray(content) || content.length === 0) return false;
+  return (content as PreviewBlock[]).every((block) => block.type === "text");
+}
+
+function lossyMessageGuardReason(message: AgentMessage): string | undefined {
+  if (!isPlainAssistantText(message)) return "it is not plain assistant text";
+  const tokens = estimateTokens(message);
+  if (tokens > LOSSY_MESSAGE_MAX_TOKENS) {
+    return `its estimated size is ${tokens} tokens, above the ${LOSSY_MESSAGE_MAX_TOKENS}-token per-message limit`;
+  }
+  return undefined;
+}
+
+function lossySelectionError(
+  messages: AgentMessage[],
+  selected: number[],
+): string | undefined {
+  for (const index of selected) {
+    const reason = lossyMessageGuardReason(messages[index]);
+    if (reason) {
+      return `Lossy hide/remove rejected message ${index + 1}: ${reason}. Use summarize to preserve durable context.`;
+    }
+  }
+  const tokens = selected.reduce((sum, index) => sum + estimateTokens(messages[index]), 0);
+  if (tokens > LOSSY_SELECTION_MAX_TOKENS) {
+    return `Lossy hide/remove rejected this ${tokens}-token selection because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit. Use summarize for meaningful context reduction.`;
+  }
+  return undefined;
+}
+
 function summaryText(rule: SummaryRule): string {
   return `[Context managed: ${rule.fingerprints.length} earlier message(s) summarized by ${rule.model}]\n\n<summary>\n${rule.summary}\n</summary>`;
 }
@@ -335,6 +371,7 @@ function renderList(state: State, messages: AgentMessage[], limit: number): stri
     else if (hidden.has(fp)) tags.push("HIDDEN");
     const rule = state.summaries.find((s) => s.fingerprints.includes(fp));
     if (rule) tags.push(`SUMMARIZED → id:${rule.id}`);
+    if (lossyMessageGuardReason(msg)) tags.push("SUMMARIZE-ONLY");
     const tag = tags.length ? `  [${tags.join(", ")}]` : "";
     lines.push(`[${i + 1}] ${msg.role}: "${preview(msg)}"${tag}`);
   }
@@ -343,7 +380,7 @@ function renderList(state: State, messages: AgentMessage[], limit: number): stri
   }
   lines.push("");
   lines.push(
-    'Use manage_context with action=hide|unhide|remove|summarize and range like "3-10" or "3,5,7" or "all". Use action=restore with a summary id to bring messages back.',
+    'Use summarize for every [SUMMARIZE-ONLY] message and for meaningful context reduction. Hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total. Use action=restore with a summary id to bring messages back.',
   );
   return lines.join("\n");
 }
@@ -395,6 +432,8 @@ function applyHide(
   if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
   const protectionError = destructiveSelectionError(messages, selected);
   if (protectionError) return { error: protectionError };
+  const lossyError = lossySelectionError(messages, selected);
+  if (lossyError) return { error: lossyError };
   const fps = selected.map((index) => fingerprint(messages[index]));
   const overlap = findOverlappingSummary(state, fps);
   if (overlap) {
@@ -429,6 +468,8 @@ function applyRemove(
   if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
   const protectionError = destructiveSelectionError(messages, selected);
   if (protectionError) return { error: protectionError };
+  const lossyError = lossySelectionError(messages, selected);
+  if (lossyError) return { error: lossyError };
   const fps = selected.map((index) => fingerprint(messages[index]));
   const overlap = findOverlappingSummary(state, fps);
   if (overlap) {
@@ -1246,15 +1287,15 @@ export default function (pi: ExtensionAPI) {
     // tool the agent calls by name.
     ...({ loadMode: "essential" } as const),
     description:
-      "Hide, remove, or summarize portions of the conversation context without compacting the whole session. Use action=stats to see context usage against the model's context window, action=list to see the current context with indices, then hide/remove/summarize by index range.",
+      "Manage old conversation context without compacting the whole session. Use stats and list first. Use summarize for meaningful or durable content. Lossy hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total.",
     promptSnippet: "Manage conversation context: hide, remove, or summarize old messages",
     promptGuidelines: [
       "Use manage_context when the conversation context is getting large and you want to hide, remove, or summarize old messages instead of compacting the whole session.",
-      "Call manage_context with action=stats and then action=list at 30% context usage. At or above 35%, manage old completed messages before runtime-owned compaction. Summarize the largest completed ranges that contain facts or constraints needed later; hide or remove only material that is safe to forget. Afterward, call stats again. If active rules save less than 1% of the context window, select a more useful completed range instead of stopping after short acknowledgments.",
+      "Call manage_context with action=stats and then action=list at 30% context usage. At or above 35%, summarize the largest completed ranges that contain facts, constraints, user content, tool exchanges, or other durable context. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total. Afterward, call stats again. If active rules save less than 1% of the context window, summarize a more useful completed range instead of stopping after short acknowledgments.",
       "For summarize, omit the model parameter to use the active model. Set model only when the user requests a known available provider/model.",
       "Whole-session compaction belongs to the runtime; manage_context never starts or suppresses it.",
       "Call manage_context with action=list first to see the current context and message indices.",
-      "Tool calls and their results are paired automatically: hiding, removing, or summarizing one side also affects the other to keep the context valid.",
+      "Selections close tool calls and results automatically. Tool exchanges are summarize-only and cannot pass the hide/remove safety guard.",
     ],
     parameters: Type.Object({
       action: Type.Union([

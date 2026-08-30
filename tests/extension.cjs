@@ -159,6 +159,14 @@ function responseText(response) {
     assert.match(responseText(response), pattern);
   }
 
+  async function assertLossyGuarded(messages, range, pattern) {
+    await runContext(messages);
+    for (const action of ["hide", "remove"]) {
+      assertError(await call({ action, range }), pattern);
+      assert.equal(await runContext(messages), undefined);
+    }
+  }
+
   await handlers.get("session_start")({}, context);
   assertError(await call({ action: "list" }), /Canonical context is not available/);
 
@@ -173,6 +181,7 @@ function responseText(response) {
   assertOk(list);
   assert.equal(list.details.messageCount, baseline.length);
   assert.doesNotMatch(responseText(list), /must not enter the canonical snapshot/);
+  assert.match(responseText(list), /SUMMARIZE-ONLY/);
   assertOk(await call({ action: "stats" }));
 
   for (const action of ["hide", "remove", "summarize"]) {
@@ -182,17 +191,94 @@ function responseText(response) {
     assert.equal(completionCalls, before);
   }
 
-  for (const action of ["hide", "remove", "summarize"]) {
+  for (const action of ["hide", "remove"]) {
     await runContext(baseline);
-    nextSummary = "Completed baseline context";
-    const result = await call({ action, range: "all", model: "test/summary" });
+    const result = await call({ action, range: "2" });
     assertOk(result);
     const managed = await runContext(baseline);
-    assert.equal(managed.messages.at(-1).content[0].text, "current request");
-    assert.equal(managed.messages.length, action === "summarize" ? 2 : 1);
+    assert.deepEqual(
+      managed.messages.map((message) => message.content[0].text),
+      ["old request", "current request"],
+    );
     assertOk(await call({ action: "reset" }));
   }
 
+  await runContext(baseline);
+  nextSummary = "Completed baseline context";
+  const baselineSummary = await call({
+    action: "summarize",
+    range: "all",
+    model: "test/summary",
+  });
+  assertOk(baselineSummary);
+  const summarizedBaseline = await runContext(baseline);
+  assert.equal(summarizedBaseline.messages.at(-1).content[0].text, "current request");
+  assert.equal(summarizedBaseline.messages.length, 2);
+  assertOk(await call({ action: "reset" }));
+
+
+  await assertLossyGuarded(baseline, "1", /message 1.*not plain assistant text.*summarize/i);
+
+  const completedToolExchange = [
+    {
+      role: "assistant",
+      content: [{ type: "toolCall", id: "old-call", name: "read", arguments: { path: "old.ts" } }],
+      timestamp: 30,
+    },
+    {
+      role: "toolResult",
+      toolCallId: "old-call",
+      toolName: "read",
+      content: [{ type: "text", text: "old tool evidence" }],
+      isError: false,
+      timestamp: 31,
+    },
+    textMessage("user", "current tool guard request", 32),
+  ];
+  await assertLossyGuarded(
+    completedToolExchange,
+    "1",
+    /message 1.*not plain assistant text.*summarize/i,
+  );
+
+  const guardedMessageFixtures = [
+    {
+      role: "assistant",
+      content: [{ type: "thinking", thinking: "durable reasoning" }],
+      timestamp: 33,
+    },
+    {
+      role: "assistant",
+      content: [{ type: "image", data: "synthetic", mimeType: "image/png" }],
+      timestamp: 34,
+    },
+    {
+      role: "custom",
+      content: [{ type: "text", text: "custom durable context" }],
+      timestamp: 35,
+    },
+  ];
+  for (const guardedMessage of guardedMessageFixtures) {
+    await assertLossyGuarded(
+      [guardedMessage, textMessage("user", "current guarded request", 36)],
+      "1",
+      /not plain assistant text.*summarize/i,
+    );
+  }
+
+  const longAssistant = [
+    textMessage("assistant", "long durable answer ".repeat(200), 37),
+    textMessage("user", "current long-message request", 38),
+  ];
+  await assertLossyGuarded(longAssistant, "1", /above the 128-token per-message limit/i);
+
+  const aggregateAssistant = [
+    ...Array.from({ length: 7 }, (_, index) =>
+      textMessage("assistant", `chunk-${index} ${"x".repeat(350)}`, 40 + index),
+    ),
+    textMessage("user", "current aggregate request", 50),
+  ];
+  await assertLossyGuarded(aggregateAssistant, "1-7", /exceeds the 512-token total limit/i);
   await runContext(baseline);
   nextSummary = "";
   const emptySummary = await call({
@@ -297,25 +383,40 @@ function responseText(response) {
     textMessage("user", "current duplicate check", 11),
   ];
   await runContext(duplicateResults);
-  assertOk(await call({ action: "hide", range: "1" }));
+  nextSummary = "First duplicate result summarized";
+  const duplicateSummary = await call({
+    action: "summarize",
+    range: "1",
+    model: "test/summary",
+  });
+  assertOk(duplicateSummary);
   const duplicateManaged = await runContext(duplicateResults);
   assert.deepEqual(
     duplicateManaged.messages.map((message) => message.toolCallId).filter(Boolean),
     ["call-two"],
   );
-  const duplicateUnhide = await call({ action: "unhide", range: "1" });
-  assertOk(duplicateUnhide);
-  assert.equal(duplicateUnhide.details.saved, 0);
+  const duplicateRestore = await call({
+    action: "restore",
+    range: duplicateSummary.details.summaryId,
+  });
+  assertOk(duplicateRestore);
+  assert.equal(duplicateRestore.details.saved, 0);
   assert.equal(await runContext(duplicateResults), undefined);
 
   await runContext(baseline);
-  assertOk(await call({ action: "hide", range: "1" }));
-  assert.deepEqual((await runContext(baseline)).messages, baseline.slice(1));
-  assertOk(await call({ action: "unhide", range: "1" }));
+  assertOk(await call({ action: "hide", range: "2" }));
+  assert.deepEqual(
+    (await runContext(baseline)).messages.map((message) => message.content[0].text),
+    ["old request", "current request"],
+  );
+  assertOk(await call({ action: "unhide", range: "2" }));
   assert.equal(await runContext(baseline), undefined);
 
-  assertOk(await call({ action: "remove", range: "1" }));
-  assert.deepEqual((await runContext(baseline)).messages, baseline.slice(1));
+  assertOk(await call({ action: "remove", range: "2" }));
+  assert.deepEqual(
+    (await runContext(baseline)).messages.map((message) => message.content[0].text),
+    ["old request", "current request"],
+  );
   const resetResponse = await call({ action: "reset" });
   assertOk(resetResponse);
   assert.equal(resetResponse.details.saved, 0);
@@ -410,7 +511,7 @@ function responseText(response) {
   assert.equal(await runContext(shortSummaryMessages), undefined);
 
   const splitMessages = [
-    textMessage("user", "HIDE OLD SPLIT HISTORY", 30),
+    textMessage("assistant", "HIDE OLD SPLIT HISTORY", 30),
     textMessage("user", "active split request", 31),
     textMessage("assistant", "active split progress", 32),
   ];
@@ -464,7 +565,7 @@ function responseText(response) {
     timestamp: 42,
   };
   const compactionMessages = [
-    textMessage("user", "HIDE THIS SECRET", 40),
+    textMessage("assistant", "HIDE THIS SECRET", 40),
     fileCall,
     fileResult,
     textMessage("user", "SUMMARIZE THIS HISTORY", 43),
@@ -473,11 +574,10 @@ function responseText(response) {
   ];
   await runContext(compactionMessages);
   assertOk(await call({ action: "hide", range: "1" }));
-  assertOk(await call({ action: "remove", range: "2" }));
   nextSummary = "Managed history summary";
   assertOk(await call({
     action: "summarize",
-    range: "4",
+    range: "2-4",
     model: "test/summary",
   }));
   assertOk(await call({ action: "hide", range: "5" }));
