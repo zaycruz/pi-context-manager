@@ -25,9 +25,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --import tsx --test tests/context-policy.test.ts && node tests/extension.cjs",
+    "test": "node --import tsx --test tests/context-policy.test.ts && node --test tests/context-autonomy-score.test.mjs && node tests/extension.cjs",
     "typecheck": "tsc --noEmit",
-    "lint:complexity": "eslint extensions/**/*.ts tests/**/*.ts benchmarks/**/*.mjs",
+    "lint:complexity": "eslint extensions/**/*.ts tests/**/*.ts tests/**/*.mjs benchmarks/**/*.mjs",
     "test:packed": "node tests/packed-install.cjs",
     "pack:check": "npm pack --dry-run",
     "check": "npm run test && npm run typecheck && npm run lint:complexity && npm run test:packed && npm run pack:check"
