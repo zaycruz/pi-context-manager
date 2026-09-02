@@ -116,7 +116,7 @@ The evaluation measures:
 
 - canonical-field accuracy and full-task pass rate;
 - superseded-decoy errors;
-- prompt tokens and measured provider cost;
+- prompt tokens, audit-continuation usage, and measured provider cost;
 - autonomous context actions;
 - human context interventions; and
 - provider failures.
@@ -126,3 +126,7 @@ The hardened clean-commit three-arm run did not meet that bar. Full context and 
 We then added the lossless-selection guard and reran the three managed seeds from clean commit `5790f77`. The agent summarized context in every trial and did not use `hide` or `remove`. It returned 35 of 36 fields, passed 2 of 3 complete tasks, met the autonomous-success criterion in 2 of 3 trials, and ended with 335,476 active-rule tokens saved. The only miss was one `queue_name` value returned as `null`.
 
 This one-arm follow-up is directional evidence. It does not prove a task-quality or cost improvement because provider behavior is nondeterministic and the comparison arms were not rerun. The previous range-hiding failure did not recur. Summary fidelity is now the observed failure boundary.
+
+The clean-commit `tool-outputs` run then exercised LLM-selected completed-tool hiding directly. All three arms returned 36 of 36 fields and passed all three tasks. Every managed trial hid all three labeled filler tool exchanges, succeeded autonomously, and together saved 334,582 active-rule tokens. Managed audit-continuation tokens were 96.1% lower than full context, while total tokens were 6.0% lower.
+
+The feature did not beat manual runtime compaction or reduce total cost in that run. Managed total cost was 35.8% above full context and 44.3% above runtime compaction. The result proves the structural path and shows correct semantic selection on this labeled fixture. It does not prove a general break-even point or correct classification of arbitrary production evidence.

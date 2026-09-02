@@ -105,6 +105,24 @@ This one-arm follow-up is directional evidence, not a causal estimate. Provider 
 
 The raw follow-up record is [`results/2026-08-30-selection-guard.json`](results/2026-08-30-selection-guard.json).
 
+## Tool-output hiding result
+
+The 2026-09-02 run used Pi 0.84.4, Node.js v25.5.0, and `openai-codex/gpt-5.4-mini`. It ran the `tool-outputs` fixture from clean commit `4ba1c7d608f596220c5bd38e101241006dded7b4`. Load pressure was 36.4% to 36.6% of the 272,000-token context window.
+
+| Arm | Fields | Full tasks | Decoy errors | Autonomous successes | Active-rule tokens saved | Audit-continuation tokens | Audit-continuation cost | Total tokens | Total cost |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `full-context` | 36/36 | 3/3 | 0 | 0/3 | N/A | 893,984 | $0.072116 | 2,095,804 | $0.413302 |
+| `runtime-compaction` | 36/36 | 3/3 | 0 | 0/3 | N/A | 19,342 | $0.008793 | 1,231,981 | $0.388913 |
+| `agent-managed` | 36/36 | 3/3 | 0 | 3/3 | 334,582 | 34,696 | $0.011511 | 1,970,732 | $0.561307 |
+
+The LLM hid all three completed filler tool exchanges in every managed trial. Seed 1 also hid the three short acknowledgments next to those exchanges. Seed 2 summarized the three compact fact packets after hiding the filler. Seed 3 first selected the active turn; the extension rejected that selection, and the LLM then hid only completed exchanges. Every managed trial retained all canonical facts.
+
+Against full context, agent management reduced audit-continuation tokens by 96.1% and audit-continuation cost by 84.0%. It reduced total tokens by 6.0%, but total cost increased by 35.8% because management added uncached model work. Manual runtime compaction used the fewest total tokens and had the lowest total cost. Agent management used 60.0% more total tokens and cost 44.3% more than runtime compaction in this run.
+
+This result proves the structural path and shows model-owned semantic selection on the labeled fixture. It does not establish a general break-even point. The run has only three audit queries, provider caching is nondeterministic, one managed seed also summarized facts, and the fixture explicitly labels its filler as reproducible and closed.
+
+The raw record is [`results/2026-09-02-tool-output-hiding.json`](results/2026-09-02-tool-output-hiding.json).
+
 ## Options
 
 - `--model`: provider/model selector. Default: `openai-codex/gpt-5.4-mini`.
