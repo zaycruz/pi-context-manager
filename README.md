@@ -6,16 +6,18 @@ See the [agent-managed context example and measured evidence](https://github.com
 
 ## Install
 
-Install the public npm package:
-
-```sh
-pi install npm:@zaycruz/pi-context-manager
-```
-
 Install the latest GitHub revision:
 
 ```sh
 pi install git:github.com/zaycruz/pi-context-manager
+```
+
+The latest GitHub revision includes LLM-selected completed-tool hiding. The public npm release is currently version 1.1.0 and does not include that feature yet.
+
+Install the published npm release:
+
+```sh
+pi install npm:@zaycruz/pi-context-manager
 ```
 
 Start a new session or run `/reload` in an open session. The agent receives the `manage_context` tool and the bundled context-management skill.
