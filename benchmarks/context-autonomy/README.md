@@ -12,6 +12,8 @@ It compares three arms:
 
 Every arm receives the same seeded fixture split across three load prompts, one preparation prompt, and three audit prompts. The fixture contains twelve canonical facts, explicit superseded decoys, and completed-work filler. Each audit prompt requests four facts as exact JSON.
 
+The default `messages` fixture places facts and filler in user messages. The `tool-outputs` fixture keeps canonical facts in compact user packets and returns the large completed-work filler through real `load_completed_log_chunk` tool calls. This mode measures whether the LLM chooses reversible tool-exchange hiding without losing the facts it still needs. Every arm loads the same benchmark-only fixture tool.
+
 ## Metrics
 
 The result records:
@@ -46,6 +48,7 @@ Run the pilot before a repeated evaluation:
 node benchmarks/context-autonomy/run.mjs \
   --seeds 1 \
   --arms full-context,runtime-compaction,agent-managed \
+  --fixture-mode tool-outputs \
   --target-chars 440000 \
   --output /tmp/context-autonomy-pilot.json
 ```
@@ -62,6 +65,7 @@ Run:
 node benchmarks/context-autonomy/run.mjs \
   --seeds 1,2,3 \
   --arms full-context,runtime-compaction,agent-managed \
+  --fixture-mode tool-outputs \
   --target-chars 440000 \
   --output benchmarks/context-autonomy/results/YYYY-MM-DD.json
 ```
@@ -105,6 +109,7 @@ The raw follow-up record is [`results/2026-08-30-selection-guard.json`](results/
 - `--model`: provider/model selector. Default: `openai-codex/gpt-5.4-mini`.
 - `--seeds`: comma-separated integer seeds. Default: `1,2,3`.
 - `--arms`: comma-separated arm names.
+- `--fixture-mode`: `messages` or `tool-outputs`. Default: `messages`.
 - `--target-chars`: approximate generated fixture size. Default: `440000`.
 - `--timeout-ms`: timeout for each RPC response or agent turn. Default: `300000`.
 - `--pi`: Pi executable. Default: `pi`.
@@ -117,6 +122,8 @@ Equivalent `AUTONOMY_BENCH_*` environment variables are available for each optio
 Provider and model behavior are nondeterministic. Run multiple seeds and repeat the evaluation on different dates before making a general claim.
 
 The full-context arm is the correctness ceiling, not a token-efficiency strategy. The runtime-compaction arm includes one explicit human context intervention. The agent-managed arm records an autonomous attempt when it invokes `hide`, `remove`, or `summarize` without a user instruction. It records autonomous success only when the final answers are exact, no provider error occurs, at least one context rule remains active, and the latest successful result with a savings measurement reports that active rules save at least 1% of the model context window. A state-changing action result or a later `stats` result can provide that measurement. The 1% floor excludes nominal actions such as hiding a few acknowledgment tokens.
+
+The `tool-outputs` fixture labels its generated logs as reproducible closed-work filler and states that they contain no canonical facts. It measures whether the LLM can use that semantic distinction. It does not prove that the model will correctly classify arbitrary production tool evidence.
 
 The harness counts nested summary usage only when Pi returns that usage through the extension. It records the missing value instead of estimating it.
 

@@ -7,7 +7,10 @@ import {
   isAutonomySuccess,
   scoreAnswer,
 } from "../benchmarks/context-autonomy/score.mjs";
-import { createFixture } from "../benchmarks/context-autonomy/fixtures.mjs";
+import {
+  createFixture,
+  createToolOutputFixture,
+} from "../benchmarks/context-autonomy/fixtures.mjs";
 
 
 test("extractJsonObject accepts raw, fenced, and prose-wrapped objects", () => {
@@ -60,6 +63,22 @@ test("fixtures retain every canonical fact and superseded decoy across insertion
       for (const decoy of fixture.decoys[key]) {
         assert.equal(fixture.fixture.includes(`SUPERSEDED_FACT ${key}=${JSON.stringify(decoy)}`), true);
       }
+    }
+  }
+});
+
+test("tool-output fixtures keep canonical facts outside reproducible tool logs", () => {
+  for (const seed of [1, 2, 3]) {
+    const fixture = createToolOutputFixture(seed);
+    assert.equal(fixture.factChunks.length, 3);
+    for (const [key, value] of Object.entries(fixture.facts)) {
+      assert.equal(fixture.fixture.includes(`CANONICAL_FACT ${key}=`), false);
+      assert.equal(
+        fixture.factChunks.some((chunk) =>
+          chunk.includes(`CANONICAL_FACT ${key}=${JSON.stringify(value)}`),
+        ),
+        true,
+      );
     }
   }
 });

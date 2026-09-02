@@ -149,6 +149,41 @@ export function createFixture(seed, targetChars = 440_000) {
   return { seed, fixture, facts, decoys, queryGroups, targetChars, actualChars: fixture.length };
 }
 
+function fillerOnlyBody(seed, targetChars) {
+  const sampleLength = fillerBlock(0, seed).length + 2;
+  const blockCount = Math.max(80, Math.ceil(targetChars / sampleLength));
+  return Array.from({ length: blockCount }, (_, index) => fillerBlock(index, seed)).join("\n\n");
+}
+
+function factPacket(keys, facts, decoys) {
+  return [
+    "PROJECT FACT PACKET",
+    "Only CANONICAL_FACT values are current. Preserve them exactly for the later audit.",
+    ...keys.flatMap((key) => [decoyLine(key, decoys[key]), canonicalLine(key, facts[key])]),
+  ].join("\n");
+}
+
+export function createToolOutputFixture(seed, targetChars = 440_000) {
+  const facts = canonicalFacts(seed);
+  const decoys = decoyFacts(seed);
+  const fixture = fillerOnlyBody(seed, targetChars);
+  const queryGroups = [
+    FACT_KEYS.slice(0, 4),
+    FACT_KEYS.slice(4, 8),
+    FACT_KEYS.slice(8, 12),
+  ];
+  return {
+    seed,
+    fixture,
+    facts,
+    decoys,
+    queryGroups,
+    factChunks: queryGroups.map((keys) => factPacket(keys, facts, decoys)),
+    targetChars,
+    actualChars: fixture.length,
+  };
+}
+
 export function fixtureChunks(fixture, count = 3) {
   const paragraphs = fixture.split("\n\n");
   const target = Math.ceil(fixture.length / count);
@@ -167,6 +202,15 @@ export function fixtureChunks(fixture, count = 3) {
 
 export function loadPrompt(chunk, index, total) {
   return `${chunk}\n\nLoad project transcript chunk ${index}/${total} for a later audit. Reply exactly LOADED ${index}/${total}.`;
+}
+
+export function toolOutputLoadPrompt(factChunk, index, total) {
+  return [
+    factChunk,
+    "",
+    `Call load_completed_log_chunk with index ${index}. Its output is closed historical execution filler and contains no canonical facts.`,
+    `After the tool returns, reply exactly LOADED ${index}/${total}.`,
+  ].join("\n");
 }
 
 export const PREPARATION_PROMPT =

@@ -250,7 +250,11 @@ function responseText(response) {
   assertOk(await call({ action: "reset" }));
 
 
-  await assertLossyGuarded(baseline, "1", /message 1.*not plain assistant text.*summarize/i);
+  await assertLossyGuarded(
+    baseline,
+    "1",
+    /message 1.*(?:neither plain assistant text|not plain assistant text)/i,
+  );
 
   const completedToolExchange = [
     {
@@ -262,17 +266,125 @@ function responseText(response) {
       role: "toolResult",
       toolCallId: "old-call",
       toolName: "read",
-      content: [{ type: "text", text: "old tool evidence" }],
+      content: [{ type: "text", text: "old tool evidence ".repeat(2_000) }],
       isError: false,
       timestamp: 31,
     },
     textMessage("user", "current tool guard request", 32),
   ];
-  await assertLossyGuarded(
-    completedToolExchange,
-    "1",
-    /message 1.*not plain assistant text.*summarize/i,
-  );
+  await runContext(completedToolExchange);
+  const toolList = await call({ action: "list" });
+  assert.match(responseText(toolList), /HIDEABLE TOOL EXCHANGE/);
+  assert.match(responseText(toolList), /toolResult \(~[\d,]+ tokens\)/);
+
+  const hiddenFromCall = await call({ action: "hide", range: "1" });
+  assertOk(hiddenFromCall);
+  assert.equal(hiddenFromCall.details.closed, 2);
+  assert.deepEqual((await runContext(completedToolExchange)).messages, [completedToolExchange[2]]);
+  assertOk(await call({ action: "unhide", range: "2" }));
+  assert.equal(await runContext(completedToolExchange), undefined);
+
+  assertOk(await call({ action: "hide", range: "2" }));
+  assert.deepEqual((await runContext(completedToolExchange)).messages, [completedToolExchange[2]]);
+  assertOk(await call({ action: "reset" }));
+  assert.equal(await runContext(completedToolExchange), undefined);
+
+  const entriesBeforeToolRemove = branch.length;
+  assertError(await call({ action: "remove", range: "1" }), /Permanent remove rejected/);
+  assert.equal(branch.length, entriesBeforeToolRemove);
+  assert.equal(await runContext(completedToolExchange), undefined);
+
+  const multiToolExchange = [
+    {
+      role: "assistant",
+      content: [
+        { type: "text", text: "completed diagnostics" },
+        { type: "toolCall", id: "multi-a", name: "read", arguments: { path: "a.ts" } },
+        { type: "toolCall", id: "multi-b", name: "read", arguments: { path: "b.ts" } },
+      ],
+      timestamp: 70,
+    },
+    {
+      role: "toolResult",
+      toolCallId: "multi-a",
+      toolName: "read",
+      content: [{ type: "text", text: "large completed output ".repeat(1_000) }],
+      isError: true,
+      timestamp: 71,
+    },
+    {
+      role: "toolResult",
+      toolCallId: "multi-b",
+      toolName: "read",
+      content: [{ type: "text", text: "second completed output" }],
+      isError: false,
+      timestamp: 72,
+    },
+    textMessage("user", "current multi-tool request", 73),
+  ];
+  await runContext(multiToolExchange);
+  const hiddenMulti = await call({ action: "hide", range: "2" });
+  assertOk(hiddenMulti);
+  assert.equal(hiddenMulti.details.closed, 3);
+  assert.deepEqual((await runContext(multiToolExchange)).messages, [multiToolExchange[3]]);
+  assertOk(await call({ action: "unhide", range: "3" }));
+  assert.equal(await runContext(multiToolExchange), undefined);
+  assertError(await call({ action: "remove", range: "2" }), /Permanent remove rejected/);
+
+  const orphanCall = [
+    {
+      role: "assistant",
+      content: [{ type: "toolCall", id: "orphan-call", name: "read", arguments: {} }],
+      timestamp: 74,
+    },
+    textMessage("user", "current orphan-call request", 75),
+  ];
+  await runContext(orphanCall);
+  const entriesBeforeOrphanCall = branch.length;
+  assertError(await call({ action: "hide", range: "1" }), /incomplete tool call/);
+  assert.equal(branch.length, entriesBeforeOrphanCall);
+  assert.equal(await runContext(orphanCall), undefined);
+
+  const orphanResult = [
+    {
+      role: "toolResult",
+      toolCallId: "orphan-result",
+      toolName: "read",
+      content: [{ type: "text", text: "unpaired result" }],
+      isError: false,
+      timestamp: 76,
+    },
+    textMessage("user", "current orphan-result request", 77),
+  ];
+  await runContext(orphanResult);
+  const entriesBeforeOrphanResult = branch.length;
+  assertError(await call({ action: "hide", range: "1" }), /orphaned tool result/);
+  assert.equal(branch.length, entriesBeforeOrphanResult);
+  assert.equal(await runContext(orphanResult), undefined);
+
+  const mixedUserSelection = [
+    ...completedToolExchange.slice(0, 2),
+    textMessage("user", "unique user decision", 78),
+    textMessage("user", "current mixed-user request", 79),
+  ];
+  await runContext(mixedUserSelection);
+  const entriesBeforeMixedUser = branch.length;
+  assertError(await call({ action: "hide", range: "1-3" }), /neither plain assistant text/);
+  assert.equal(branch.length, entriesBeforeMixedUser);
+  assert.equal(await runContext(mixedUserSelection), undefined);
+
+  const mixedSafeSelection = [
+    ...completedToolExchange.slice(0, 2),
+    textMessage("assistant", "old acknowledgment", 80),
+    textMessage("user", "current mixed-safe request", 81),
+  ];
+  await runContext(mixedSafeSelection);
+  const hiddenMixed = await call({ action: "hide", range: "1-3" });
+  assertOk(hiddenMixed);
+  assert.equal(hiddenMixed.details.closed, 3);
+  assert.deepEqual((await runContext(mixedSafeSelection)).messages, [mixedSafeSelection[3]]);
+  assertOk(await call({ action: "reset" }));
+  assert.equal(await runContext(mixedSafeSelection), undefined);
 
   const guardedMessageFixtures = [
     {
@@ -295,7 +407,7 @@ function responseText(response) {
     await assertLossyGuarded(
       [guardedMessage, textMessage("user", "current guarded request", 36)],
       "1",
-      /not plain assistant text.*summarize/i,
+      /(?:neither plain assistant text|not plain assistant text).*summarize/i,
     );
   }
 
@@ -353,7 +465,7 @@ function responseText(response) {
   await assertLossyGuarded(
     overSelectionBoundary,
     "1-5",
-    /513-token selection.*512-token total limit/i,
+    /513-token.*512-token total limit/i,
   );
 
   await assertLossyGuarded(baseline, "2,3..5", /Invalid range/);
@@ -365,7 +477,11 @@ function responseText(response) {
     /positive safe integers/,
   );
   await assertLossyGuarded(baseline, "1-1000000000", /current request|active turn/);
-  await assertLossyGuarded(baseline, "2-1", /message 1.*not plain assistant text/i);
+  await assertLossyGuarded(
+    baseline,
+    "2-1",
+    /message 1.*(?:neither plain assistant text|not plain assistant text)/i,
+  );
   await runContext(baseline);
   nextSummary = "";
   const emptySummary = await call({

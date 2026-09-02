@@ -380,6 +380,81 @@ function lossyMessageGuardReason(message: AgentMessage): string | undefined {
   return undefined;
 }
 
+function isToolExchangeMessage(message: AgentMessage): boolean {
+  if (message.role === "toolResult") return typeof message.toolCallId === "string";
+  return collectToolCallIds(message).length > 0;
+}
+
+function hideSelectionError(
+  messages: AgentMessage[],
+  selected: number[],
+): string | undefined {
+  let plainTokens = 0;
+  for (const index of selected) {
+    const message = messages[index];
+    const tokens = plainAssistantTextTokens(message);
+    if (tokens !== undefined) {
+      if (tokens > LOSSY_MESSAGE_MAX_TOKENS) {
+        return `Reversible hide rejected message ${index + 1}: its estimated size is ${tokens} tokens, above the ${LOSSY_MESSAGE_MAX_TOKENS}-token per-message limit for plain assistant text.`;
+      }
+      plainTokens += tokens;
+      continue;
+    }
+    if (!isToolExchangeMessage(message)) {
+      return `Reversible hide rejected message ${index + 1}: it is neither plain assistant text nor part of a completed tool exchange. Use summarize to preserve durable context.`;
+    }
+  }
+  if (plainTokens > LOSSY_SELECTION_MAX_TOKENS) {
+    return `Reversible hide rejected the ${plainTokens}-token plain-assistant portion because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit.`;
+  }
+  const links = collectSelectedToolLinks(messages, new Set(selected));
+  for (const callId of links.callIds) {
+    if (!links.resultIds.has(callId)) {
+      return `Reversible hide rejected incomplete tool call '${callId}': no matching result is present.`;
+    }
+  }
+  for (const resultId of links.resultIds) {
+    if (!links.callIds.has(resultId)) {
+      return `Reversible hide rejected orphaned tool result '${resultId}': no matching call is present.`;
+    }
+  }
+  return undefined;
+}
+
+function messageTokenEstimate(message: AgentMessage): number {
+  return plainAssistantTextTokens(message) ?? estimateTokens(message);
+}
+
+function toolResultIndicesBefore(
+  messages: AgentMessage[],
+  end: number,
+): Map<string, number[]> {
+  const resultsByCall = new Map<string, number[]>();
+  for (let index = 0; index < end; index++) {
+    const message = messages[index];
+    if (message.role !== "toolResult" || typeof message.toolCallId !== "string") continue;
+    const indices = resultsByCall.get(message.toolCallId) ?? [];
+    indices.push(index);
+    resultsByCall.set(message.toolCallId, indices);
+  }
+  return resultsByCall;
+}
+
+function completedToolMessageIndices(messages: AgentMessage[]): Set<number> {
+  const protectedStart = currentTurnStart(messages);
+  const resultsByCall = toolResultIndicesBefore(messages, protectedStart);
+  const completed = new Set<number>();
+  for (let index = 0; index < protectedStart; index++) {
+    const callIds = collectToolCallIds(messages[index]);
+    if (callIds.length === 0 || !callIds.every((id) => resultsByCall.has(id))) continue;
+    completed.add(index);
+    for (const callId of callIds) {
+      for (const resultIndex of resultsByCall.get(callId) ?? []) completed.add(resultIndex);
+    }
+  }
+  return completed;
+}
+
 function lossySelectionError(
   messages: AgentMessage[],
   selected: number[],
@@ -387,7 +462,7 @@ function lossySelectionError(
   for (const index of selected) {
     const reason = lossyMessageGuardReason(messages[index]);
     if (reason) {
-      return `Lossy hide/remove rejected message ${index + 1}: ${reason}. Use summarize to preserve durable context.`;
+      return `Permanent remove rejected message ${index + 1}: ${reason}. Use hide for a completed tool exchange or summarize durable context.`;
     }
   }
   const tokens = selected.reduce(
@@ -395,7 +470,7 @@ function lossySelectionError(
     0,
   );
   if (tokens > LOSSY_SELECTION_MAX_TOKENS) {
-    return `Lossy hide/remove rejected this ${tokens}-token selection because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit. Use summarize for meaningful context reduction.`;
+    return `Permanent remove rejected this ${tokens}-token selection because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit. Use summarize for meaningful context reduction.`;
   }
   return undefined;
 }
@@ -407,7 +482,8 @@ function summaryText(rule: SummaryRule): string {
 function renderList(state: State, messages: AgentMessage[], limit: number): string {
   const hidden = new Set(state.hidden);
   const removed = new Set(state.removed);
-  const totalTokens = messages.reduce((sum, m) => sum + estimateTokens(m), 0);
+  const completedToolMessages = completedToolMessageIndices(messages);
+  const totalTokens = messages.reduce((sum, message) => sum + messageTokenEstimate(message), 0);
   const lines: string[] = [];
   lines.push(
     `Context: ${messages.length} message(s), ~${totalTokens.toLocaleString()} tokens (est.)`,
@@ -425,16 +501,18 @@ function renderList(state: State, messages: AgentMessage[], limit: number): stri
     else if (hidden.has(fp)) tags.push("HIDDEN");
     const rule = state.summaries.find((s) => s.fingerprints.includes(fp));
     if (rule) tags.push(`SUMMARIZED → id:${rule.id}`);
-    if (lossyMessageGuardReason(msg)) tags.push("SUMMARIZE-ONLY");
+    if (completedToolMessages.has(i)) tags.push("HIDEABLE TOOL EXCHANGE");
+    else if (lossyMessageGuardReason(msg)) tags.push("SUMMARIZE-ONLY");
     const tag = tags.length ? `  [${tags.join(", ")}]` : "";
-    lines.push(`[${i + 1}] ${msg.role}: "${preview(msg)}"${tag}`);
+    const tokens = messageTokenEstimate(msg).toLocaleString();
+    lines.push(`[${i + 1}] ${msg.role} (~${tokens} tokens): "${preview(msg)}"${tag}`);
   }
   if (messages.length > limit) {
     lines.push(`… ${messages.length - limit} earlier message(s) omitted (use limit to see more)`);
   }
   lines.push("");
   lines.push(
-    'Use summarize for every [SUMMARIZE-ONLY] message and for meaningful context reduction. Hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total. Use action=restore with a summary id to bring messages back.',
+    "The LLM decides which completed context is no longer needed. Hide is reversible and may select [HIDEABLE TOOL EXCHANGE] messages of any size; calls and results close together automatically. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total. Use summarize for durable context and action=restore with a summary id.",
   );
   return lines.join("\n");
 }
@@ -456,13 +534,16 @@ function contextStats(
   state: State,
 ): ContextStats {
   const usage = ctx.getContextUsage();
-  const originalTokens = messages.reduce((sum, message) => sum + estimateTokens(message), 0);
+  const originalTokens = messages.reduce(
+    (sum, message) => sum + messageTokenEstimate(message),
+    0,
+  );
   const tokens = usage?.tokens && usage.tokens > 0 ? usage.tokens : originalTokens;
   const cap = ctx.model?.contextWindow;
   const pct = cap ? Math.round((tokens / cap) * 100) : undefined;
   const managedMessages = applyContextRules(state, messages) ?? messages;
   const managedTokens = managedMessages.reduce(
-    (sum, message) => sum + estimateTokens(message),
+    (sum, message) => sum + messageTokenEstimate(message),
     0,
   );
   return { tokens, cap, pct, saved: Math.max(0, originalTokens - managedTokens) };
@@ -503,8 +584,8 @@ function applyHide(
   const { requested, selected } = resolution;
   const protectionError = destructiveSelectionError(messages, selected);
   if (protectionError) return { error: protectionError };
-  const lossyError = lossySelectionError(messages, selected);
-  if (lossyError) return { error: lossyError };
+  const selectionError = hideSelectionError(messages, selected);
+  if (selectionError) return { error: selectionError };
   const fps = selected.map((index) => fingerprint(messages[index]));
   const overlap = findOverlappingSummary(state, fps);
   if (overlap) {
@@ -523,7 +604,7 @@ function applyUnhide(
 ): CountResult {
   const resolution = resolveIndices(range, messages.length);
   if ("error" in resolution) return resolution;
-  const selected = resolution.indices;
+  const selected = closeSelection(messages, resolution.indices);
   if (selected.length === 0) return { error: `No valid indices in range '${range ?? ""}'` };
   const fps = new Set(selected.map((index) => fingerprint(messages[index])));
   const before = state.hidden.length;
@@ -1361,16 +1442,16 @@ export default function (pi: ExtensionAPI) {
     // tool the agent calls by name.
     ...({ loadMode: "essential" } as const),
     description:
-      "Manage old conversation context without compacting the whole session. Use stats and list first. Use summarize for meaningful or durable content. Lossy hide/remove accept only plain assistant text up to 128 tokens per message and 512 tokens total.",
+      "Manage old conversation context without compacting the whole session. The LLM inspects stats/list and decides what completed context it no longer needs. Hide is reversible and accepts complete tool exchanges of any size plus short plain assistant text. Remove stays limited to short plain assistant text. Summarize durable content when supported.",
     promptSnippet: "Manage conversation context: hide, remove, or summarize old messages",
     promptGuidelines: [
       "Use manage_context when the conversation context is getting large and you want to hide, remove, or summarize old messages instead of compacting the whole session.",
-      "Call manage_context with action=stats and then action=list at 30% context usage. At or above 35%, summarize the largest completed ranges that contain facts, constraints, user content, tool exchanges, or other durable context. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total. Afterward, call stats again. If active rules save less than 1% of the context window, summarize a more useful completed range instead of stopping after short acknowledgments.",
+      "Call manage_context with action=stats and then action=list at 30% context usage. At or above 35%, decide which completed context is no longer needed. Reversibly hide completed tool exchanges when their raw output is no longer useful; calls and all matching results close together. Summarize durable facts, constraints, user content, or unique evidence when supported. Remove is limited to plain assistant text up to 128 tokens per message and 512 tokens total. Afterward, call stats again.",
       "For summarize, omit the model parameter to use the active model. Set model only when the user requests a known available provider/model.",
-      "If summarize is unsupported in this runtime, do not use hide/remove as a substitute for durable context. Leave durable content to runtime-owned compaction.",
+      "If summarize is unsupported, hide a completed tool exchange only when its raw evidence is no longer needed. Leave durable content to runtime-owned compaction.",
       "Whole-session compaction belongs to the runtime; manage_context never starts or suppresses it.",
-      "Call manage_context with action=list first to see the current context and message indices.",
-      "Selections close tool calls and results automatically. Tool exchanges are summarize-only and cannot pass the hide/remove safety guard.",
+      "Call manage_context with action=list first to see message indices, token estimates, and structurally hideable tool exchanges. The LLM owns the semantic choice; the extension does not rank importance.",
+      "Tool-call assistant messages and every matching tool result hide and unhide together. Incomplete or orphaned tool exchanges are rejected.",
     ],
     parameters: Type.Object({
       action: Type.Union([

@@ -3,13 +3,14 @@
 `pi-context-manager` gives an agent a bounded control loop for its own working context:
 
 1. Observe context use with `stats`.
-2. Inspect messages and safety tags with `list`.
-3. Summarize completed durable context.
-4. Use `hide` or `remove` only for short plain assistant text.
-5. Verify the reduced working set with `stats` and `list`.
-6. Recover with `unhide`, `restore`, or `reset` if the managed material becomes relevant.
+2. Inspect message types, token estimates, and structural safety tags with `list`.
+3. Decide which completed context is no longer needed.
+4. Reversibly hide completed tool exchanges whose raw output is no longer useful.
+5. Summarize durable context when model-backed summarization is available.
+6. Verify the reduced working set with `stats` and `list`.
+7. Recover with `unhide`, `restore`, or `reset` if the managed material becomes relevant.
 
-This process is different from whole-session compaction. The agent selects the working set before the runtime must compact the full conversation. The runtime remains the sole owner of compaction.
+The LLM owns the semantic selection. The extension supplies structure and token estimates but does not rank importance. This process is different from whole-session compaction. The runtime remains the sole owner of compaction.
 
 ## Reproduce the control loop
 
@@ -28,23 +29,23 @@ The agent can then use this sequence:
 ```text
 manage_context(action="stats")
 manage_context(action="list", limit=25)
-manage_context(action="summarize", range="<completed-durable-range>")
+manage_context(action="hide", range="<completed-tool-exchange-range>")
 manage_context(action="stats")
 ```
 
-This sequence requires Pi. OMP cannot summarize because its extension API does not expose model completion. On OMP, the extension can remove only short plain assistant text.
+Selecting either side of a completed tool exchange hides the call and every matching result. Pi can also summarize durable ranges. OMP cannot summarize because its extension API does not expose model completion, but it can reversibly hide completed tool exchanges.
 
 A successful run has these observable properties:
 
 - The second `stats` result reports tokens saved by context rules.
-- The next provider request replaces the selected messages with one summary.
+- The next provider request excludes the selected tool call and all matching results.
 - The current user request and active turn remain present.
-- A summary selection containing one side of a tool exchange automatically includes its paired tool call or tool result.
-- `restore` or `reset` restores summarized messages.
-- `hide` and `remove` reject messages tagged `SUMMARIZE-ONLY`.
+- `unhide` or `reset` restores the complete exchange.
+- `remove` still rejects tool exchanges.
+- Orphaned results and incomplete calls cannot be hidden.
 - The rules survive process restart and session continuation.
 
-At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it tells the agent to summarize durable completed context. It limits `hide` and `remove` to plain assistant text with at most 128 estimated tokens per message and 512 estimated tokens per selection. Passive monitoring never replaces or modifies the system prompt.
+At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it asks the LLM to decide which completed context it no longer needs. `hide` accepts complete tool exchanges of any size. `remove` remains limited to plain assistant text with at most 128 estimated tokens per message and 512 estimated tokens per selection. Passive monitoring never replaces or modifies the system prompt.
 
 ## What the automated tests prove
 
@@ -57,16 +58,18 @@ npm run check
 
 The behavioral suite verifies these contracts:
 
-- `stats` and `list` expose the canonical host context.
-- `hide`, `remove`, `unhide`, `restore`, and `reset` persist and reconcile correctly.
-- `hide` and `remove` reject user content, tool exchanges, summaries, rich content, large messages, and large selections.
-- The lossy guard enforces its exact 128-token message and 512-token selection boundaries for block-array and string-form assistant content.
+- `stats` and `list` expose canonical host context, per-message token estimates, and structural tool-exchange tags.
+- Completed tool calls and all matching results hide and unhide together from either selected side.
+- Large and failed completed tool outputs remain structurally hideable because the LLM owns the semantic decision.
+- `remove` rejects every tool exchange.
+- Orphaned results, incomplete calls, user content, summaries, unrelated rich content, and active-turn content cannot be hidden.
+- Mixed tool-plus-short-assistant selections work, while mixed tool-plus-user selections fail without persisted mutation.
+- The plain-assistant guard enforces its exact 128-token message and 512-token selection boundaries for block-array and string-form content.
 - Range parsing rejects malformed or unsafe numeric input without partial action or unbounded expansion.
 - Policy migration restores all pre-policy hidden and removed messages while preserving valid summaries.
 - Pi can summarize a selected range and restore its original messages.
 - OMP rejects `summarize` without changing state because OMP does not expose model completion to extensions.
-- The extension rejects changes to the active turn.
-- Tool calls and tool results remain paired.
+- Tool calls and tool results remain paired during context rendering and runtime compaction.
 - A threshold notice is persisted once, retries if persistence fails, and does not replace Pi's string system prompt or OMP's system-prompt array.
 - A direct jump above 35% emits the 30% notice before the 35% notice.
 
