@@ -1,0 +1,2040 @@
+{
+  "schemaVersion": 1,
+  "runAt": "2026-09-02T15:07:49.549Z",
+  "source": {
+    "commit": "4ba1c7d608f596220c5bd38e101241006dded7b4",
+    "dirty": false
+  },
+  "environment": {
+    "piVersion": "0.84.4",
+    "nodeVersion": "v25.5.0",
+    "model": "openai-codex/gpt-5.4-mini"
+  },
+  "config": {
+    "seeds": [
+      1,
+      2,
+      3
+    ],
+    "arms": [
+      "full-context",
+      "runtime-compaction",
+      "agent-managed"
+    ],
+    "targetChars": 440000,
+    "timeoutMs": 300000,
+    "identicalPromptsBySeed": true,
+    "fixtureMode": "tool-outputs"
+  },
+  "trials": [
+    {
+      "arm": "full-context",
+      "seed": 1,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99067,
+        "contextWindow": 272000,
+        "percent": 36.42169117647059
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 137027,
+          "output": 295,
+          "cacheRead": 561152,
+          "cacheWrite": 0,
+          "reasoning": 33,
+          "totalTokens": 698474,
+          "cost": {
+            "input": 0.10277025,
+            "output": 0.0013275,
+            "cacheRead": 0.0420864,
+            "cacheWrite": 0,
+            "total": 0.14618415
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 137027,
+          "output": 295,
+          "cacheRead": 561152,
+          "cacheWrite": 0,
+          "reasoning": 33,
+          "totalTokens": 698474,
+          "cost": {
+            "input": 0.10277025,
+            "output": 0.0013275,
+            "cacheRead": 0.0420864,
+            "cacheWrite": 0,
+            "total": 0.14618415
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 1332,
+        "output": 175,
+        "cacheRead": 296448,
+        "cacheWrite": 0,
+        "reasoning": 12,
+        "totalTokens": 297955,
+        "cost": {
+          "input": 0.000999,
+          "output": 0.0007875,
+          "cacheRead": 0.0222336,
+          "cacheWrite": 0,
+          "total": 0.024020100000000003
+        }
+      },
+      "measuredUsage": {
+        "input": 137027,
+        "output": 295,
+        "cacheRead": 561152,
+        "cacheWrite": 0,
+        "reasoning": 33,
+        "totalTokens": 698474,
+        "cost": {
+          "input": 0.10277025,
+          "output": 0.0013275,
+          "cacheRead": 0.0420864,
+          "cacheWrite": 0,
+          "total": 0.14618415
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "runtime-compaction",
+      "seed": 1,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99067,
+        "contextWindow": 272000,
+        "percent": 36.42169117647059
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 1,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 137824,
+          "output": 322,
+          "cacheRead": 268800,
+          "cacheWrite": 0,
+          "reasoning": 56,
+          "totalTokens": 406946,
+          "cost": {
+            "input": 0.10336799999999999,
+            "output": 0.001449,
+            "cacheRead": 0.020159999999999997,
+            "cacheWrite": 0,
+            "total": 0.124977
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 2863,
+          "output": 712,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 78,
+          "totalTokens": 3575,
+          "cost": {
+            "input": 0.00214725,
+            "output": 0.0032040000000000003,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.00535125
+          }
+        },
+        "total": {
+          "input": 140687,
+          "output": 1034,
+          "cacheRead": 268800,
+          "cacheWrite": 0,
+          "reasoning": 134,
+          "totalTokens": 410521,
+          "cost": {
+            "input": 0.10551524999999999,
+            "output": 0.004653,
+            "cacheRead": 0.020159999999999997,
+            "cacheWrite": 0,
+            "total": 0.13032825
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 3153,
+        "output": 202,
+        "cacheRead": 3072,
+        "cacheWrite": 0,
+        "reasoning": 35,
+        "totalTokens": 6427,
+        "cost": {
+          "input": 0.00236475,
+          "output": 0.0009090000000000001,
+          "cacheRead": 0.0002304,
+          "cacheWrite": 0,
+          "total": 0.00350415
+        }
+      },
+      "measuredUsage": {
+        "input": 140687,
+        "output": 1034,
+        "cacheRead": 268800,
+        "cacheWrite": 0,
+        "reasoning": 134,
+        "totalTokens": 410521,
+        "cost": {
+          "input": 0.10551524999999999,
+          "output": 0.004653,
+          "cacheRead": 0.020159999999999997,
+          "cacheWrite": 0,
+          "total": 0.13032825
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 1,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99567,
+        "contextWindow": 272000,
+        "percent": 36.60551470588235
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-4d09a33f\",\"rollback_digest\":\"sha256:51fdb4ee49d559b950539440\",\"database_mode\":\"primary-ff07a95d22\",\"feature_flag\":\"flag-ea84800851\"}",
+        "{\"queue_name\":\"queue-02e9e9b1d0\",\"retention_days\":\"76\",\"incident_channel\":\"#ops-a0bdeaab06\",\"owner\":\"eec80a18d2@example.test\"}",
+        "{\"release_window\":\"Saturday 08:03 UTC\",\"health_endpoint\":\"/health/113a9f5e8d\",\"max_parallel_jobs\":\"9\",\"audit_bucket\":\"gs://audit-d1c9af2d6e33\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-4d09a33f",
+            "rollback_digest": "sha256:51fdb4ee49d559b950539440",
+            "database_mode": "primary-ff07a95d22",
+            "feature_flag": "flag-ea84800851"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-02e9e9b1d0",
+            "retention_days": "76",
+            "incident_channel": "#ops-a0bdeaab06",
+            "owner": "eec80a18d2@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 08:03 UTC",
+            "health_endpoint": "/health/113a9f5e8d",
+            "max_parallel_jobs": "9",
+            "audit_bucket": "gs://audit-d1c9af2d6e33"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": true,
+      "contextTokensSaved": 111290,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 9,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_8zczTyALe65zTSipmt7bqAof|fc_0d0f69f76e12750d016a983a94ea7c87d299ec960b9242a47f",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,715 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 14"
+        },
+        {
+          "toolCallId": "call_l9UtwvbXKvuMyRLw4fzTXWS7|fc_0d0f69f76e12750d016a983a97dd5887d2b4dd661c02eecb7d",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 16 message(s), ~112,431 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user (~348 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT d…\"  [SUMMARIZE-ONLY]\n[2] assistant (~9 tokens): \"[thinking] toolCall: load_completed_log_chunk({\"index\":1})\"  [HIDEABLE TOOL EXCHANGE]\n[3] toolResult (~36,995 tokens): \"COMPLETED_WORK_NOTE 0 marker=1bdcb3c6. This historical execution note is closed and does not change any canonical constr…\"  [HIDEABLE TOOL EXCHANGE]\n[4] assistant (~3 tokens): \"LOADED 1/3\"\n[5] user (~327 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT q…\"  [SUMMARIZE-ONLY]\n[6] assistant (~9 tokens): \"toolCall: load_completed_log_chunk({\"index\":2})\"  [HIDEABLE TOOL EXCHANGE]\n[7] toolResult (~37,052 tokens): \"COMPLETED_WORK_NOTE 371 marker=6d771f43. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[8] assistant (~3 tokens): \"LOADED 2/3\"\n[9] user (~345 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT r…\"  [SUMMARIZE-ONLY]\n[10] assistant (~9 tokens): \"[thinking] toolCall: load_completed_log_chunk({\"index\":3})\"  [HIDEABLE TOOL EXCHANGE]\n[11] toolResult (~37,207 tokens): \"COMPLETED_WORK_NOTE 742 marker=b6e9fac0. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[12] assistant (~3 tokens): \"LOADED 3/3\"\n[13] user (~25 tokens): \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[14] custom (~45 tokens): \"[Context usage: 37% of 272k (99,577 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[15] assistant (~18 tokens): \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[16] toolResult (~33 tokens): \"Context usage: 37% of 272k (99,715 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nThe LLM decides which completed context is no longer needed. Hide is reversible and may select [HIDEABLE TOOL EXCHANGE] messages of any size; calls and results close together automatically. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total. Use summarize for durable context and action=restore with a summary id."
+        },
+        {
+          "toolCallId": "call_0cbcjKOERbCJxGlTgQUBToUC|fc_0d0f69f76e12750d016a983a9b23cc87d29549ef4e75b5bbba",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "2-4,6-8,10-12"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111290,
+          "result": "Hidden 9 message(s). They are excluded from context until unhidden. Active rules now save ~111,290 tokens."
+        },
+        {
+          "toolCallId": "call_Frm6w1tpdjEMBPuUblymIILE|fc_0d0f69f76e12750d016a983a9c71f887d28b3dba19766e2b49",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111290,
+          "result": "Context usage: 1% of 272k (3,833 tokens)\nRules: 9 hidden, 0 removed, 0 summaries\nSaved by rules: ~111,290 tokens\nMessages in session: 20"
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 242697,
+          "output": 575,
+          "cacheRead": 380928,
+          "cacheWrite": 0,
+          "reasoning": 215,
+          "totalTokens": 624200,
+          "cost": {
+            "input": 0.18202275,
+            "output": 0.0025875,
+            "cacheRead": 0.0285696,
+            "cacheWrite": 0,
+            "total": 0.21317985
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 242697,
+          "output": 575,
+          "cacheRead": 380928,
+          "cacheWrite": 0,
+          "reasoning": 215,
+          "totalTokens": 624200,
+          "cost": {
+            "input": 0.18202275,
+            "output": 0.0025875,
+            "cacheRead": 0.0285696,
+            "cacheWrite": 0,
+            "total": 0.21317985
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 2026,
+        "output": 191,
+        "cacheRead": 9728,
+        "cacheWrite": 0,
+        "reasoning": 26,
+        "totalTokens": 11945,
+        "cost": {
+          "input": 0.0015195,
+          "output": 0.0008595,
+          "cacheRead": 0.0007296,
+          "cacheWrite": 0,
+          "total": 0.0031086000000000004
+        }
+      },
+      "measuredUsage": {
+        "input": 242697,
+        "output": 575,
+        "cacheRead": 380928,
+        "cacheWrite": 0,
+        "reasoning": 215,
+        "totalTokens": 624200,
+        "cost": {
+          "input": 0.18202275,
+          "output": 0.0025875,
+          "cacheRead": 0.0285696,
+          "cacheWrite": 0,
+          "total": 0.21317985
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "full-context",
+      "seed": 2,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99098,
+        "contextWindow": 272000,
+        "percent": 36.43308823529412
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 167391,
+          "output": 292,
+          "cacheRead": 530944,
+          "cacheWrite": 0,
+          "reasoning": 41,
+          "totalTokens": 698627,
+          "cost": {
+            "input": 0.12554325000000002,
+            "output": 0.0013140000000000003,
+            "cacheRead": 0.039820799999999996,
+            "cacheWrite": 0,
+            "total": 0.16667805
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 167391,
+          "output": 292,
+          "cacheRead": 530944,
+          "cacheWrite": 0,
+          "reasoning": 41,
+          "totalTokens": 698627,
+          "cost": {
+            "input": 0.12554325000000002,
+            "output": 0.0013140000000000003,
+            "cacheRead": 0.039820799999999996,
+            "cacheWrite": 0,
+            "total": 0.16667805
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 1387,
+        "output": 161,
+        "cacheRead": 296448,
+        "cacheWrite": 0,
+        "reasoning": 11,
+        "totalTokens": 297996,
+        "cost": {
+          "input": 0.00104025,
+          "output": 0.0007245,
+          "cacheRead": 0.0222336,
+          "cacheWrite": 0,
+          "total": 0.023998349999999998
+        }
+      },
+      "measuredUsage": {
+        "input": 167391,
+        "output": 292,
+        "cacheRead": 530944,
+        "cacheWrite": 0,
+        "reasoning": 41,
+        "totalTokens": 698627,
+        "cost": {
+          "input": 0.12554325000000002,
+          "output": 0.0013140000000000003,
+          "cacheRead": 0.039820799999999996,
+          "cacheWrite": 0,
+          "total": 0.16667805
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "runtime-compaction",
+      "seed": 2,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99088,
+        "contextWindow": 272000,
+        "percent": 36.42941176470588
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 1,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 105462,
+          "output": 330,
+          "cacheRead": 301056,
+          "cacheWrite": 0,
+          "reasoning": 75,
+          "totalTokens": 406848,
+          "cost": {
+            "input": 0.07909649999999999,
+            "output": 0.001485,
+            "cacheRead": 0.022579199999999997,
+            "cacheWrite": 0,
+            "total": 0.10316070000000001
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 2875,
+          "output": 651,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 85,
+          "totalTokens": 3526,
+          "cost": {
+            "input": 0.00215625,
+            "output": 0.0029295,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.00508575
+          }
+        },
+        "total": {
+          "input": 108337,
+          "output": 981,
+          "cacheRead": 301056,
+          "cacheWrite": 0,
+          "reasoning": 160,
+          "totalTokens": 410374,
+          "cost": {
+            "input": 0.08125274999999998,
+            "output": 0.0044145,
+            "cacheRead": 0.022579199999999997,
+            "cacheWrite": 0,
+            "total": 0.10824645000000001
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 1917,
+        "output": 194,
+        "cacheRead": 4096,
+        "cacheWrite": 0,
+        "reasoning": 40,
+        "totalTokens": 6207,
+        "cost": {
+          "input": 0.00143775,
+          "output": 0.0008730000000000001,
+          "cacheRead": 0.0003072,
+          "cacheWrite": 0,
+          "total": 0.00261795
+        }
+      },
+      "measuredUsage": {
+        "input": 108337,
+        "output": 981,
+        "cacheRead": 301056,
+        "cacheWrite": 0,
+        "reasoning": 160,
+        "totalTokens": 410374,
+        "cost": {
+          "input": 0.08125274999999998,
+          "output": 0.0044145,
+          "cacheRead": 0.022579199999999997,
+          "cacheWrite": 0,
+          "total": 0.10824645000000001
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 2,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99578,
+        "contextWindow": 272000,
+        "percent": 36.60955882352941
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-ea93871e\",\"rollback_digest\":\"sha256:0dd1963ff13c6e773988dbc8\",\"database_mode\":\"primary-2736b45cbc\",\"feature_flag\":\"flag-db0405c52d\"}",
+        "{\"queue_name\":\"queue-effb2a18ec\",\"retention_days\":\"184\",\"incident_channel\":\"#ops-3fb2633b44\",\"owner\":\"401afe9433@example.test\"}",
+        "{\"release_window\":\"Saturday 02:29 UTC\",\"health_endpoint\":\"/health/f3374fbdb3\",\"max_parallel_jobs\":\"3\",\"audit_bucket\":\"gs://audit-db2b8894e605\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-ea93871e",
+            "rollback_digest": "sha256:0dd1963ff13c6e773988dbc8",
+            "database_mode": "primary-2736b45cbc",
+            "feature_flag": "flag-db0405c52d"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-effb2a18ec",
+            "retention_days": "184",
+            "incident_channel": "#ops-3fb2633b44",
+            "owner": "401afe9433@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 02:29 UTC",
+            "health_endpoint": "/health/f3374fbdb3",
+            "max_parallel_jobs": "3",
+            "audit_bucket": "gs://audit-db2b8894e605"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": true,
+      "contextTokensSaved": 112011,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 6,
+        "removed": 0,
+        "summaries": 1
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_VtDQHm38V6EZj1GXHpBLVwe6|fc_0cf727dae612b657016a983b16e21c87d18efa6137c495eb06",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,715 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 14"
+        },
+        {
+          "toolCallId": "call_qaRe6QgcXI6m8pgsex7YwcoW|fc_0cf727dae612b657016a983b199e5087d18ca816218b77a8b6",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 16 message(s), ~112,432 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user (~348 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT d…\"  [SUMMARIZE-ONLY]\n[2] assistant (~9 tokens): \"[thinking] toolCall: load_completed_log_chunk({\"index\":1})\"  [HIDEABLE TOOL EXCHANGE]\n[3] toolResult (~36,995 tokens): \"COMPLETED_WORK_NOTE 0 marker=95e0ed5f. This historical execution note is closed and does not change any canonical constr…\"  [HIDEABLE TOOL EXCHANGE]\n[4] assistant (~3 tokens): \"LOADED 1/3\"\n[5] user (~328 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT q…\"  [SUMMARIZE-ONLY]\n[6] assistant (~9 tokens): \"toolCall: load_completed_log_chunk({\"index\":2})\"  [HIDEABLE TOOL EXCHANGE]\n[7] toolResult (~37,052 tokens): \"COMPLETED_WORK_NOTE 371 marker=e34b41da. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[8] assistant (~3 tokens): \"LOADED 2/3\"\n[9] user (~345 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT r…\"  [SUMMARIZE-ONLY]\n[10] assistant (~9 tokens): \"toolCall: load_completed_log_chunk({\"index\":3})\"  [HIDEABLE TOOL EXCHANGE]\n[11] toolResult (~37,207 tokens): \"COMPLETED_WORK_NOTE 742 marker=38d5a459. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[12] assistant (~3 tokens): \"LOADED 3/3\"\n[13] user (~25 tokens): \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[14] custom (~45 tokens): \"[Context usage: 37% of 272k (99,588 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[15] assistant (~18 tokens): \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[16] toolResult (~33 tokens): \"Context usage: 37% of 272k (99,715 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nThe LLM decides which completed context is no longer needed. Hide is reversible and may select [HIDEABLE TOOL EXCHANGE] messages of any size; calls and results close together automatically. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total. Use summarize for durable context and action=restore with a summary id."
+        },
+        {
+          "toolCallId": "call_YSYxOjl9WdiyTLKvD6ymxKB8|fc_0cf727dae612b657016a983b20e11087d1aa1e779f7fe13ca8",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "2-3"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 37004,
+          "result": "Hidden 2 message(s). They are excluded from context until unhidden. Active rules now save ~37,004 tokens."
+        },
+        {
+          "toolCallId": "call_CB0pjIPgooaw5xEmIvWIci0U|fc_0cf727dae612b657016a983b20e12487d1a8084de78acad764",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "6-7"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 74065,
+          "result": "Hidden 2 message(s). They are excluded from context until unhidden. Active rules now save ~74,065 tokens."
+        },
+        {
+          "toolCallId": "call_IAjfGAU1xUh7B6rRRMWVYUWm|fc_0cf727dae612b657016a983b20e12c87d1bac64ae5dc463824",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "10-11"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111281,
+          "result": "Hidden 2 message(s). They are excluded from context until unhidden. Active rules now save ~111,281 tokens."
+        },
+        {
+          "toolCallId": "call_DDbob6q3vrgWqEG769okP99g|fc_0cf727dae612b657016a983b20e13087d1b48cab219549d6f3",
+          "action": "summarize",
+          "args": {
+            "action": "summarize",
+            "range": "1,5,9"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 112011,
+          "result": "Summarized 3 message(s) into a single context block (id:951214e9, model: openai-codex/gpt-5.4-mini). Use action=restore range=951214e9 to bring them back. Active rules now save ~112,011 tokens."
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 141808,
+          "output": 699,
+          "cacheRead": 476160,
+          "cacheWrite": 0,
+          "reasoning": 298,
+          "totalTokens": 618667,
+          "cost": {
+            "input": 0.10635600000000002,
+            "output": 0.0031455,
+            "cacheRead": 0.035712,
+            "cacheWrite": 0,
+            "total": 0.1452135
+          }
+        },
+        "summary": {
+          "input": 1176,
+          "output": 292,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 1468,
+          "cost": {
+            "input": 0.000882,
+            "output": 0.001314,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0.002196
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 142984,
+          "output": 991,
+          "cacheRead": 476160,
+          "cacheWrite": 0,
+          "reasoning": 298,
+          "totalTokens": 620135,
+          "cost": {
+            "input": 0.10723800000000001,
+            "output": 0.0044595,
+            "cacheRead": 0.035712,
+            "cacheWrite": 0,
+            "total": 0.1474095
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 2548,
+        "output": 181,
+        "cacheRead": 7680,
+        "cacheWrite": 0,
+        "reasoning": 27,
+        "totalTokens": 10409,
+        "cost": {
+          "input": 0.0019110000000000002,
+          "output": 0.0008144999999999999,
+          "cacheRead": 0.000576,
+          "cacheWrite": 0,
+          "total": 0.0033014999999999997
+        }
+      },
+      "measuredUsage": {
+        "input": 142984,
+        "output": 991,
+        "cacheRead": 476160,
+        "cacheWrite": 0,
+        "reasoning": 298,
+        "totalTokens": 620135,
+        "cost": {
+          "input": 0.10723800000000001,
+          "output": 0.0044595,
+          "cacheRead": 0.035712,
+          "cacheWrite": 0,
+          "total": 0.1474095
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "full-context",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99102,
+        "contextWindow": 272000,
+        "percent": 36.434558823529414
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 69147,
+          "output": 308,
+          "cacheRead": 629248,
+          "cacheWrite": 0,
+          "reasoning": 45,
+          "totalTokens": 698703,
+          "cost": {
+            "input": 0.05186025,
+            "output": 0.001386,
+            "cacheRead": 0.0471936,
+            "cacheWrite": 0,
+            "total": 0.10043985
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 69147,
+          "output": 308,
+          "cacheRead": 629248,
+          "cacheWrite": 0,
+          "reasoning": 45,
+          "totalTokens": 698703,
+          "cost": {
+            "input": 0.05186025,
+            "output": 0.001386,
+            "cacheRead": 0.0471936,
+            "cacheWrite": 0,
+            "total": 0.10043985
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 1405,
+        "output": 180,
+        "cacheRead": 296448,
+        "cacheWrite": 0,
+        "reasoning": 18,
+        "totalTokens": 298033,
+        "cost": {
+          "input": 0.00105375,
+          "output": 0.0008100000000000001,
+          "cacheRead": 0.0222336,
+          "cacheWrite": 0,
+          "total": 0.02409735
+        }
+      },
+      "measuredUsage": {
+        "input": 69147,
+        "output": 308,
+        "cacheRead": 629248,
+        "cacheWrite": 0,
+        "reasoning": 45,
+        "totalTokens": 698703,
+        "cost": {
+          "input": 0.05186025,
+          "output": 0.001386,
+          "cacheRead": 0.0471936,
+          "cacheWrite": 0,
+          "total": 0.10043985
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "runtime-compaction",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99090,
+        "contextWindow": 272000,
+        "percent": 36.43014705882353
+      },
+      "noticeLevels": [],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": false,
+      "autonomySuccess": false,
+      "contextTokensSaved": 0,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 0,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [],
+      "humanContextInterventions": 1,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 168460,
+          "output": 330,
+          "cacheRead": 238592,
+          "cacheWrite": 0,
+          "reasoning": 63,
+          "totalTokens": 407382,
+          "cost": {
+            "input": 0.126345,
+            "output": 0.0014850000000000002,
+            "cacheRead": 0.017894399999999998,
+            "cacheWrite": 0,
+            "total": 0.1457244
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 1100,
+          "output": 812,
+          "cacheRead": 1792,
+          "cacheWrite": 0,
+          "reasoning": 85,
+          "totalTokens": 3704,
+          "cost": {
+            "input": 0.000825,
+            "output": 0.003654,
+            "cacheRead": 0.0001344,
+            "cacheWrite": 0,
+            "total": 0.0046134
+          }
+        },
+        "total": {
+          "input": 169560,
+          "output": 1142,
+          "cacheRead": 240384,
+          "cacheWrite": 0,
+          "reasoning": 148,
+          "totalTokens": 411086,
+          "cost": {
+            "input": 0.12717,
+            "output": 0.005139,
+            "cacheRead": 0.018028799999999998,
+            "cacheWrite": 0,
+            "total": 0.1503378
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 1900,
+        "output": 200,
+        "cacheRead": 4608,
+        "cacheWrite": 0,
+        "reasoning": 34,
+        "totalTokens": 6708,
+        "cost": {
+          "input": 0.001425,
+          "output": 0.0009000000000000001,
+          "cacheRead": 0.0003456,
+          "cacheWrite": 0,
+          "total": 0.0026706000000000004
+        }
+      },
+      "measuredUsage": {
+        "input": 169560,
+        "output": 1142,
+        "cacheRead": 240384,
+        "cacheWrite": 0,
+        "reasoning": 148,
+        "totalTokens": 411086,
+        "cost": {
+          "input": 0.12717,
+          "output": 0.005139,
+          "cacheRead": 0.018028799999999998,
+          "cacheWrite": 0,
+          "total": 0.1503378
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "arm": "agent-managed",
+      "seed": 3,
+      "valid": true,
+      "invalidReason": null,
+      "fixture": {
+        "targetChars": 440000,
+        "actualChars": 445016
+      },
+      "contextPressureAfterLoad": {
+        "tokens": 99590,
+        "contextWindow": 272000,
+        "percent": 36.6139705882353
+      },
+      "noticeLevels": [
+        30
+      ],
+      "answers": [
+        "{\"deployment_region\":\"region-2e75695f\",\"rollback_digest\":\"sha256:7df2aa2fc1fd1b5960dd4824\",\"database_mode\":\"primary-328cb73dd5\",\"feature_flag\":\"flag-23823bb6b4\"}",
+        "{\"queue_name\":\"queue-19681b1c0d\",\"retention_days\":\"122\",\"incident_channel\":\"#ops-60e6053742\",\"owner\":\"e9ede54d1b@example.test\"}",
+        "{\"release_window\":\"Saturday 12:00 UTC\",\"health_endpoint\":\"/health/5cc7ef126a\",\"max_parallel_jobs\":\"5\",\"audit_bucket\":\"gs://audit-14c9c8c42a87\"}"
+      ],
+      "queryScores": [
+        {
+          "parsed": {
+            "deployment_region": "region-2e75695f",
+            "rollback_digest": "sha256:7df2aa2fc1fd1b5960dd4824",
+            "database_mode": "primary-328cb73dd5",
+            "feature_flag": "flag-23823bb6b4"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "queue_name": "queue-19681b1c0d",
+            "retention_days": "122",
+            "incident_channel": "#ops-60e6053742",
+            "owner": "e9ede54d1b@example.test"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        },
+        {
+          "parsed": {
+            "release_window": "Saturday 12:00 UTC",
+            "health_endpoint": "/health/5cc7ef126a",
+            "max_parallel_jobs": "5",
+            "audit_bucket": "gs://audit-14c9c8c42a87"
+          },
+          "correct": 4,
+          "total": 4,
+          "accuracy": 1,
+          "exact": true,
+          "formatExact": true,
+          "extra": [],
+          "missing": [],
+          "wrong": [],
+          "decoyErrors": []
+        }
+      ],
+      "score": {
+        "correct": 12,
+        "total": 12,
+        "accuracy": 1,
+        "exact": true,
+        "decoyErrors": [],
+        "missing": [],
+        "wrong": []
+      },
+      "autonomyAttempted": true,
+      "autonomySuccess": true,
+      "contextTokensSaved": 111281,
+      "minimumMeaningfulSavedTokens": 2720,
+      "finalManagedState": {
+        "hidden": 6,
+        "removed": 0,
+        "summaries": 0
+      },
+      "contextActions": [
+        {
+          "toolCallId": "call_o8AKk3r4ctQcKAO9Xhtt4qxR|fc_0b5cdf27484670d9016a983ba4cc0c87d2ae5d7a37f3e6edfc",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 0,
+          "result": "Context usage: 37% of 272k (99,741 tokens)\nRules: 0 hidden, 0 removed, 0 summaries\nSaved by rules: ~0 tokens\nMessages in session: 14"
+        },
+        {
+          "toolCallId": "call_cgsWLy5KGkDbV3xeyJUAsuR2|fc_0b5cdf27484670d9016a983ba78aa887d293e203dc0b688b89",
+          "action": "list",
+          "args": {
+            "action": "list",
+            "limit": 20
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Context: 16 message(s), ~112,432 tokens (est.)\nRules: 0 hidden, 0 removed, 0 summaries\n\n[1] user (~348 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT d…\"  [SUMMARIZE-ONLY]\n[2] assistant (~9 tokens): \"[thinking] toolCall: load_completed_log_chunk({\"index\":1})\"  [HIDEABLE TOOL EXCHANGE]\n[3] toolResult (~36,995 tokens): \"COMPLETED_WORK_NOTE 0 marker=0ff426d4. This historical execution note is closed and does not change any canonical constr…\"  [HIDEABLE TOOL EXCHANGE]\n[4] assistant (~3 tokens): \"LOADED 1/3\"\n[5] user (~328 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT q…\"  [SUMMARIZE-ONLY]\n[6] assistant (~9 tokens): \"toolCall: load_completed_log_chunk({\"index\":2})\"  [HIDEABLE TOOL EXCHANGE]\n[7] toolResult (~37,052 tokens): \"COMPLETED_WORK_NOTE 371 marker=795f8a51. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[8] assistant (~3 tokens): \"[thinking] LOADED 2/3\"  [SUMMARIZE-ONLY]\n[9] user (~345 tokens): \"PROJECT FACT PACKET Only CANONICAL_FACT values are current. Preserve them exactly for the later audit. SUPERSEDED_FACT r…\"  [SUMMARIZE-ONLY]\n[10] assistant (~9 tokens): \"[thinking] toolCall: load_completed_log_chunk({\"index\":3})\"  [HIDEABLE TOOL EXCHANGE]\n[11] toolResult (~37,207 tokens): \"COMPLETED_WORK_NOTE 742 marker=a2c16fd2. This historical execution note is closed and does not change any canonical cons…\"  [HIDEABLE TOOL EXCHANGE]\n[12] assistant (~3 tokens): \"LOADED 3/3\"\n[13] user (~25 tokens): \"Prepare for the canonical-fact audit that follows. Do not answer any facts yet. Reply exactly READY.\"  [SUMMARIZE-ONLY]\n[14] custom (~45 tokens): \"[Context usage: 37% of 272k (99,600 tokens). Usage reached 30%. Call manage_context action=stats, then action=list, and …\"  [SUMMARIZE-ONLY]\n[15] assistant (~18 tokens): \"[thinking] toolCall: manage_context({\"action\":\"stats\"})\"  [SUMMARIZE-ONLY]\n[16] toolResult (~33 tokens): \"Context usage: 37% of 272k (99,741 tokens) Rules: 0 hidden, 0 removed, 0 summaries Saved by rules: ~0 tokens Messages in…\"  [SUMMARIZE-ONLY]\n\nThe LLM decides which completed context is no longer needed. Hide is reversible and may select [HIDEABLE TOOL EXCHANGE] messages of any size; calls and results close together automatically. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total. Use summarize for durable context and action=restore with a summary id."
+        },
+        {
+          "toolCallId": "call_BAVAv7wAY046hHXNpREAY3fH|fc_0b5cdf27484670d9016a983bae863887d2bc0231864ba8e66f",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "2-3,6-7,10-11,15-16"
+          },
+          "ok": false,
+          "providerError": false,
+          "savedTokens": null,
+          "result": "Range includes the current request or active turn (message 13 or later). Manage only completed earlier turns."
+        },
+        {
+          "toolCallId": "call_KC6NwV8a8IL3IRv3Jhq5qjNB|fc_0b5cdf27484670d9016a983bb2771087d28e087a06790f1e92",
+          "action": "hide",
+          "args": {
+            "action": "hide",
+            "range": "2-3,6-7,10-11"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111281,
+          "result": "Hidden 6 message(s). They are excluded from context until unhidden. Active rules now save ~111,281 tokens."
+        },
+        {
+          "toolCallId": "call_sIK898b5Ab9XdU6o6qtNXVOZ|fc_0b5cdf27484670d9016a983bb6572c87d2bd7f20ee35cf748e",
+          "action": "stats",
+          "args": {
+            "action": "stats"
+          },
+          "ok": true,
+          "providerError": false,
+          "savedTokens": 111281,
+          "result": "Context usage: 2% of 272k (4,132 tokens)\nRules: 6 hidden, 0 removed, 0 summaries\nSaved by rules: ~111,281 tokens\nMessages in session: 22"
+        }
+      ],
+      "humanContextInterventions": 0,
+      "providerErrors": [],
+      "usage": {
+        "main": {
+          "input": 211575,
+          "output": 774,
+          "cacheRead": 514048,
+          "cacheWrite": 0,
+          "reasoning": 373,
+          "totalTokens": 726397,
+          "cost": {
+            "input": 0.15868125,
+            "output": 0.0034830000000000004,
+            "cacheRead": 0.0385536,
+            "cacheWrite": 0,
+            "total": 0.20071785
+          }
+        },
+        "summary": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "compaction": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "reasoning": 0,
+          "totalTokens": 0,
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "total": 0
+          }
+        },
+        "total": {
+          "input": 211575,
+          "output": 774,
+          "cacheRead": 514048,
+          "cacheWrite": 0,
+          "reasoning": 373,
+          "totalTokens": 726397,
+          "cost": {
+            "input": 0.15868125,
+            "output": 0.0034830000000000004,
+            "cacheRead": 0.0385536,
+            "cacheWrite": 0,
+            "total": 0.20071785
+          }
+        }
+      },
+      "continuationUsage": {
+        "input": 4992,
+        "output": 182,
+        "cacheRead": 7168,
+        "cacheWrite": 0,
+        "reasoning": 18,
+        "totalTokens": 12342,
+        "cost": {
+          "input": 0.003744,
+          "output": 0.0008190000000000001,
+          "cacheRead": 0.0005376,
+          "cacheWrite": 0,
+          "total": 0.0051006
+        }
+      },
+      "measuredUsage": {
+        "input": 211575,
+        "output": 774,
+        "cacheRead": 514048,
+        "cacheWrite": 0,
+        "reasoning": 373,
+        "totalTokens": 726397,
+        "cost": {
+          "input": 0.15868125,
+          "output": 0.0034830000000000004,
+          "cacheRead": 0.0385536,
+          "cacheWrite": 0,
+          "total": 0.20071785
+        }
+      },
+      "stderr": ""
+    }
+  ],
+  "aggregate": {
+    "full-context": {
+      "trials": 3,
+      "validTrials": 3,
+      "invalidTrials": 0,
+      "fieldAccuracy": 1,
+      "fullTaskPassRate": 1,
+      "decoyErrors": 0,
+      "autonomyAttemptRate": 0,
+      "autonomySuccessRate": 0,
+      "contextTokensSaved": 0,
+      "providerErrors": 0,
+      "usage": {
+        "input": 373565,
+        "output": 895,
+        "cacheRead": 1721344,
+        "cacheWrite": 0,
+        "reasoning": 119,
+        "totalTokens": 2095804,
+        "cost": {
+          "input": 0.28017375,
+          "output": 0.0040275,
+          "cacheRead": 0.12910080000000002,
+          "cacheWrite": 0,
+          "total": 0.41330205
+        }
+      },
+      "continuationUsage": {
+        "input": 4124,
+        "output": 516,
+        "cacheRead": 889344,
+        "cacheWrite": 0,
+        "reasoning": 41,
+        "totalTokens": 893984,
+        "cost": {
+          "input": 0.0030930000000000003,
+          "output": 0.002322,
+          "cacheRead": 0.0667008,
+          "cacheWrite": 0,
+          "total": 0.07211580000000001
+        }
+      }
+    },
+    "runtime-compaction": {
+      "trials": 3,
+      "validTrials": 3,
+      "invalidTrials": 0,
+      "fieldAccuracy": 1,
+      "fullTaskPassRate": 1,
+      "decoyErrors": 0,
+      "autonomyAttemptRate": 0,
+      "autonomySuccessRate": 0,
+      "contextTokensSaved": 0,
+      "providerErrors": 0,
+      "usage": {
+        "input": 418584,
+        "output": 3157,
+        "cacheRead": 810240,
+        "cacheWrite": 0,
+        "reasoning": 442,
+        "totalTokens": 1231981,
+        "cost": {
+          "input": 0.313938,
+          "output": 0.0142065,
+          "cacheRead": 0.06076799999999999,
+          "cacheWrite": 0,
+          "total": 0.3889125
+        }
+      },
+      "continuationUsage": {
+        "input": 6970,
+        "output": 596,
+        "cacheRead": 11776,
+        "cacheWrite": 0,
+        "reasoning": 109,
+        "totalTokens": 19342,
+        "cost": {
+          "input": 0.0052275,
+          "output": 0.0026820000000000004,
+          "cacheRead": 0.0008832,
+          "cacheWrite": 0,
+          "total": 0.0087927
+        }
+      }
+    },
+    "agent-managed": {
+      "trials": 3,
+      "validTrials": 3,
+      "invalidTrials": 0,
+      "fieldAccuracy": 1,
+      "fullTaskPassRate": 1,
+      "decoyErrors": 0,
+      "autonomyAttemptRate": 1,
+      "autonomySuccessRate": 1,
+      "contextTokensSaved": 334582,
+      "providerErrors": 0,
+      "usage": {
+        "input": 597256,
+        "output": 2340,
+        "cacheRead": 1371136,
+        "cacheWrite": 0,
+        "reasoning": 886,
+        "totalTokens": 1970732,
+        "cost": {
+          "input": 0.447942,
+          "output": 0.01053,
+          "cacheRead": 0.10283519999999999,
+          "cacheWrite": 0,
+          "total": 0.5613072
+        }
+      },
+      "continuationUsage": {
+        "input": 9566,
+        "output": 554,
+        "cacheRead": 24576,
+        "cacheWrite": 0,
+        "reasoning": 71,
+        "totalTokens": 34696,
+        "cost": {
+          "input": 0.0071745,
+          "output": 0.002493,
+          "cacheRead": 0.0018432000000000001,
+          "cacheWrite": 0,
+          "total": 0.0115107
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Provider and model behavior are nondeterministic.",
+    "Nested summary usage is counted only when the provider returns it through the extension.",
+    "A small number of seeds is preliminary evidence, not a provider-wide performance claim."
+  ]
+}

@@ -8,17 +8,21 @@ import { fileURLToPath } from "node:url";
 import {
   PREPARATION_PROMPT,
   createFixture,
+  createToolOutputFixture,
   fixtureChunks,
   loadPrompt,
   queryPrompt,
+  toolOutputLoadPrompt,
 } from "./fixtures.mjs";
 import { PiRpcClient } from "./rpc-client.mjs";
 import { aggregateTrials, combineUsage, isAutonomySuccess, scoreAnswer } from "./score.mjs";
 
 const ALL_ARMS = ["full-context", "runtime-compaction", "agent-managed"];
+const FIXTURE_MODES = ["messages", "tool-outputs"];
 const benchmarkDir = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(benchmarkDir, "../..");
 const extension = join(repo, "extensions/context-manager.ts");
+const fixtureTool = join(benchmarkDir, "fixture-tool.ts");
 
 function option(name, fallback) {
   const index = process.argv.indexOf(`--${name}`);
@@ -42,10 +46,16 @@ function benchmarkConfig() {
   const arms = listOption("arms", process.env.AUTONOMY_BENCH_ARMS ?? ALL_ARMS.join(","));
   const invalidArm = arms.find((arm) => !ALL_ARMS.includes(arm));
   if (invalidArm) throw new Error(`Unknown arm '${invalidArm}'`);
+  const fixtureMode = option(
+    "fixture-mode",
+    process.env.AUTONOMY_BENCH_FIXTURE_MODE ?? "messages",
+  );
+  if (!FIXTURE_MODES.includes(fixtureMode)) throw new Error(`Unknown fixture mode '${fixtureMode}'`);
   return {
     model: option("model", process.env.AUTONOMY_BENCH_MODEL ?? "openai-codex/gpt-5.4-mini"),
     seeds: listOption("seeds", process.env.AUTONOMY_BENCH_SEEDS ?? "1,2,3").map(Number),
     arms,
+    fixtureMode,
     targetChars: numberOption("target-chars", process.env.AUTONOMY_BENCH_TARGET_CHARS ?? 440_000),
     timeoutMs: numberOption("timeout-ms", process.env.AUTONOMY_BENCH_TIMEOUT_MS ?? 300_000),
     piBinary: option("pi", process.env.AUTONOMY_BENCH_PI ?? "pi"),
@@ -65,6 +75,7 @@ function piArgs(config, arm, sessionDir, seed) {
     "--session-dir", sessionDir,
     "--name", `context-autonomy-${arm}-${seed}`,
   ];
+  if (config.fixtureMode === "tool-outputs") args.push("--extension", fixtureTool);
   if (arm === "agent-managed") args.push("--extension", extension);
   return args;
 }
@@ -224,13 +235,16 @@ function measuredUsage(events, compactUsage) {
   };
 }
 
-async function executeStages(client, arm, fixture) {
+async function executeStages(client, arm, fixture, fixtureMode) {
   await client.disableAutoCompaction();
   const state = await client.state();
   const chunks = fixtureChunks(fixture.fixture);
   const stages = { load: [], queries: [] };
   for (let index = 0; index < chunks.length; index += 1) {
-    stages.load.push(await client.prompt(loadPrompt(chunks[index], index + 1, chunks.length)));
+    const prompt = fixtureMode === "tool-outputs"
+      ? toolOutputLoadPrompt(fixture.factChunks[index], index + 1, chunks.length)
+      : loadPrompt(chunks[index], index + 1, chunks.length);
+    stages.load.push(await client.prompt(prompt));
   }
   stages.preparation = await client.prompt(PREPARATION_PROMPT);
   let compactUsage;
@@ -281,6 +295,9 @@ async function buildTrialResult(client, arm, fixture, execution) {
   );
   const status = thresholdStatus(arm, pressure);
   const usage = measuredUsage(allEvents, execution.compactUsage);
+  const continuationUsage = combineUsage(
+    execution.stages.queries.flatMap((events) => eventUsage(events)),
+  );
   const score = combinedScore(queryScores);
   const errors = providerErrors(allEvents);
   const contextTokensSaved = lastSavedTokens(actions);
@@ -312,20 +329,28 @@ async function buildTrialResult(client, arm, fixture, execution) {
     humanContextInterventions: arm === "runtime-compaction" ? 1 : 0,
     providerErrors: errors,
     usage,
+    continuationUsage,
     measuredUsage: usage.total,
     stderr: client.stderr.trim(),
   };
 }
 
 async function runTrial(config, arm, fixture, workRoot) {
+  const toolFixturePath = join(workRoot, `tool-fixture-${arm}-${fixture.seed}.json`);
+  const env = {};
+  if (config.fixtureMode === "tool-outputs") {
+    await writeFile(toolFixturePath, JSON.stringify({ chunks: fixtureChunks(fixture.fixture) }));
+    env.CONTEXT_AUTONOMY_TOOL_FIXTURE = toolFixturePath;
+  }
   const client = new PiRpcClient({
     binary: config.piBinary,
     args: piArgs(config, arm, join(workRoot, `${arm}-${fixture.seed}`), fixture.seed),
     cwd: repo,
     timeoutMs: config.timeoutMs,
+    env,
   }).start();
   try {
-    const execution = await executeStages(client, arm, fixture);
+    const execution = await executeStages(client, arm, fixture, config.fixtureMode);
     return await buildTrialResult(client, arm, fixture, execution);
   } finally {
     await client.close();
@@ -356,9 +381,11 @@ async function main() {
   const trials = [];
   try {
     for (const seed of config.seeds) {
-      const fixture = createFixture(seed, config.targetChars);
+      const fixture = config.fixtureMode === "tool-outputs"
+        ? createToolOutputFixture(seed, config.targetChars)
+        : createFixture(seed, config.targetChars);
       for (const arm of config.arms) {
-        process.stderr.write(`context-autonomy: seed=${seed} arm=${arm}\n`);
+        process.stderr.write(`context-autonomy: fixture=${config.fixtureMode} seed=${seed} arm=${arm}\n`);
         trials.push(await runTrial(config, arm, fixture, workRoot));
       }
     }
@@ -377,6 +404,7 @@ async function main() {
         targetChars: config.targetChars,
         timeoutMs: config.timeoutMs,
         identicalPromptsBySeed: true,
+        fixtureMode: config.fixtureMode,
       },
       trials,
       aggregate: groupByArm(trials),

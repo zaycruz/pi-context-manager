@@ -7,7 +7,10 @@ import {
   isAutonomySuccess,
   scoreAnswer,
 } from "../benchmarks/context-autonomy/score.mjs";
-import { createFixture } from "../benchmarks/context-autonomy/fixtures.mjs";
+import {
+  createFixture,
+  createToolOutputFixture,
+} from "../benchmarks/context-autonomy/fixtures.mjs";
 
 
 test("extractJsonObject accepts raw, fenced, and prose-wrapped objects", () => {
@@ -64,6 +67,22 @@ test("fixtures retain every canonical fact and superseded decoy across insertion
   }
 });
 
+test("tool-output fixtures keep canonical facts outside reproducible tool logs", () => {
+  for (const seed of [1, 2, 3]) {
+    const fixture = createToolOutputFixture(seed);
+    assert.equal(fixture.factChunks.length, 3);
+    for (const [key, value] of Object.entries(fixture.facts)) {
+      assert.equal(fixture.fixture.includes(`CANONICAL_FACT ${key}=`), false);
+      assert.equal(
+        fixture.factChunks.some((chunk) =>
+          chunk.includes(`CANONICAL_FACT ${key}=${JSON.stringify(value)}`),
+        ),
+        true,
+      );
+    }
+  }
+});
+
 test("combineUsage sums provider tokens and costs", () => {
   const usage = combineUsage([
     { input: 10, output: 2, cacheRead: 4, totalTokens: 16, cost: { total: 0.1 } },
@@ -95,6 +114,7 @@ test("aggregateTrials excludes invalid trials and computes outcome rates", () =>
     valid: true,
     providerErrors: [],
     measuredUsage: { input: 10, output: 1, totalTokens: 11, cost: { total: 0.01 } },
+    continuationUsage: { input: 4, output: 1, totalTokens: 5, cost: { total: 0.004 } },
   };
   const aggregate = aggregateTrials([
     { ...base, autonomyAttempted: true, autonomySuccess: true, contextTokensSaved: 4000, score: { correct: 12, total: 12, exact: true, decoyErrors: [] } },
@@ -109,4 +129,6 @@ test("aggregateTrials excludes invalid trials and computes outcome rates", () =>
   assert.equal(aggregate.autonomyAttemptRate, 1);
   assert.equal(aggregate.contextTokensSaved, 4009);
   assert.equal(aggregate.decoyErrors, 1);
+  assert.equal(aggregate.continuationUsage.totalTokens, 10);
+  assert.equal(aggregate.continuationUsage.cost.total, 0.008);
 });

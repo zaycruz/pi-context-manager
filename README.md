@@ -34,12 +34,12 @@ Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the acti
 
 | Action | Description |
 |---|---|
-| `list` | Show the current context with indices, token estimates, active rules, and `SUMMARIZE-ONLY` safety tags. |
+| `list` | Show current context with indices, per-message token estimates, active rules, and structural safety tags. It does not rank importance. |
 | `stats` | Show context usage against the model's context window (tokens, cap, percent, tokens saved by rules). |
-| `hide` | Temporarily exclude short plain-assistant-text messages. Each message must be at most 128 estimated tokens. The closed selection must be at most 512 estimated tokens. |
-| `unhide` | Bring hidden messages back. |
-| `remove` | Exclude short plain-assistant-text messages until `reset`. It uses the same 128-token message limit and 512-token selection limit as `hide`. |
-| `summarize` | Replace messages with one model-generated summary block. Use it for user content, facts, constraints, tool exchanges, and other durable context. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing because its extension context does not expose that method. |
+| `hide` | Reversibly exclude LLM-selected completed tool exchanges of any size or short plain assistant text. Tool calls and all matching results move together. |
+| `unhide` | Bring hidden messages back. Tool calls and matching results return together. |
+| `remove` | Exclude short plain-assistant-text messages until `reset`. Each message must be at most 128 estimated tokens. The plain-text selection must be at most 512 estimated tokens. Tool exchanges cannot be removed. |
+| `summarize` | Replace messages with one model-generated summary block. Use it for user content, facts, constraints, unique tool evidence, and other durable context. Pi supports this action through `modelRegistry.complete`. OMP returns an error and changes nothing because its extension context does not expose that method. |
 | `restore` | Bring summarized messages back (by summary id). |
 | `reset` | Clear all rules. |
 
@@ -47,7 +47,7 @@ Requirements: Node.js 22.19 or later and Pi 0.84 or later. OMP supports the acti
 
 The extension never changes the system prompt.
 
-When usage first reaches 30%, the extension appends one persisted conversation message that asks the agent to inspect old completed messages. When usage first reaches 35%, it appends one persisted conversation message that requires the agent to summarize durable completed context. The notice limits `hide` and `remove` to short plain assistant text. The extension does not append another notice at the same threshold.
+When usage first reaches 30%, the extension appends one persisted conversation message that asks the agent to inspect old completed messages. When usage first reaches 35%, it asks the LLM to decide which completed context it no longer needs. The notice allows reversible hiding of complete tool exchanges, keeps permanent removal limited to short plain assistant text, and directs durable content to summarization or runtime compaction. The extension does not append another notice at the same threshold.
 
 Usage below 30% resets the notification cycle. A later crossing can then append new 30% and 35% notices.
 
@@ -65,22 +65,24 @@ If you set `model`, use `provider/model`. The action returns an error without se
 
 ## Selection safety
 
-The extension marks messages that `hide` and `remove` cannot select as `SUMMARIZE-ONLY` in `list`.
+The extension marks structurally complete tool calls and results as `HIDEABLE TOOL EXCHANGE`. It shows an estimated token count for each message. These are facts for the LLM's decision, not static importance weights.
 
-`hide` and `remove` accept only plain assistant text. Each selected message must contain only text and must be at most 128 estimated tokens. The full tool-pair-closed selection must be at most 512 estimated tokens. The extension rejects user messages, tool calls, tool results, summaries, thinking, images, custom messages, and larger selections. Use `summarize` for those messages.
+`hide` accepts a complete tool exchange of any size. Selecting either the call or its result automatically selects both. `hide` can also include plain assistant text under the 128-token per-message and 512-token plain-text-selection limits. It rejects user messages, summaries, custom messages, unrelated rich assistant content, orphaned results, incomplete calls, out-of-order results, duplicate or reused IDs, duplicate results, and empty or malformed IDs.
+
+`remove` remains stricter. It accepts only plain assistant text under the same limits and rejects every tool exchange.
 
 The extension rejects any `hide`, `remove`, or `summarize` selection that includes the latest user request or the active turn.
 
 The first context event after this policy upgrade clears all existing `hide` and `remove` rules. The extension cannot reconstruct the original selection groupings needed to prove the new limits. It preserves valid summaries and notification state.
 
-Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while the malformed context remains. The extension auto-extends each summary selection so tool calls stay paired with their results. It also applies this closure defensively in the `context` handler, so hand-edited state cannot produce an orphaned `toolResult`.
+Some provider protocols require each `toolResult` to match one preceding `toolCall`. An orphaned result can cause repeated provider-request failures while malformed context remains. The extension builds one validated chronological exchange index for `hide`, `unhide`, `remove`, `summarize`, list tags, and defensive rendering. It creates an exchange only when every call has one non-empty globally unique string ID and exactly one later result before the active turn. Malformed or ambiguous IDs never create closure edges.
 
-The tool output reports when the selection was auto-extended.
+Hiding removes the raw tool evidence from provider context until the LLM calls `unhide` or `reset`. The LLM owns the semantic decision. The extension does not decide whether a completed result is still important.
 
 ## Runtime support
 
 - **pi**: all actions work, including `summarize` through `modelRegistry.complete`.
-- **OMP**: `list`, `stats`, guarded `hide`, `unhide`, guarded `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API. The 35% notice tells OMP agents to leave durable content to runtime-owned compaction. OMP can remove only short plain assistant text and cannot perform durable-context reduction through this extension.
+- **OMP**: `list`, `stats`, reversible tool-exchange `hide`, `unhide`, guarded `remove`, `restore`, and `reset` work. `summarize` is unavailable because OMP's extension context does not expose a model-completion API. The 35% notice tells the LLM to hide only completed exchanges whose raw evidence is no longer needed and to leave durable content to runtime-owned compaction.
 
 ## Privacy
 

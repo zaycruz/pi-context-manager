@@ -89,7 +89,9 @@ test("notification text describes the crossed threshold", () => {
   assert.match(contextNotificationText(35, "35%", ""), /plain assistant text/);
   assert.match(contextNotificationText(35, "35%", ""), /128 tokens/);
   assert.match(contextNotificationText(35, "35%", ""), /512 tokens total/);
+  assert.match(contextNotificationText(35, "35%", ""), /completed tool exchanges/);
   const ompText = contextNotificationText(35, "35%", "", false);
   assert.match(ompText, /cannot summarize through manage_context/);
   assert.match(ompText, /runtime-owned compaction/);
+  assert.match(ompText, /completed tool exchanges/);
 });

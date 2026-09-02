@@ -6,11 +6,12 @@ function timeoutError(label, timeoutMs, stderr) {
 }
 
 export class PiRpcClient {
-  constructor({ binary = "pi", args, cwd, timeoutMs = 300_000 }) {
+  constructor({ binary = "pi", args, cwd, timeoutMs = 300_000, env = {} }) {
     this.binary = binary;
     this.args = args;
     this.cwd = cwd;
     this.timeoutMs = timeoutMs;
+    this.env = env;
     this.events = [];
     this.stderr = "";
     this.buffer = "";
@@ -22,7 +23,7 @@ export class PiRpcClient {
     this.child = spawn(this.binary, this.args, {
       cwd: this.cwd,
       stdio: ["pipe", "pipe", "pipe"],
-      env: process.env,
+      env: { ...process.env, ...this.env },
     });
     this.child.stdout.setEncoding("utf8");
     this.child.stderr.setEncoding("utf8");

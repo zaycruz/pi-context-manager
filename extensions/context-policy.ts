@@ -62,10 +62,10 @@ export function contextNotificationText(
 ): string {
   const prefix = `[Context usage: ${usageText}${savedText}.`;
   if (level === CONTEXT_ACTION_PERCENT && !canSummarize) {
-    return `${prefix} Usage reached 35%. This runtime cannot summarize through manage_context. Do not hide or remove durable context as a substitute. Leave durable content to runtime-owned compaction. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total.]`;
+    return `${prefix} Usage reached 35%. This runtime cannot summarize through manage_context. Call stats and list. Decide which completed tool exchanges are no longer needed, then reversibly hide those exchanges; calls and matching results move together. Do not hide durable or unique evidence as a substitute for summarization. Leave durable content to runtime-owned compaction. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total.]`;
   }
   if (level === CONTEXT_ACTION_PERCENT) {
-    return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, and manage completed context before runtime-owned compaction. Summarize the largest completed ranges that contain facts, constraints, user content, tool exchanges, or other durable context. Hide/remove are lossy cleanup actions limited to plain assistant text up to 128 tokens per message and 512 tokens total. Call stats again; if active rules save less than 1% of the context window, summarize a more useful completed range.]`;
+    return `${prefix} Usage reached 35%. Call manage_context action=stats now, then action=list, and manage completed context before runtime-owned compaction. Decide which completed context is no longer needed. Reversibly hide completed tool exchanges whose raw output is no longer useful; calls and matching results move together. Summarize facts, constraints, user content, or unique evidence. Remove accepts only plain assistant text up to 128 tokens per message and 512 tokens total. Call stats again to verify meaningful reduction.]`;
   }
   return `${prefix} Usage reached 30%. Call manage_context action=stats, then action=list, and review old completed messages. Manage them only when safe.]`;
 }
