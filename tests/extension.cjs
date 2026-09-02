@@ -362,6 +362,152 @@ function responseText(response) {
   assert.equal(branch.length, entriesBeforeOrphanResult);
   assert.equal(await runContext(orphanResult), undefined);
 
+  async function assertMalformedToolExchange(messages, range) {
+    await runContext(messages);
+    assert.doesNotMatch(
+      responseText(await call({ action: "list" })),
+      /^\[\d+\].*\[HIDEABLE TOOL EXCHANGE\]$/m,
+    );
+    const entriesBefore = branch.length;
+    assertError(
+      await call({ action: "hide", range }),
+      /(?:incomplete tool call|orphaned tool result).*malformed or ambiguous/i,
+    );
+    assert.equal(branch.length, entriesBefore);
+    assert.equal(await runContext(messages), undefined);
+  }
+
+  await assertMalformedToolExchange(
+    [
+      {
+        role: "toolResult",
+        toolCallId: "out-of-order",
+        toolName: "read",
+        content: [{ type: "text", text: "result before call" }],
+        isError: false,
+        timestamp: 78,
+      },
+      {
+        role: "assistant",
+        content: [{ type: "toolCall", id: "out-of-order", name: "read", arguments: {} }],
+        timestamp: 79,
+      },
+      textMessage("user", "current out-of-order request", 80),
+    ],
+    "2",
+  );
+
+  await assertMalformedToolExchange(
+    [
+      {
+        role: "assistant",
+        content: [{ type: "toolCall", id: "reused-id", name: "read", arguments: { part: 1 } }],
+        timestamp: 81,
+      },
+      {
+        role: "toolResult",
+        toolCallId: "reused-id",
+        toolName: "read",
+        content: [{ type: "text", text: "first result" }],
+        isError: false,
+        timestamp: 82,
+      },
+      {
+        role: "assistant",
+        content: [{ type: "toolCall", id: "reused-id", name: "read", arguments: { part: 2 } }],
+        timestamp: 83,
+      },
+      {
+        role: "toolResult",
+        toolCallId: "reused-id",
+        toolName: "read",
+        content: [{ type: "text", text: "second result" }],
+        isError: false,
+        timestamp: 84,
+      },
+      textMessage("user", "current reused-id request", 85),
+    ],
+    "1",
+  );
+
+  await assertMalformedToolExchange(
+    [
+      {
+        role: "assistant",
+        content: [
+          { type: "toolCall", id: "duplicate-in-call", name: "read", arguments: { part: 1 } },
+          { type: "toolCall", id: "duplicate-in-call", name: "read", arguments: { part: 2 } },
+        ],
+        timestamp: 86,
+      },
+      {
+        role: "toolResult",
+        toolCallId: "duplicate-in-call",
+        toolName: "read",
+        content: [{ type: "text", text: "ambiguous result" }],
+        isError: false,
+        timestamp: 87,
+      },
+      textMessage("user", "current duplicate-call request", 88),
+    ],
+    "1",
+  );
+
+  await assertMalformedToolExchange(
+    [
+      {
+        role: "assistant",
+        content: [{ type: "toolCall", id: "duplicate-results", name: "read", arguments: {} }],
+        timestamp: 89,
+      },
+      {
+        role: "toolResult",
+        toolCallId: "duplicate-results",
+        toolName: "read",
+        content: [{ type: "text", text: "first duplicate result" }],
+        isError: false,
+        timestamp: 90,
+      },
+      {
+        role: "toolResult",
+        toolCallId: "duplicate-results",
+        toolName: "read",
+        content: [{ type: "text", text: "second duplicate result" }],
+        isError: false,
+        timestamp: 91,
+      },
+      textMessage("user", "current duplicate-result request", 92),
+    ],
+    "1",
+  );
+
+  for (const [id, label] of [
+    ["", "empty"],
+    ["   ", "whitespace"],
+    [undefined, "missing"],
+    [42, "non-string"],
+  ]) {
+    await assertMalformedToolExchange(
+      [
+        {
+          role: "assistant",
+          content: [{ type: "toolCall", id, name: "read", arguments: {} }],
+          timestamp: 93,
+        },
+        {
+          role: "toolResult",
+          toolCallId: id,
+          toolName: "read",
+          content: [{ type: "text", text: `${label} id result` }],
+          isError: false,
+          timestamp: 94,
+        },
+        textMessage("user", `current ${label}-id request`, 95),
+      ],
+      "1",
+    );
+  }
+
   const mixedUserSelection = [
     ...completedToolExchange.slice(0, 2),
     textMessage("user", "unique user decision", 78),

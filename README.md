@@ -67,7 +67,7 @@ If you set `model`, use `provider/model`. The action returns an error without se
 
 The extension marks structurally complete tool calls and results as `HIDEABLE TOOL EXCHANGE`. It shows an estimated token count for each message. These are facts for the LLM's decision, not static importance weights.
 
-`hide` accepts a complete tool exchange of any size. Selecting either the call or a result automatically selects the call and every matching result. `hide` can also include plain assistant text under the 128-token per-message and 512-token plain-text-selection limits. It rejects user messages, summaries, custom messages, unrelated rich assistant content, orphaned results, and incomplete calls.
+`hide` accepts a complete tool exchange of any size. Selecting either the call or its result automatically selects both. `hide` can also include plain assistant text under the 128-token per-message and 512-token plain-text-selection limits. It rejects user messages, summaries, custom messages, unrelated rich assistant content, orphaned results, incomplete calls, out-of-order results, duplicate or reused IDs, duplicate results, and empty or malformed IDs.
 
 `remove` remains stricter. It accepts only plain assistant text under the same limits and rejects every tool exchange.
 
@@ -75,7 +75,7 @@ The extension rejects any `hide`, `remove`, or `summarize` selection that includ
 
 The first context event after this policy upgrade clears all existing `hide` and `remove` rules. The extension cannot reconstruct the original selection groupings needed to prove the new limits. It preserves valid summaries and notification state.
 
-Some provider protocols require each `toolResult` to match a preceding `toolCall`. An orphaned result can cause repeated provider-request failures while malformed context remains. The extension closes `hide`, `unhide`, `remove`, and `summarize` selections over calls and matching results. It rejects incomplete tool exchanges before hiding and applies closure defensively when rendering persisted state.
+Some provider protocols require each `toolResult` to match one preceding `toolCall`. An orphaned result can cause repeated provider-request failures while malformed context remains. The extension builds one validated chronological exchange index for `hide`, `unhide`, `remove`, `summarize`, list tags, and defensive rendering. It creates an exchange only when every call has one non-empty globally unique string ID and exactly one later result before the active turn. Malformed or ambiguous IDs never create closure edges.
 
 Hiding removes the raw tool evidence from provider context until the LLM calls `unhide` or `reset`. The LLM owns the semantic decision. The extension does not decide whether a completed result is still important.
 

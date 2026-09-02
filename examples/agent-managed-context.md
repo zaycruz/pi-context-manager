@@ -42,7 +42,7 @@ A successful run has these observable properties:
 - The current user request and active turn remain present.
 - `unhide` or `reset` restores the complete exchange.
 - `remove` still rejects tool exchanges.
-- Orphaned results and incomplete calls cannot be hidden.
+- Orphaned, incomplete, out-of-order, duplicate, reused, or malformed exchanges cannot be hidden.
 - The rules survive process restart and session continuation.
 
 At 30% context use, the extension appends one persisted message that asks the agent to inspect old completed work. At 35%, it asks the LLM to decide which completed context it no longer needs. `hide` accepts complete tool exchanges of any size. `remove` remains limited to plain assistant text with at most 128 estimated tokens per message and 512 estimated tokens per selection. Passive monitoring never replaces or modifies the system prompt.
@@ -62,7 +62,7 @@ The behavioral suite verifies these contracts:
 - Completed tool calls and all matching results hide and unhide together from either selected side.
 - Large and failed completed tool outputs remain structurally hideable because the LLM owns the semantic decision.
 - `remove` rejects every tool exchange.
-- Orphaned results, incomplete calls, user content, summaries, unrelated rich content, and active-turn content cannot be hidden.
+- Orphaned results, incomplete calls, out-of-order results, duplicate or reused IDs, duplicate results, malformed IDs, user content, summaries, unrelated rich content, and active-turn content cannot be hidden.
 - Mixed tool-plus-short-assistant selections work, while mixed tool-plus-user selections fail without persisted mutation.
 - The plain-assistant guard enforces its exact 128-token message and 512-token selection boundaries for block-array and string-form content.
 - Range parsing rejects malformed or unsafe numeric input without partial action or unbounded expansion.

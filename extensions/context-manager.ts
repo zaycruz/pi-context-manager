@@ -271,60 +271,96 @@ function destructiveSelectionError(
   return `Range includes the current request or active turn (message ${protectedStart + 1} or later). Manage only completed earlier turns.`;
 }
 
-function collectToolCallIds(msg: AgentMessage): string[] {
+function toolCallBlocks(msg: AgentMessage): Array<{ id?: unknown }> {
   if (msg.role !== "assistant" || !Array.isArray(msg.content)) return [];
-  const ids: string[] = [];
-  for (const block of msg.content) {
-    if (block.type === "toolCall") ids.push(block.id);
-  }
-  return ids;
+  return msg.content.filter((block) => block.type === "toolCall") as Array<{
+    id?: unknown;
+  }>;
 }
 
-interface ToolLinks {
-  callIds: Set<string>;
-  resultIds: Set<string>;
+function collectToolCallIds(msg: AgentMessage): string[] {
+  return toolCallBlocks(msg)
+    .map((block) => block.id)
+    .filter((id): id is string => typeof id === "string");
 }
 
-function collectSelectedToolLinks(messages: AgentMessage[], selected: Set<number>): ToolLinks {
-  const callIds = new Set<string>();
-  const resultIds = new Set<string>();
-  for (const index of selected) {
-    const message = messages[index];
-    for (const id of collectToolCallIds(message)) callIds.add(id);
-    if (message.role === "toolResult" && typeof message.toolCallId === "string") {
-      resultIds.add(message.toolCallId);
+function toolCallIndicesById(messages: AgentMessage[]): Map<string, number[]> {
+  const callsById = new Map<string, number[]>();
+  for (let index = 0; index < messages.length; index++) {
+    for (const id of collectToolCallIds(messages[index])) {
+      const indices = callsById.get(id) ?? [];
+      indices.push(index);
+      callsById.set(id, indices);
     }
   }
-  return { callIds, resultIds };
+  return callsById;
 }
 
-function isLinkedToolMessage(message: AgentMessage, links: ToolLinks): boolean {
-  if (message.role === "toolResult" && typeof message.toolCallId === "string") {
-    return links.callIds.has(message.toolCallId);
+function toolResultIndicesBefore(
+  messages: AgentMessage[],
+  end: number,
+): Map<string, number[]> {
+  const resultsByCall = new Map<string, number[]>();
+  for (let index = 0; index < end; index++) {
+    const message = messages[index];
+    if (message.role !== "toolResult" || typeof message.toolCallId !== "string") continue;
+    const indices = resultsByCall.get(message.toolCallId) ?? [];
+    indices.push(index);
+    resultsByCall.set(message.toolCallId, indices);
   }
-  return (
-    message.role === "assistant" &&
-    collectToolCallIds(message).some((id) => links.resultIds.has(id))
-  );
+  return resultsByCall;
+}
+
+function validToolCallId(id: string): boolean {
+  return id.trim().length > 0;
+}
+
+function completedResultIndex(
+  id: string,
+  callIndex: number,
+  protectedStart: number,
+  callsById: Map<string, number[]>,
+  resultsById: Map<string, number[]>,
+): number | undefined {
+  const calls = callsById.get(id) ?? [];
+  const results = resultsById.get(id) ?? [];
+  if (!validToolCallId(id) || calls.length !== 1 || calls[0] !== callIndex) return undefined;
+  if (results.length !== 1) return undefined;
+  const resultIndex = results[0];
+  if (resultIndex <= callIndex || resultIndex >= protectedStart) return undefined;
+  return resultIndex;
+}
+
+function completedToolExchangeIndex(messages: AgentMessage[]): Map<number, number[]> {
+  const protectedStart = currentTurnStart(messages);
+  const callsById = toolCallIndicesById(messages);
+  const resultsById = toolResultIndicesBefore(messages, messages.length);
+  const exchangeByMessage = new Map<number, number[]>();
+  for (let callIndex = 0; callIndex < protectedStart; callIndex++) {
+    const blocks = toolCallBlocks(messages[callIndex]);
+    const ids = collectToolCallIds(messages[callIndex]);
+    if (blocks.length === 0 || ids.length !== blocks.length || new Set(ids).size !== ids.length) {
+      continue;
+    }
+    const results = ids.map((id) =>
+      completedResultIndex(id, callIndex, protectedStart, callsById, resultsById),
+    );
+    if (results.some((index) => index === undefined)) continue;
+    const group = [callIndex, ...(results as number[])].sort((left, right) => left - right);
+    for (const index of group) exchangeByMessage.set(index, group);
+  }
+  return exchangeByMessage;
 }
 
 /**
- * Extend a 0-based selection so no toolResult is left without its toolCall and
- * no assistant toolCall message is left without its toolResults. Provider
- * protocols can reject malformed tool exchanges on every request that retains
- * the orphaned message.
+ * Extend a 0-based selection only through validated chronological tool
+ * exchanges. Malformed or ambiguous IDs never create closure edges.
  */
 function closeSelection(messages: AgentMessage[], indices: number[]): number[] {
   const selected = new Set(indices);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    const links = collectSelectedToolLinks(messages, selected);
-    for (let index = 0; index < messages.length; index++) {
-      if (selected.has(index) || !isLinkedToolMessage(messages[index], links)) continue;
-      selected.add(index);
-      changed = true;
-    }
+  const exchangeByMessage = completedToolExchangeIndex(messages);
+  for (const index of indices) {
+    for (const linked of exchangeByMessage.get(index) ?? []) selected.add(linked);
   }
   return [...selected].sort((left, right) => left - right);
 }
@@ -380,9 +416,15 @@ function lossyMessageGuardReason(message: AgentMessage): string | undefined {
   return undefined;
 }
 
-function isToolExchangeMessage(message: AgentMessage): boolean {
-  if (message.role === "toolResult") return typeof message.toolCallId === "string";
-  return collectToolCallIds(message).length > 0;
+
+function invalidToolExchangeReason(message: AgentMessage, index: number): string {
+  if (toolCallBlocks(message).length > 0) {
+    return `Reversible hide rejected incomplete tool call at message ${index + 1}: its IDs, result cardinality, or chronological ownership are malformed or ambiguous.`;
+  }
+  if (message.role === "toolResult") {
+    return `Reversible hide rejected orphaned tool result at message ${index + 1}: its ID, call cardinality, or chronological ownership is malformed or ambiguous.`;
+  }
+  return `Reversible hide rejected message ${index + 1}: it is neither plain assistant text nor part of a completed tool exchange. Use summarize to preserve durable context.`;
 }
 
 function hideSelectionError(
@@ -390,6 +432,7 @@ function hideSelectionError(
   selected: number[],
 ): string | undefined {
   let plainTokens = 0;
+  const exchangeByMessage = completedToolExchangeIndex(messages);
   for (const index of selected) {
     const message = messages[index];
     const tokens = plainAssistantTextTokens(message);
@@ -400,23 +443,10 @@ function hideSelectionError(
       plainTokens += tokens;
       continue;
     }
-    if (!isToolExchangeMessage(message)) {
-      return `Reversible hide rejected message ${index + 1}: it is neither plain assistant text nor part of a completed tool exchange. Use summarize to preserve durable context.`;
-    }
+    if (!exchangeByMessage.has(index)) return invalidToolExchangeReason(message, index);
   }
   if (plainTokens > LOSSY_SELECTION_MAX_TOKENS) {
     return `Reversible hide rejected the ${plainTokens}-token plain-assistant portion because it exceeds the ${LOSSY_SELECTION_MAX_TOKENS}-token total limit.`;
-  }
-  const links = collectSelectedToolLinks(messages, new Set(selected));
-  for (const callId of links.callIds) {
-    if (!links.resultIds.has(callId)) {
-      return `Reversible hide rejected incomplete tool call '${callId}': no matching result is present.`;
-    }
-  }
-  for (const resultId of links.resultIds) {
-    if (!links.callIds.has(resultId)) {
-      return `Reversible hide rejected orphaned tool result '${resultId}': no matching call is present.`;
-    }
   }
   return undefined;
 }
@@ -425,34 +455,9 @@ function messageTokenEstimate(message: AgentMessage): number {
   return plainAssistantTextTokens(message) ?? estimateTokens(message);
 }
 
-function toolResultIndicesBefore(
-  messages: AgentMessage[],
-  end: number,
-): Map<string, number[]> {
-  const resultsByCall = new Map<string, number[]>();
-  for (let index = 0; index < end; index++) {
-    const message = messages[index];
-    if (message.role !== "toolResult" || typeof message.toolCallId !== "string") continue;
-    const indices = resultsByCall.get(message.toolCallId) ?? [];
-    indices.push(index);
-    resultsByCall.set(message.toolCallId, indices);
-  }
-  return resultsByCall;
-}
 
 function completedToolMessageIndices(messages: AgentMessage[]): Set<number> {
-  const protectedStart = currentTurnStart(messages);
-  const resultsByCall = toolResultIndicesBefore(messages, protectedStart);
-  const completed = new Set<number>();
-  for (let index = 0; index < protectedStart; index++) {
-    const callIds = collectToolCallIds(messages[index]);
-    if (callIds.length === 0 || !callIds.every((id) => resultsByCall.has(id))) continue;
-    completed.add(index);
-    for (const callId of callIds) {
-      for (const resultIndex of resultsByCall.get(callId) ?? []) completed.add(resultIndex);
-    }
-  }
-  return completed;
+  return new Set(completedToolExchangeIndex(messages).keys());
 }
 
 function lossySelectionError(
