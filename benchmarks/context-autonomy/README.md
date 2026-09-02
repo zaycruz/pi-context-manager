@@ -23,6 +23,7 @@ The result records:
 - superseded-decoy errors;
 - provider errors;
 - prompt, cache-read, output, reasoning, and total tokens;
+- audit-continuation usage after preparation or context management; and
 - main-loop, nested-summary, compaction, and total measured cost;
 - every `manage_context` action and its result;
 - autonomous management attempts and successful retained rules;
@@ -126,6 +127,8 @@ The full-context arm is the correctness ceiling, not a token-efficiency strategy
 The `tool-outputs` fixture labels its generated logs as reproducible closed-work filler and states that they contain no canonical facts. It measures whether the LLM can use that semantic distinction. It does not prove that the model will correctly classify arbitrary production tool evidence.
 
 The harness counts nested summary usage only when Pi returns that usage through the extension. It records the missing value instead of estimating it.
+Audit-continuation usage includes only the three audit-query turns. It excludes fixture loading, preparation, management, summarization, and compaction. Compare it with total usage to distinguish lower continuation cost from management overhead.
+
 
 The harness executes arms in the requested order. Provider caches can remain warm across runs. Treat the recorded cost as an observation for this run, not a causal estimate of each strategy's billing effect.
 

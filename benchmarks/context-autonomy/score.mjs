@@ -170,5 +170,6 @@ export function aggregateTrials(trials) {
     ),
     providerErrors: valid.reduce((sum, trial) => sum + trial.providerErrors.length, 0),
     usage: combineUsage(valid.map((trial) => trial.measuredUsage)),
+    continuationUsage: combineUsage(valid.map((trial) => trial.continuationUsage)),
   };
 }

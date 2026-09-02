@@ -114,6 +114,7 @@ test("aggregateTrials excludes invalid trials and computes outcome rates", () =>
     valid: true,
     providerErrors: [],
     measuredUsage: { input: 10, output: 1, totalTokens: 11, cost: { total: 0.01 } },
+    continuationUsage: { input: 4, output: 1, totalTokens: 5, cost: { total: 0.004 } },
   };
   const aggregate = aggregateTrials([
     { ...base, autonomyAttempted: true, autonomySuccess: true, contextTokensSaved: 4000, score: { correct: 12, total: 12, exact: true, decoyErrors: [] } },
@@ -128,4 +129,6 @@ test("aggregateTrials excludes invalid trials and computes outcome rates", () =>
   assert.equal(aggregate.autonomyAttemptRate, 1);
   assert.equal(aggregate.contextTokensSaved, 4009);
   assert.equal(aggregate.decoyErrors, 1);
+  assert.equal(aggregate.continuationUsage.totalTokens, 10);
+  assert.equal(aggregate.continuationUsage.cost.total, 0.008);
 });

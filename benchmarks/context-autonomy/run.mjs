@@ -295,6 +295,9 @@ async function buildTrialResult(client, arm, fixture, execution) {
   );
   const status = thresholdStatus(arm, pressure);
   const usage = measuredUsage(allEvents, execution.compactUsage);
+  const continuationUsage = combineUsage(
+    execution.stages.queries.flatMap((events) => eventUsage(events)),
+  );
   const score = combinedScore(queryScores);
   const errors = providerErrors(allEvents);
   const contextTokensSaved = lastSavedTokens(actions);
@@ -326,6 +329,7 @@ async function buildTrialResult(client, arm, fixture, execution) {
     humanContextInterventions: arm === "runtime-compaction" ? 1 : 0,
     providerErrors: errors,
     usage,
+    continuationUsage,
     measuredUsage: usage.total,
     stderr: client.stderr.trim(),
   };
