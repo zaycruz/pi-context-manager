@@ -14,6 +14,13 @@ pi install git:github.com/zaycruz/pi-context-manager
 
 The latest GitHub revision includes LLM-selected completed-tool hiding. The public npm release is currently version 1.1.0 and does not include that feature yet.
 
+Switch an existing npm installation to the latest GitHub revision:
+
+```sh
+pi remove npm:@zaycruz/pi-context-manager
+pi install git:github.com/zaycruz/pi-context-manager
+```
+
 Install the published npm release:
 
 ```sh
